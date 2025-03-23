@@ -17,13 +17,15 @@ class UserProvider with ChangeNotifier {
   // Initialize user data
   Future<void> initialize() async {
     _isLoading = true;
-    notifyListeners();
+    // Use a microtask to defer notifyListeners until after the current build phase
+    Future.microtask(() => notifyListeners());
 
     _userProfile = await _repository.getUserProfile();
     _bodyMeasurements = await _repository.getBodyMeasurements();
 
     _isLoading = false;
-    notifyListeners();
+    // Use a microtask to defer notifyListeners until after the current build phase
+    Future.microtask(() => notifyListeners());
   }
 
   // Save user profile

@@ -9,6 +9,7 @@ import '../models/food_item.dart';
 import '../models/daily_nutrition.dart';
 import '../providers/nutrition_provider.dart';
 import '../providers/user_provider.dart';
+import 'package:uuid/uuid.dart';
 
 class CalorieTrackerScreen extends StatefulWidget {
   const CalorieTrackerScreen({super.key});
@@ -41,7 +42,7 @@ class _CalorieTrackerScreenState extends State<CalorieTrackerScreen> {
       final calorieGoal = profile.calculateDailyCalorieGoal();
       await nutritionProvider.updateDailyNutrition(
         calorieGoal,
-        profile.macroDistribution,
+        profile.macroDistribution ?? profile.defaultMacroDistribution,
       );
     }
   }
@@ -68,7 +69,7 @@ class _CalorieTrackerScreenState extends State<CalorieTrackerScreen> {
         final calorieGoal = profile.calculateDailyCalorieGoal();
         await nutritionProvider.updateDailyNutrition(
           calorieGoal,
-          profile.macroDistribution,
+          profile.macroDistribution ?? profile.defaultMacroDistribution,
         );
       }
     }
@@ -245,7 +246,7 @@ class _CalorieTrackerScreenState extends State<CalorieTrackerScreen> {
         final calorieGoal = profile.calculateDailyCalorieGoal();
         await nutritionProvider.updateDailyNutrition(
           calorieGoal,
-          profile.macroDistribution,
+          profile.macroDistribution ?? profile.defaultMacroDistribution,
         );
       }
     }
@@ -371,9 +372,10 @@ class _NutrientProgress extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         SizedBox(
-          height: 60,
-          width: 60,
+          height: 65,
+          width: 65,
           child: Stack(
+            alignment: Alignment.center,
             children: [
               CircularProgressIndicator(
                 value: progress,
@@ -381,13 +383,12 @@ class _NutrientProgress extends StatelessWidget {
                 valueColor: AlwaysStoppedAnimation<Color>(color),
                 strokeWidth: 8,
               ),
-              Center(
-                child: Text(
-                  '${(progress * 100).toInt()}%',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    fontWeight: FontWeight.bold,
-                  ),
+              Text(
+                '${(progress * 100).toInt()}%',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
@@ -396,6 +397,7 @@ class _NutrientProgress extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           '${current.toInt()}/${goal.toInt()}g',
+          textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.onPrimaryContainer,
           ),
@@ -433,26 +435,31 @@ class MealCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      meal.type == MealType.breakfast
-                          ? Icons.wb_sunny
-                          : meal.type == MealType.lunch
-                          ? Icons.wb_twilight
-                          : meal.type == MealType.dinner
-                          ? Icons.nights_stay
-                          : Icons.fastfood,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      meal.name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Row(
+                    children: [
+                      Icon(
+                        meal.type == MealType.breakfast
+                            ? Icons.wb_sunny
+                            : meal.type == MealType.lunch
+                            ? Icons.wb_twilight
+                            : meal.type == MealType.dinner
+                            ? Icons.nights_stay
+                            : Icons.fastfood,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          meal.name,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 Row(
                   children: [
@@ -820,7 +827,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
         final calorieGoal = profile.calculateDailyCalorieGoal();
         await nutritionProvider.updateDailyNutrition(
           calorieGoal,
-          profile.macroDistribution,
+          profile.macroDistribution ?? profile.defaultMacroDistribution,
         );
       }
 
@@ -1087,7 +1094,7 @@ class _EditMealScreenState extends State<EditMealScreen> {
         final calorieGoal = profile.calculateDailyCalorieGoal();
         await nutritionProvider.updateDailyNutrition(
           calorieGoal,
-          profile.macroDistribution,
+          profile.macroDistribution ?? profile.defaultMacroDistribution,
         );
       }
 

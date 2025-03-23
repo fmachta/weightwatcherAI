@@ -93,71 +93,88 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initializeApp() async {
-    // Initialize all providers
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final nutritionProvider = Provider.of<NutritionProvider>(context, listen: false);
-    final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
-    final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
+    try {
+      // Initialize all providers
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final nutritionProvider = Provider.of<NutritionProvider>(context, listen: false);
+      final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+      final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
 
-    await userProvider.initialize();
-    await nutritionProvider.initialize();
-    await workoutProvider.initialize();
-    await aiTrainerProvider.initialize();
+      await userProvider.initialize();
+      await nutritionProvider.initialize();
+      await workoutProvider.initialize();
+      await aiTrainerProvider.initialize();
 
-    // If no user profile exists, create a default one
-    if (userProvider.userProfile == null) {
-      final defaultProfile = UserProfile(
-        name: 'Alex',
-        email: 'alex@example.com',
-        currentWeight: 75.0,
-        targetWeight: 70.0,
-        height: 175.0,
-        age: 30,
-        gender: 'Male',
-        bodyFat: 15.0,
-        muscleMass: 30.0,
-        activityLevel: ActivityLevel.moderatelyActive,
-        fitnessGoal: FitnessGoal.maintenance,
-      );
-
-      await userProvider.saveUserProfile(defaultProfile);
-
-      // Add a sample body measurement
-      final measurement = BodyMeasurement(
-        date: DateTime.now().subtract(const Duration(days: 30)),
-        weight: 77.0,
-        bodyFat: 16.0,
-        muscleMass: 29.0,
-      );
-      await userProvider.saveBodyMeasurement(measurement);
-
-      final currentMeasurement = BodyMeasurement(
-        date: DateTime.now(),
-        weight: 75.0,
-        bodyFat: 15.0,
-        muscleMass: 30.0,
-      );
-      await userProvider.saveBodyMeasurement(currentMeasurement);
-    }
-
-    // Update nutrition goals based on user profile
-    final profile = userProvider.userProfile!;
-    final calorieGoal = profile.calculateDailyCalorieGoal();
-    await nutritionProvider.updateDailyNutrition(
-      calorieGoal,
-      profile.macroDistribution,
-    );
-
-    // Add sample data if there's no data
-    await _addSampleDataIfNeeded(nutritionProvider, workoutProvider);
-
-    // Navigate to main screen after 1.5 seconds to show splash screen
-    if (mounted) {
-      Future.delayed(const Duration(milliseconds: 1500), () {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const MainScreen()),
+      // If no user profile exists, create a default one
+      if (userProvider.userProfile == null) {
+        final defaultProfile = UserProfile(
+          name: 'Alex',
+          email: 'alex@example.com',
+          currentWeight: 75.0,
+          targetWeight: 70.0,
+          height: 175.0,
+          age: 30,
+          gender: 'Male',
+          bodyFat: 15.0,
+          muscleMass: 30.0,
+          activityLevel: ActivityLevel.moderatelyActive,
+          fitnessGoal: FitnessGoal.maintenance,
         );
-      });
+
+        await userProvider.saveUserProfile(defaultProfile);
+
+        // Add a sample body measurement
+        final measurement = BodyMeasurement(
+          date: DateTime.now().subtract(const Duration(days: 30)),
+          weight: 77.0,
+          bodyFat: 16.0,
+          muscleMass: 29.0,
+        );
+        await userProvider.saveBodyMeasurement(measurement);
+
+        final currentMeasurement = BodyMeasurement(
+          date: DateTime.now(),
+          weight: 75.0,
+          bodyFat: 15.0,
+          muscleMass: 30.0,
+        );
+        await userProvider.saveBodyMeasurement(currentMeasurement);
+      }
+
+      // Update nutrition goals based on user profile
+      if (userProvider.userProfile != null) {
+        final profile = userProvider.userProfile!;
+        final calorieGoal = profile.calculateDailyCalorieGoal();
+        await nutritionProvider.updateDailyNutrition(
+          calorieGoal,
+          profile.macroDistribution ?? profile.defaultMacroDistribution,
+        );
+
+        // Add sample data if there's no data
+        await _addSampleDataIfNeeded(nutritionProvider, workoutProvider);
+      }
+
+      // Navigate to main screen after 1.5 seconds to show splash screen
+      if (mounted) {
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const MainScreen()),
+          );
+        });
+      }
+    } catch (e, stackTrace) {
+      // Log error and show error message
+      print('Error initializing app: $e');
+      print(stackTrace);
+      
+      // Still navigate to main screen after a delay
+      if (mounted) {
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const MainScreen()),
+          );
+        });
+      }
     }
   }
 
@@ -364,12 +381,12 @@ class _MainScreenState extends State<MainScreen> {
           NavigationDestination(
             icon: Icon(Icons.fitness_center_outlined),
             selectedIcon: Icon(Icons.fitness_center),
-            label: 'Workouts',
+            label: 'Workout',
           ),
           NavigationDestination(
             icon: Icon(Icons.smart_toy_outlined),
             selectedIcon: Icon(Icons.smart_toy),
-            label: 'AI Trainer',
+            label: 'AI',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),
@@ -383,6 +400,8 @@ class _MainScreenState extends State<MainScreen> {
             _currentIndex = index;
           });
         },
+        height: 65,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       ),
     );
   }

@@ -5,7 +5,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="75f8237b-c096-4773-b9e9-f1c71f966cc1" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/weightwatcherAI.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/weightwatcherAI.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/app/intermediates/flutter/debug/.last_build_id" beforeDir="false" afterPath="$PROJECT_DIR$/build/app/intermediates/flutter/debug/.last_build_id" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/models/ai_plan.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/models/ai_plan.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/models/daily_nutrition.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/models/daily_nutrition.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/models/exercise.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/models/exercise.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/models/meal.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/models/meal.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/models/workout.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/models/workout.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/providers/ai_trainer_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/ai_trainer_provider.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/providers/user_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/user_provider.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/providers/workout_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/workout_provider.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/ai_trainer_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/ai_trainer_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/calorie_tracker_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/calorie_tracker_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/dashboard_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/dashboard_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/profile_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/profile_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/workout_tracker_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/workout_tracker_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/openai_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/openai_service.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,6 +59,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Flutter.main.dart.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.cidr.known.project.marker": "true",
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
@@ -47,6 +67,7 @@
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
     "git-widget-placeholder": "main",
+    "io.flutter.reload.alreadyRun": "true",
     "kotlin-language-version-configured": "true",
     "settings.editor.selected.configurable": "dart.settings",
     "show.migrate.to.gradle.popup": "false"

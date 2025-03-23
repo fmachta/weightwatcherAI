@@ -5,6 +5,8 @@ class Exercise {
   final String targetMuscleGroup;
   final List<ExerciseSet>? sets;
   final Duration? duration;
+  final String? description;
+  final double? caloriesBurnedPerMinute;
 
   Exercise({
     required this.id,
@@ -12,6 +14,8 @@ class Exercise {
     required this.targetMuscleGroup,
     this.sets,
     this.duration,
+    this.description,
+    this.caloriesBurnedPerMinute,
   });
 
   // Convert to and from JSON for persistence
@@ -22,6 +26,8 @@ class Exercise {
       'targetMuscleGroup': targetMuscleGroup,
       'sets': sets?.map((set) => set.toJson()).toList(),
       'duration': duration?.inSeconds,
+      'description': description,
+      'caloriesBurnedPerMinute': caloriesBurnedPerMinute,
     };
   }
 
@@ -36,6 +42,8 @@ class Exercise {
       duration: json['duration'] != null
           ? Duration(seconds: json['duration'])
           : null,
+      description: json['description'],
+      caloriesBurnedPerMinute: json['caloriesBurnedPerMinute']?.toDouble(),
     );
   }
 }

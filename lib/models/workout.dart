@@ -61,5 +61,7 @@ enum WorkoutType {
   cardio,
   hiit,
   flexibility,
+  balance,
+  sports,
   other
 }

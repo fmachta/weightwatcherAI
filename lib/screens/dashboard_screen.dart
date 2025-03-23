@@ -293,7 +293,7 @@ class _WeightProgressChart extends StatelessWidget {
                   ),
                   minX: 0,
                   maxX: displayedMeasurements.length - 1.toDouble(),
-                  minY: yMin,
+                  minY: yMin.toDouble(),
                   maxY: yMax,
                   lineBarsData: [
                     LineChartBarData(

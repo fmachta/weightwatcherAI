@@ -105,10 +105,13 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Your Workouts',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        'Your Workouts',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     TextButton.icon(
@@ -222,7 +225,7 @@ class WorkoutSummaryCard extends StatelessWidget {
 
         // Calculate total workout time, calories, and exercises
         int totalMinutes = 0;
-        double totalCalories = 0;
+        int totalCalories = 0;
         int totalExercises = 0;
 
         for (final workout in workouts) {
@@ -285,7 +288,7 @@ class WorkoutSummaryCard extends StatelessWidget {
                     ),
                     _WorkoutStat(
                       icon: Icons.local_fire_department,
-                      value: totalCalories.toInt().toString(),
+                      value: totalCalories.toString(),
                       label: 'Calories',
                       color: Theme.of(context).colorScheme.onSecondaryContainer,
                     ),
@@ -353,6 +356,32 @@ class WorkoutCard extends StatelessWidget {
     required this.onDelete,
   });
 
+  String _getWorkoutTypeLabel(WorkoutType type) {
+    switch (type) {
+      case WorkoutType.strength:
+        return 'Strength';
+      case WorkoutType.cardio:
+        return 'Cardio';
+      case WorkoutType.hiit:
+        return 'HIIT';
+      case WorkoutType.flexibility:
+        return 'Flexibility';
+      case WorkoutType.balance:
+        return 'Balance';
+      case WorkoutType.sports:
+        return 'Sports';
+      case WorkoutType.other:
+        return 'Other';
+    }
+  }
+
+  String _formatDuration(Duration duration) {
+    if (duration.inHours > 0) {
+      return '${duration.inHours}h ${duration.inMinutes % 60}m';
+    }
+    return '${duration.inMinutes}m';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -402,7 +431,7 @@ class WorkoutCard extends StatelessWidget {
                 _WorkoutDetail(
                   icon: Icons.local_fire_department,
                   label: 'Calories',
-                  value: workout.caloriesBurned.toInt().toString(),
+                  value: workout.caloriesBurned.toString(),
                 ),
               ],
             ),
@@ -450,7 +479,6 @@ class WorkoutCard extends StatelessWidget {
                   onPressed: onDelete,
                   icon: const Icon(Icons.delete),
                   tooltip: 'Delete workout',
-                  color: Colors.red,
                 ),
               ],
             ),
@@ -458,34 +486,6 @@ class WorkoutCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _formatDuration(Duration duration) {
-    final hours = duration.inHours;
-    final minutes = duration.inMinutes % 60;
-
-    if (hours > 0) {
-      return '$hours h $minutes min';
-    } else {
-      return '$minutes min';
-    }
-  }
-
-  String _getWorkoutTypeLabel(WorkoutType type) {
-    switch (type) {
-      case WorkoutType.cardio:
-        return 'Cardio';
-      case WorkoutType.strength:
-        return 'Strength';
-      case WorkoutType.flexibility:
-        return 'Flexibility';
-      case WorkoutType.balance:
-        return 'Balance';
-      case WorkoutType.sports:
-        return 'Sports';
-      case WorkoutType.other:
-        return 'Other';
-    }
   }
 }
 
@@ -778,59 +778,48 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
     }
   }
 
-  void _saveWorkout() async {
-    if (_formKey.currentState!.validate()) {
-      if (_selectedExercises.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please add at least one exercise'),
-          ),
-        );
-        return;
-      }
-
-      // Calculate calories burned if not entered
-      double caloriesBurned;
-      if (_caloriesController.text.isEmpty) {
-        // Simple estimation based on workout type and duration
-        final minutes = int.parse(_durationController.text);
-        final caloriesPerMinute = _getEstimatedCaloriesPerMinute(_selectedWorkoutType);
-        caloriesBurned = minutes * caloriesPerMinute;
-      } else {
-        caloriesBurned = double.parse(_caloriesController.text);
-      }
-
-      // Create DateTime with selected date and time
-      final dateTime = DateTime(
-        widget.selectedDate.year,
-        widget.selectedDate.month,
-        widget.selectedDate.day,
-        _selectedTime.hour,
-        _selectedTime.minute,
+  Future<void> _saveWorkout() async {
+    if (_nameController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a workout name')),
       );
+      return;
+    }
 
-      // Save workout
-      final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
-      await workoutProvider.addWorkout(
-        _nameController.text,
-        dateTime,
-        Duration(minutes: int.parse(_durationController.text)),
-        _selectedWorkoutType,
-        _selectedExercises,
-        caloriesBurned,
-        notes: _notesController.text.isEmpty ? null : _notesController.text,
-      );
+    final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+    final exercise = Exercise(
+      id: const Uuid().v4(),
+      name: _nameController.text,
+      targetMuscleGroup: 'Full Body',
+      description: _getWorkoutTypeDescription(_selectedWorkoutType),
+      sets: _selectedExercises.isNotEmpty ? List.from(_selectedExercises) : null,
+      duration: Duration(minutes: int.tryParse(_durationController.text) ?? 0),
+      caloriesBurnedPerMinute: _getCaloriesPerMinute(_selectedWorkoutType),
+    );
 
+    final caloriesBurned = int.tryParse(_caloriesController.text) ?? 0;
+    await workoutProvider.addWorkout(
+      _nameController.text,
+      widget.selectedDate,
+      Duration(minutes: int.tryParse(_durationController.text) ?? 0),
+      _selectedWorkoutType,
+      [exercise],
+      caloriesBurned,
+    );
+
+    if (mounted) {
       Navigator.of(context).pop();
     }
   }
 
   String _getWorkoutTypeLabel(WorkoutType type) {
     switch (type) {
-      case WorkoutType.cardio:
-        return 'Cardio';
       case WorkoutType.strength:
         return 'Strength';
+      case WorkoutType.cardio:
+        return 'Cardio';
+      case WorkoutType.hiit:
+        return 'HIIT';
       case WorkoutType.flexibility:
         return 'Flexibility';
       case WorkoutType.balance:
@@ -842,13 +831,33 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
     }
   }
 
-  double _getEstimatedCaloriesPerMinute(WorkoutType type) {
-    // These are rough estimates
+  String _getWorkoutTypeDescription(WorkoutType type) {
     switch (type) {
+      case WorkoutType.strength:
+        return 'Weight training and resistance exercises';
       case WorkoutType.cardio:
-        return 10.0;
+        return 'Aerobic exercises for cardiovascular health';
+      case WorkoutType.hiit:
+        return 'High-intensity interval training';
+      case WorkoutType.flexibility:
+        return 'Stretching and mobility exercises';
+      case WorkoutType.balance:
+        return 'Balance and stability exercises';
+      case WorkoutType.sports:
+        return 'Sports-specific training';
+      case WorkoutType.other:
+        return 'Other types of physical activity';
+    }
+  }
+
+  double _getCaloriesPerMinute(WorkoutType type) {
+    switch (type) {
       case WorkoutType.strength:
         return 8.0;
+      case WorkoutType.cardio:
+        return 10.0;
+      case WorkoutType.hiit:
+        return 12.0;
       case WorkoutType.flexibility:
         return 3.0;
       case WorkoutType.balance:
@@ -1152,7 +1161,7 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
         duration: Duration(minutes: int.parse(_durationController.text)),
         type: _selectedWorkoutType,
         exercises: _selectedExercises,
-        caloriesBurned: double.parse(_caloriesController.text),
+        caloriesBurned: int.parse(_caloriesController.text),
         notes: _notesController.text.isEmpty ? null : _notesController.text,
       );
 
@@ -1165,10 +1174,12 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
 
   String _getWorkoutTypeLabel(WorkoutType type) {
     switch (type) {
-      case WorkoutType.cardio:
-        return 'Cardio';
       case WorkoutType.strength:
         return 'Strength';
+      case WorkoutType.cardio:
+        return 'Cardio';
+      case WorkoutType.hiit:
+        return 'HIIT';
       case WorkoutType.flexibility:
         return 'Flexibility';
       case WorkoutType.balance:
@@ -1205,10 +1216,13 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
   final TextEditingController _caloriesController = TextEditingController();
 
   // Strength training set fields
-  bool _hasStrengthSets = false ? const SizedBox() : const SizedBox(),
+  bool _hasStrengthSets = false;
   final TextEditingController _setsController = TextEditingController(text: '3');
-  final TextEditingController _repsController = TextEditingController(text: '10');
-  final TextEditingController _weightController = TextEditingController();
+  final TextEditingController _repsController = TextEditingController(text: '12');
+  final TextEditingController _weightController = TextEditingController(text: '0');
+  final TextEditingController _durationController = TextEditingController(text: '0');
+
+  WorkoutType _selectedType = WorkoutType.strength;
 
   @override
   void initState() {
@@ -1239,6 +1253,7 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
     _setsController.dispose();
     _repsController.dispose();
     _weightController.dispose();
+    _durationController.dispose();
     super.dispose();
   }
 
@@ -1475,10 +1490,9 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
               const SizedBox(height: 16),
 
               // Strength training fields
-              _hasStrengthSets = false,
               SwitchListTile(
                 title: const Text('Add Sets & Reps'),
-                value: _hasStrengthSets,
+                value: _hasStrengthSets ?? false,
                 onChanged: (value) {
                   setState(() {
                     _hasStrengthSets = value;
@@ -1545,7 +1559,7 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
 
               if (_hasStrengthSets) {
                 final sets = int.tryParse(_setsController.text) ?? 3;
-                final reps = int.tryParse(_repsController.text) ?? 10;
+                final reps = int.tryParse(_repsController.text) ?? 12;
                 final weight = double.tryParse(_weightController.text);
 
                 // Create exercise sets
@@ -1560,7 +1574,6 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
                   id: exercise.id,
                   name: exercise.name,
                   description: exercise.description,
-                  imageUrl: exercise.imageUrl,
                   targetMuscleGroup: exercise.targetMuscleGroup,
                   caloriesBurnedPerMinute: exercise.caloriesBurnedPerMinute,
                   sets: exerciseSets,
@@ -1601,7 +1614,7 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
     List<ExerciseSet>? exerciseSets;
     if (_hasStrengthSets) {
       final sets = int.tryParse(_setsController.text) ?? 3;
-      final reps = int.tryParse(_repsController.text) ?? 10;
+      final reps = int.tryParse(_repsController.text) ?? 12;
       final weight = double.tryParse(_weightController.text);
 
       exerciseSets = List.generate(sets, (_) =>
@@ -1613,10 +1626,10 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
     }
 
     final customExercise = Exercise(
-      id: id,
-      name: name,
+      id: id ?? const Uuid().v4(),
+      name: name ?? '',
       description: description,
-      targetMuscleGroup: targetMuscleGroup,
+      targetMuscleGroup: targetMuscleGroup ?? 'Not specified',
       caloriesBurnedPerMinute: caloriesBurnedPerMinute,
       sets: exerciseSets,
     );
@@ -1631,5 +1644,79 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
     }
   }
 
+  String _getWorkoutTypeIcon(WorkoutType type) {
+    switch (type) {
+      case WorkoutType.strength:
+        return '💪';
+      case WorkoutType.cardio:
+        return '🏃';
+      case WorkoutType.hiit:
+        return '⚡';
+      case WorkoutType.flexibility:
+        return '🧘';
+      case WorkoutType.balance:
+        return '⚖️';
+      case WorkoutType.sports:
+        return '⚽';
+      case WorkoutType.other:
+        return '🏋️';
+    }
+  }
 
+  String _getWorkoutTypeLabel(WorkoutType type) {
+    switch (type) {
+      case WorkoutType.strength:
+        return 'Strength';
+      case WorkoutType.cardio:
+        return 'Cardio';
+      case WorkoutType.hiit:
+        return 'HIIT';
+      case WorkoutType.flexibility:
+        return 'Flexibility';
+      case WorkoutType.balance:
+        return 'Balance';
+      case WorkoutType.sports:
+        return 'Sports';
+      case WorkoutType.other:
+        return 'Other';
+    }
+  }
+
+  String _getWorkoutTypeDescription(WorkoutType type) {
+    switch (type) {
+      case WorkoutType.strength:
+        return 'Weight training and resistance exercises';
+      case WorkoutType.cardio:
+        return 'Aerobic exercises for cardiovascular health';
+      case WorkoutType.hiit:
+        return 'High-intensity interval training';
+      case WorkoutType.flexibility:
+        return 'Stretching and mobility exercises';
+      case WorkoutType.balance:
+        return 'Balance and stability exercises';
+      case WorkoutType.sports:
+        return 'Sports-specific training';
+      case WorkoutType.other:
+        return 'Other types of physical activity';
+    }
+  }
+
+  double _getCaloriesPerMinute(WorkoutType type) {
+    switch (type) {
+      case WorkoutType.strength:
+        return 8.0;
+      case WorkoutType.cardio:
+        return 10.0;
+      case WorkoutType.hiit:
+        return 12.0;
+      case WorkoutType.flexibility:
+        return 3.0;
+      case WorkoutType.balance:
+        return 4.0;
+      case WorkoutType.sports:
+        return 9.0;
+      case WorkoutType.other:
+        return 6.0;
+    }
+  }
 }

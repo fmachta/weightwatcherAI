@@ -1,3 +1,7 @@
+import 'meal.dart';
+import 'workout.dart';
+import 'user_profile.dart';
+
 class AIPlan {
   final String id;
   final String title;

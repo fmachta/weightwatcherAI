@@ -50,7 +50,7 @@ class WorkoutProvider with ChangeNotifier {
       Duration duration,
       WorkoutType type,
       List<Exercise> exercises,
-      double caloriesBurned,
+      int caloriesBurned,
       {String? notes}) async {
     _isLoading = true;
     notifyListeners();

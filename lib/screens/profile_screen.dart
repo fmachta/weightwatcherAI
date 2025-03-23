@@ -54,13 +54,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // Current body measurements
                 Row(
                   children: [
-                    Text(
-                      'Current Measurements',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        'Current Measurements',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const Spacer(),
                     TextButton.icon(
                       onPressed: () => _showAddMeasurementSheet(context),
                       icon: const Icon(Icons.add),
@@ -239,23 +241,26 @@ class _ProfileCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      _ProfileInfoChip(
-                        label: '${userProfile.age} years',
-                        icon: Icons.cake,
-                      ),
-                      const SizedBox(width: 8),
-                      _ProfileInfoChip(
-                        label: '${userProfile.height.toInt()} cm',
-                        icon: Icons.height,
-                      ),
-                      const SizedBox(width: 8),
-                      _ProfileInfoChip(
-                        label: userProfile.gender,
-                        icon: Icons.person,
-                      ),
-                    ],
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _ProfileInfoChip(
+                          label: '${userProfile.age} years',
+                          icon: Icons.cake,
+                        ),
+                        const SizedBox(width: 8),
+                        _ProfileInfoChip(
+                          label: '${userProfile.height.toInt()} cm',
+                          icon: Icons.height,
+                        ),
+                        const SizedBox(width: 8),
+                        _ProfileInfoChip(
+                          label: userProfile.gender,
+                          icon: Icons.person,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

@@ -245,9 +245,12 @@ class OpenAIService {
 
   // Create a prompt for meal plan generation
   String _createMealPlanPrompt(UserProfile userProfile) {
-    // Calculate daily calorie goal
+    // Calculate calorie targets based on user profile
     final dailyCalories = userProfile.calculateDailyCalorieGoal();
-    final macros = userProfile.macroDistribution;
+    final macrosDistribution = userProfile.macroDistribution ?? userProfile.defaultMacroDistribution;
+    final proteinGoal = dailyCalories * macrosDistribution['protein']! / 4; // 4 calories per gram of protein
+    final carbsGoal = dailyCalories * macrosDistribution['carbs']! / 4; // 4 calories per gram of carbs
+    final fatGoal = dailyCalories * macrosDistribution['fat']! / 9; // 9 calories per gram of fat
 
     return '''
     Create a detailed 1-week meal plan for a user with the following profile:
@@ -262,9 +265,9 @@ class OpenAIService {
     
     Dietary Requirements:
     - Daily Calorie Target: ${dailyCalories.toInt()} calories
-    - Protein: ${(macros['protein']! * 100).toInt()}% (${(dailyCalories * macros['protein']! / 4).toInt()}g)
-    - Carbs: ${(macros['carbs']! * 100).toInt()}% (${(dailyCalories * macros['carbs']! / 4).toInt()}g)
-    - Fat: ${(macros['fat']! * 100).toInt()}% (${(dailyCalories * macros['fat']! / 9).toInt()}g)
+    - Protein: ${(macrosDistribution['protein']! * 100).toInt()}% (${(dailyCalories * macrosDistribution['protein']! / 4).toInt()}g)
+    - Carbs: ${(macrosDistribution['carbs']! * 100).toInt()}% (${(dailyCalories * macrosDistribution['carbs']! / 4).toInt()}g)
+    - Fat: ${(macrosDistribution['fat']! * 100).toInt()}% (${(dailyCalories * macrosDistribution['fat']! / 9).toInt()}g)
     
     The plan should:
     1. Cover 7 days
@@ -308,9 +311,16 @@ class OpenAIService {
   // Create a prompt for insight generation
   String _createInsightPrompt(UserProfile userProfile, List<dynamic> recentWorkouts, List<dynamic> recentMeals) {
     // Create simple summaries of recent activity
-    String workoutSummary = recentWorkouts.isEmpty
-        ? "No recent workouts"
-        : "${recentWorkouts.length} workouts in the past week, totaling approximately ${recentWorkouts.fold(0, (sum, workout) => sum + workout.duration.inMinutes).toInt()} minutes";
+    String formattedWorkouts;
+    if (recentWorkouts.isEmpty) {
+      formattedWorkouts = "No workouts in the past week";
+    } else {
+      int totalMinutes = 0;
+      for (var workout in recentWorkouts) {
+        totalMinutes += workout.duration.inMinutes as int;
+      }
+      formattedWorkouts = "${recentWorkouts.length} workouts in the past week, totaling approximately $totalMinutes minutes";
+    }
 
     String mealSummary = recentMeals.isEmpty
         ? "No meal tracking data available"
@@ -326,7 +336,7 @@ class OpenAIService {
     - Fitness Goal: ${userProfile.fitnessGoal.name}
     
     Recent Activity:
-    - $workoutSummary
+    - $formattedWorkouts
     - $mealSummary
     
     Provide a specific, actionable insight (1-2 sentences) based on their profile and activity that can help them make progress toward their fitness goal.
@@ -404,10 +414,10 @@ class OpenAIService {
           id: _uuid.v4(),
           name: workoutData['name'] ?? 'Day $dayNumber Workout',
           dateTime: DateTime.now().add(Duration(days: dayNumber - 1)),
-          duration: Duration(minutes: workoutData['duration'] ?? 45),
+          duration: Duration(minutes: workoutData['duration'] != null ? (workoutData['duration'] as num).toInt() : 45),
           type: _parseWorkoutType(workoutData['type']),
           exercises: exercises,
-          caloriesBurned: _estimateCaloriesBurned(exercises, workoutData['duration'] ?? 45, userProfile),
+          caloriesBurned: (_estimateCaloriesBurned(exercises, workoutData['duration'] != null ? (workoutData['duration'] as num).toInt() : 45, userProfile)).toInt(),
           notes: workoutData['notes'],
         );
 
@@ -546,23 +556,19 @@ class OpenAIService {
 
   // Estimate calories burned for a workout
   double _estimateCaloriesBurned(List<Exercise> exercises, int durationMinutes, UserProfile userProfile) {
-    // A simple estimation algorithm
-    final workoutIntensity = exercises.length > 5 ? 1.2 : 1.0;
-    final weightFactor = userProfile.currentWeight / 70.0; // Adjust for body weight
-
+    // Simple calorie estimation based on weight, duration and exercise type
     switch (exercises.isEmpty ? WorkoutType.other : _determineWorkoutType(exercises)) {
-      case WorkoutType.cardio:
-        return 10.0 * durationMinutes * workoutIntensity * weightFactor;
       case WorkoutType.strength:
-        return 8.0 * durationMinutes * workoutIntensity * weightFactor;
+        return 6 * userProfile.currentWeight * (durationMinutes / 60);
+      case WorkoutType.cardio:
+        return 8 * userProfile.currentWeight * (durationMinutes / 60);
+      case WorkoutType.hiit:
+        return 10 * userProfile.currentWeight * (durationMinutes / 60);
       case WorkoutType.flexibility:
-        return 3.0 * durationMinutes * workoutIntensity * weightFactor;
       case WorkoutType.balance:
-        return 4.0 * durationMinutes * workoutIntensity * weightFactor;
       case WorkoutType.sports:
-        return 9.0 * durationMinutes * workoutIntensity * weightFactor;
       case WorkoutType.other:
-        return 6.0 * durationMinutes * workoutIntensity * weightFactor;
+        return 5 * userProfile.currentWeight * (durationMinutes / 60);
     }
   }
 
@@ -782,7 +788,7 @@ class OpenAIService {
         duration: const Duration(minutes: 45),
         type: workoutType,
         exercises: exercises,
-        caloriesBurned: _estimateCaloriesBurned(exercises, 45, userProfile),
+        caloriesBurned: (_estimateCaloriesBurned(exercises, 45, userProfile)).toInt(),
         notes: 'Default workout for ${userProfile.fitnessGoal.name}',
       );
 
@@ -825,9 +831,10 @@ class OpenAIService {
 
     // Calculate calorie targets based on user profile
     final dailyCalories = userProfile.calculateDailyCalorieGoal();
-    final proteinGoal = dailyCalories * userProfile.macroDistribution['protein']! / 4; // 4 calories per gram of protein
-    final carbsGoal = dailyCalories * userProfile.macroDistribution['carbs']! / 4; // 4 calories per gram of carbs
-    final fatGoal = dailyCalories * userProfile.macroDistribution['fat']! / 9; // 9 calories per gram of fat
+    final macrosDistribution = userProfile.macroDistribution ?? userProfile.defaultMacroDistribution;
+    final proteinGoal = dailyCalories * macrosDistribution['protein']! / 4; // 4 calories per gram of protein
+    final carbsGoal = dailyCalories * macrosDistribution['carbs']! / 4; // 4 calories per gram of carbs
+    final fatGoal = dailyCalories * macrosDistribution['fat']! / 9; // 9 calories per gram of fat
 
     // Create a simple 7-day meal plan
     for (int day = 1; day <= 7; day++) {

@@ -8,6 +8,7 @@ import '../providers/ai_trainer_provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/nutrition_provider.dart';
 import '../providers/workout_provider.dart';
+import '../models/meal.dart';
 
 class AITrainerScreen extends StatefulWidget {
   const AITrainerScreen({super.key});
@@ -961,16 +962,24 @@ class PlanDetailsScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Start: ${DateFormat('MMM d, yyyy').format(plan.startDate)}',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      Expanded(
+                        child: Text(
+                          'Start: ${DateFormat('MMM d, yyyy').format(plan.startDate)}',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Text(
-                        'End: ${DateFormat('MMM d, yyyy').format(plan.endDate)}',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'End: ${DateFormat('MMM d, yyyy').format(plan.endDate)}',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.end,
                         ),
                       ),
                     ],
@@ -1065,33 +1074,44 @@ class PlanDetailsScreen extends StatelessWidget {
               )),
             ],
 
-            if (day.meals != null && day.meals!.isNotEmpty) ...[
-              const SizedBox(height: 16),
+            if (day.meals != null && day.meals!.isNotEmpty)
               Text(
                 'Meals',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
+            if (day.meals != null && day.meals!.isNotEmpty)
               const SizedBox(height: 8),
-              ...day.meals!.map((meal) => ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(
-                  meal.type == MealType.breakfast
-                      ? Icons.wb_sunny
-                      : meal.type == MealType.lunch
-                      ? Icons.wb_twilight
-                      : meal.type == MealType.dinner
-                      ? Icons.nights_stay
-                      : Icons.fastfood,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                title: Text(meal.name),
-                subtitle: Text(
-                  '${meal.totalCalories.toInt()} kcal | P: ${meal.totalProtein.toInt()}g | C: ${meal.totalCarbs.toInt()}g | F: ${meal.totalFat.toInt()}g',
-                ),
-              )),
-            ],
+            if (day.meals != null)
+              ...day.meals!.map((mealObj) {
+                // Convert to map to safely access properties
+                final mealMap = mealObj is Map<dynamic, dynamic> ? mealObj as Map<dynamic, dynamic> : <dynamic, dynamic>{};
+                final mealName = mealMap['name']?.toString() ?? 'Meal';
+                final mealType = mealMap['type']?.toString() ?? '';
+                final calories = (mealMap['totalCalories'] as num?) ?? 0;
+                final protein = (mealMap['totalProtein'] as num?) ?? 0;
+                final carbs = (mealMap['totalCarbs'] as num?) ?? 0;
+                final fat = (mealMap['totalFat'] as num?) ?? 0;
+                
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(
+                    mealType.contains('breakfast')
+                        ? Icons.wb_sunny
+                        : mealType.contains('lunch')
+                        ? Icons.wb_twilight
+                        : mealType.contains('dinner')
+                        ? Icons.nights_stay
+                        : Icons.fastfood,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: Text(mealName),
+                  subtitle: Text(
+                    '${calories.toInt()} kcal | P: ${protein.toInt()}g | C: ${carbs.toInt()}g | F: ${fat.toInt()}g',
+                  ),
+                );
+              }),
           ],
         ),
       ),

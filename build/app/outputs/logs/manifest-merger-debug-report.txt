@@ -1,0 +1,319 @@
+-- Merging decision tree log ---
+application
+INJECTED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/main/AndroidManifest.xml:2:5-33:19
+INJECTED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/debug/AndroidManifest.xml
+MERGED from [androidx.window:window:1.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/37f26d50dc9e8fd6d76af0909beadc16/transformed/jetified-window-1.2.0/AndroidManifest.xml:22:5-29:19
+MERGED from [androidx.window:window:1.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/37f26d50dc9e8fd6d76af0909beadc16/transformed/jetified-window-1.2.0/AndroidManifest.xml:22:5-29:19
+MERGED from [androidx.core:core:1.13.1] /Users/ferasmachta/.gradle/caches/transforms-3/25cf3a390b9c71bf17593562629fb892/transformed/core-1.13.1/AndroidManifest.xml:28:5-89
+MERGED from [androidx.core:core:1.13.1] /Users/ferasmachta/.gradle/caches/transforms-3/25cf3a390b9c71bf17593562629fb892/transformed/core-1.13.1/AndroidManifest.xml:28:5-89
+MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/e162af6e8ed161fd7461567f670d306f/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/e162af6e8ed161fd7461567f670d306f/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/ferasmachta/.gradle/caches/transforms-3/11e5856f816b9c1ab00d53faff14fc23/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:25:5-31:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/ferasmachta/.gradle/caches/transforms-3/11e5856f816b9c1ab00d53faff14fc23/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:25:5-31:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /Users/ferasmachta/.gradle/caches/transforms-3/d17b55404edce87bd4caab79dd8db34f/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /Users/ferasmachta/.gradle/caches/transforms-3/d17b55404edce87bd4caab79dd8db34f/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:24:5-25:19
+	android:extractNativeLibs
+		INJECTED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/debug/AndroidManifest.xml
+	android:appComponentFactory
+		ADDED from [androidx.core:core:1.13.1] /Users/ferasmachta/.gradle/caches/transforms-3/25cf3a390b9c71bf17593562629fb892/transformed/core-1.13.1/AndroidManifest.xml:28:18-86
+	android:name
+		INJECTED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/main/AndroidManifest.xml
+manifest
+ADDED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/main/AndroidManifest.xml:1:1-45:12
+MERGED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/main/AndroidManifest.xml:1:1-45:12
+INJECTED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/debug/AndroidManifest.xml:1:1-7:12
+INJECTED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/debug/AndroidManifest.xml:1:1-7:12
+INJECTED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/debug/AndroidManifest.xml:1:1-7:12
+MERGED from [:flutter_native_splash] /Users/ferasmachta/Documents/GitHub/weightwatcherAI/build/flutter_native_splash/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-7:12
+MERGED from [:path_provider_android] /Users/ferasmachta/Documents/GitHub/weightwatcherAI/build/path_provider_android/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-7:12
+MERGED from [:shared_preferences_android] /Users/ferasmachta/Documents/GitHub/weightwatcherAI/build/shared_preferences_android/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.preference:preference:1.2.1] /Users/ferasmachta/.gradle/caches/transforms-3/8cd68a37250c9141fc35c648b18f4c16/transformed/preference-1.2.1/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.appcompat:appcompat:1.1.0] /Users/ferasmachta/.gradle/caches/transforms-3/1ccfe90965a69838ac989a8eaa5bc26a/transformed/appcompat-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.fragment:fragment-ktx:1.7.1] /Users/ferasmachta/.gradle/caches/transforms-3/764ca8d21c7c741fe39b8ef6115733a4/transformed/jetified-fragment-ktx-1.7.1/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.fragment:fragment:1.7.1] /Users/ferasmachta/.gradle/caches/transforms-3/166eb6e3c3aedb2dd6108492b5251a4e/transformed/fragment-1.7.1/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.recyclerview:recyclerview:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/d27559f86f164fd06e0a2177c15b537f/transformed/recyclerview-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/686f9433b61282297a3082b014fde9b1/transformed/legacy-support-core-ui-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/58a4144e20b61b7fcee897f2ae7d8851/transformed/slidingpanelayout-1.2.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.window:window:1.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/37f26d50dc9e8fd6d76af0909beadc16/transformed/jetified-window-1.2.0/AndroidManifest.xml:17:1-31:12
+MERGED from [androidx.window:window-java:1.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/b390190853825a78e6663fb5ec1987ed/transformed/jetified-window-java-1.2.0/AndroidManifest.xml:17:1-21:12
+MERGED from [androidx.activity:activity-ktx:1.8.1] /Users/ferasmachta/.gradle/caches/transforms-3/f5ecbdc0a905879837064187eeb2ca28/transformed/jetified-activity-ktx-1.8.1/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.activity:activity:1.8.1] /Users/ferasmachta/.gradle/caches/transforms-3/3f8c457b15ce4dc478340a4eaba30126/transformed/jetified-activity-1.8.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/ba5a9bf53af8512832eeccb9bc84788b/transformed/legacy-support-core-utils-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.loader:loader:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/7bebbdd82f45d378390004877eec6b6d/transformed/loader-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.viewpager:viewpager:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/6757897f59d1e58b58c9ef52cc8165fb/transformed/viewpager-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/90a1f2bd5270bedc0c8ca688c47b3e97/transformed/jetified-lifecycle-runtime-ktx-2.7.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/d2c5e8e1685950042649d6715b966421/transformed/lifecycle-livedata-2.7.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata-core-ktx:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/6d8a583958a202f4c7034d15d69bce7a/transformed/jetified-lifecycle-livedata-core-ktx-2.7.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/83ab8ac23d34bb6163519dc9204f2ef1/transformed/jetified-lifecycle-viewmodel-ktx-2.7.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/690843268ef557dc7aa3001ef39a5946/transformed/lifecycle-viewmodel-2.7.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/20496ccad947e937944f7b8cf1e00c12/transformed/lifecycle-livedata-core-2.7.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/c445a5b87abf0231a978453c8c8fe7c9/transformed/jetified-lifecycle-viewmodel-savedstate-2.7.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.core:core-ktx:1.13.1] /Users/ferasmachta/.gradle/caches/transforms-3/209fc01324407623d7f2f5575363eff1/transformed/jetified-core-ktx-1.13.1/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.appcompat:appcompat-resources:1.1.0] /Users/ferasmachta/.gradle/caches/transforms-3/f809ebb4c8e9e67136abd16d3d1ce900/transformed/jetified-appcompat-resources-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/f3f4520ee564512a33016f551862e3f7/transformed/drawerlayout-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/89d463f0a71f100a8e9fa97b2b6b2b86/transformed/coordinatorlayout-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.customview:customview:1.1.0] /Users/ferasmachta/.gradle/caches/transforms-3/dec63b9fec50f8fece67e0f9f0211f2a/transformed/customview-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.transition:transition:1.4.1] /Users/ferasmachta/.gradle/caches/transforms-3/7bb84e52036aa2708b8fc233be42af4f/transformed/transition-1.4.1/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /Users/ferasmachta/.gradle/caches/transforms-3/2fcfd1fa369b05c8770aef3a11510844/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /Users/ferasmachta/.gradle/caches/transforms-3/1eec08d50d9c0afc5b2c14b92b089a74/transformed/vectordrawable-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/6027b37d7186b396e47cf4f8ed3afce0/transformed/swiperefreshlayout-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/b4985f3f84d086d1eb6f03699fb06d0d/transformed/asynclayoutinflater-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.core:core:1.13.1] /Users/ferasmachta/.gradle/caches/transforms-3/25cf3a390b9c71bf17593562629fb892/transformed/core-1.13.1/AndroidManifest.xml:17:1-30:12
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/1177d5b957406b63102275ba97872c1f/transformed/lifecycle-runtime-2.7.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/e162af6e8ed161fd7461567f670d306f/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:17:1-35:12
+MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] /Users/ferasmachta/.gradle/caches/transforms-3/1b33309f2f031c8436b6b21aefd87dc3/transformed/jetified-savedstate-ktx-1.2.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.savedstate:savedstate:1.2.1] /Users/ferasmachta/.gradle/caches/transforms-3/d5317f18628b098357fcc3396c1e7523/transformed/jetified-savedstate-1.2.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:17:1-55:12
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/ferasmachta/.gradle/caches/transforms-3/11e5856f816b9c1ab00d53faff14fc23/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:17:1-33:12
+MERGED from [androidx.tracing:tracing:1.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/7e841fa0e00638f43422a0870913654d/transformed/jetified-tracing-1.2.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.datastore:datastore-core-android:1.1.3] /Users/ferasmachta/.gradle/caches/transforms-3/a703a2727741d92b0fb90ec2ff1f663e/transformed/jetified-datastore-core-release/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.datastore:datastore-preferences-android:1.1.3] /Users/ferasmachta/.gradle/caches/transforms-3/060c6ab0e9bf4fa5546c3182c55b6c3c/transformed/jetified-datastore-preferences-release/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.datastore:datastore-android:1.1.3] /Users/ferasmachta/.gradle/caches/transforms-3/9e6f8973de07ea43a2124e576b9c9b70/transformed/jetified-datastore-release/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/768485bcb679d30fdcdb6c3c0986032b/transformed/core-runtime-2.2.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /Users/ferasmachta/.gradle/caches/transforms-3/d17b55404edce87bd4caab79dd8db34f/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:17:1-27:12
+MERGED from [androidx.interpolator:interpolator:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/f4db716680b2cc4090aa649f8e66f302/transformed/interpolator-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/2655bfa11c448179a5168b9dbf028ef4/transformed/cursoradapter-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.window.extensions.core:core:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/d96f22aed55f6fb3c50da780b7e5f747/transformed/jetified-core-1.0.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.documentfile:documentfile:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/aaa70b7e81c0a7b63650fbd6ae610d24/transformed/documentfile-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/d2a9c9bc5b7b0f20e23166c058806bdc/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.print:print:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/abe191155c3a60c2a0bc4b42b94f93e5/transformed/print-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.annotation:annotation-experimental:1.4.0] /Users/ferasmachta/.gradle/caches/transforms-3/a031d87a7d01e890037f574b92486bc6/transformed/jetified-annotation-experimental-1.4.0/AndroidManifest.xml:2:1-7:12
+MERGED from [com.getkeepsafe.relinker:relinker:1.4.5] /Users/ferasmachta/.gradle/caches/transforms-3/61fc022a96a1f41e52755df7e83f6fb6/transformed/jetified-relinker-1.4.5/AndroidManifest.xml:2:1-7:12
+	package
+		INJECTED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/debug/AndroidManifest.xml
+	android:versionName
+		INJECTED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/debug/AndroidManifest.xml
+	android:versionCode
+		INJECTED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/debug/AndroidManifest.xml
+	xmlns:android
+		ADDED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/main/AndroidManifest.xml:1:11-69
+queries
+ADDED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/main/AndroidManifest.xml:39:5-44:15
+intent#action:name:android.intent.action.PROCESS_TEXT+data:mimeType:text/plain
+ADDED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/main/AndroidManifest.xml:40:9-43:18
+action#android.intent.action.PROCESS_TEXT
+ADDED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/main/AndroidManifest.xml:41:13-72
+	android:name
+		ADDED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/main/AndroidManifest.xml:41:21-70
+data
+ADDED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/main/AndroidManifest.xml:42:13-50
+	android:mimeType
+		ADDED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/main/AndroidManifest.xml:42:19-48
+uses-permission#android.permission.INTERNET
+ADDED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/debug/AndroidManifest.xml:6:5-66
+	android:name
+		ADDED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/debug/AndroidManifest.xml:6:22-64
+uses-sdk
+INJECTED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/debug/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/debug/AndroidManifest.xml
+INJECTED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/debug/AndroidManifest.xml
+MERGED from [:flutter_native_splash] /Users/ferasmachta/Documents/GitHub/weightwatcherAI/build/flutter_native_splash/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:flutter_native_splash] /Users/ferasmachta/Documents/GitHub/weightwatcherAI/build/flutter_native_splash/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:path_provider_android] /Users/ferasmachta/Documents/GitHub/weightwatcherAI/build/path_provider_android/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:path_provider_android] /Users/ferasmachta/Documents/GitHub/weightwatcherAI/build/path_provider_android/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:shared_preferences_android] /Users/ferasmachta/Documents/GitHub/weightwatcherAI/build/shared_preferences_android/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:shared_preferences_android] /Users/ferasmachta/Documents/GitHub/weightwatcherAI/build/shared_preferences_android/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [androidx.preference:preference:1.2.1] /Users/ferasmachta/.gradle/caches/transforms-3/8cd68a37250c9141fc35c648b18f4c16/transformed/preference-1.2.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.preference:preference:1.2.1] /Users/ferasmachta/.gradle/caches/transforms-3/8cd68a37250c9141fc35c648b18f4c16/transformed/preference-1.2.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.appcompat:appcompat:1.1.0] /Users/ferasmachta/.gradle/caches/transforms-3/1ccfe90965a69838ac989a8eaa5bc26a/transformed/appcompat-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.appcompat:appcompat:1.1.0] /Users/ferasmachta/.gradle/caches/transforms-3/1ccfe90965a69838ac989a8eaa5bc26a/transformed/appcompat-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.fragment:fragment-ktx:1.7.1] /Users/ferasmachta/.gradle/caches/transforms-3/764ca8d21c7c741fe39b8ef6115733a4/transformed/jetified-fragment-ktx-1.7.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.fragment:fragment-ktx:1.7.1] /Users/ferasmachta/.gradle/caches/transforms-3/764ca8d21c7c741fe39b8ef6115733a4/transformed/jetified-fragment-ktx-1.7.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.fragment:fragment:1.7.1] /Users/ferasmachta/.gradle/caches/transforms-3/166eb6e3c3aedb2dd6108492b5251a4e/transformed/fragment-1.7.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.fragment:fragment:1.7.1] /Users/ferasmachta/.gradle/caches/transforms-3/166eb6e3c3aedb2dd6108492b5251a4e/transformed/fragment-1.7.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/d27559f86f164fd06e0a2177c15b537f/transformed/recyclerview-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/d27559f86f164fd06e0a2177c15b537f/transformed/recyclerview-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/686f9433b61282297a3082b014fde9b1/transformed/legacy-support-core-ui-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/686f9433b61282297a3082b014fde9b1/transformed/legacy-support-core-ui-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/58a4144e20b61b7fcee897f2ae7d8851/transformed/slidingpanelayout-1.2.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/58a4144e20b61b7fcee897f2ae7d8851/transformed/slidingpanelayout-1.2.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.window:window:1.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/37f26d50dc9e8fd6d76af0909beadc16/transformed/jetified-window-1.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.window:window:1.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/37f26d50dc9e8fd6d76af0909beadc16/transformed/jetified-window-1.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.window:window-java:1.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/b390190853825a78e6663fb5ec1987ed/transformed/jetified-window-java-1.2.0/AndroidManifest.xml:19:5-44
+MERGED from [androidx.window:window-java:1.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/b390190853825a78e6663fb5ec1987ed/transformed/jetified-window-java-1.2.0/AndroidManifest.xml:19:5-44
+MERGED from [androidx.activity:activity-ktx:1.8.1] /Users/ferasmachta/.gradle/caches/transforms-3/f5ecbdc0a905879837064187eeb2ca28/transformed/jetified-activity-ktx-1.8.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.activity:activity-ktx:1.8.1] /Users/ferasmachta/.gradle/caches/transforms-3/f5ecbdc0a905879837064187eeb2ca28/transformed/jetified-activity-ktx-1.8.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.activity:activity:1.8.1] /Users/ferasmachta/.gradle/caches/transforms-3/3f8c457b15ce4dc478340a4eaba30126/transformed/jetified-activity-1.8.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.activity:activity:1.8.1] /Users/ferasmachta/.gradle/caches/transforms-3/3f8c457b15ce4dc478340a4eaba30126/transformed/jetified-activity-1.8.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/ba5a9bf53af8512832eeccb9bc84788b/transformed/legacy-support-core-utils-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/ba5a9bf53af8512832eeccb9bc84788b/transformed/legacy-support-core-utils-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/7bebbdd82f45d378390004877eec6b6d/transformed/loader-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/7bebbdd82f45d378390004877eec6b6d/transformed/loader-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/6757897f59d1e58b58c9ef52cc8165fb/transformed/viewpager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/6757897f59d1e58b58c9ef52cc8165fb/transformed/viewpager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/90a1f2bd5270bedc0c8ca688c47b3e97/transformed/jetified-lifecycle-runtime-ktx-2.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/90a1f2bd5270bedc0c8ca688c47b3e97/transformed/jetified-lifecycle-runtime-ktx-2.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/d2c5e8e1685950042649d6715b966421/transformed/lifecycle-livedata-2.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/d2c5e8e1685950042649d6715b966421/transformed/lifecycle-livedata-2.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core-ktx:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/6d8a583958a202f4c7034d15d69bce7a/transformed/jetified-lifecycle-livedata-core-ktx-2.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core-ktx:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/6d8a583958a202f4c7034d15d69bce7a/transformed/jetified-lifecycle-livedata-core-ktx-2.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/83ab8ac23d34bb6163519dc9204f2ef1/transformed/jetified-lifecycle-viewmodel-ktx-2.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/83ab8ac23d34bb6163519dc9204f2ef1/transformed/jetified-lifecycle-viewmodel-ktx-2.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/690843268ef557dc7aa3001ef39a5946/transformed/lifecycle-viewmodel-2.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/690843268ef557dc7aa3001ef39a5946/transformed/lifecycle-viewmodel-2.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/20496ccad947e937944f7b8cf1e00c12/transformed/lifecycle-livedata-core-2.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/20496ccad947e937944f7b8cf1e00c12/transformed/lifecycle-livedata-core-2.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/c445a5b87abf0231a978453c8c8fe7c9/transformed/jetified-lifecycle-viewmodel-savedstate-2.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/c445a5b87abf0231a978453c8c8fe7c9/transformed/jetified-lifecycle-viewmodel-savedstate-2.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core-ktx:1.13.1] /Users/ferasmachta/.gradle/caches/transforms-3/209fc01324407623d7f2f5575363eff1/transformed/jetified-core-ktx-1.13.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.core:core-ktx:1.13.1] /Users/ferasmachta/.gradle/caches/transforms-3/209fc01324407623d7f2f5575363eff1/transformed/jetified-core-ktx-1.13.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.appcompat:appcompat-resources:1.1.0] /Users/ferasmachta/.gradle/caches/transforms-3/f809ebb4c8e9e67136abd16d3d1ce900/transformed/jetified-appcompat-resources-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.appcompat:appcompat-resources:1.1.0] /Users/ferasmachta/.gradle/caches/transforms-3/f809ebb4c8e9e67136abd16d3d1ce900/transformed/jetified-appcompat-resources-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/f3f4520ee564512a33016f551862e3f7/transformed/drawerlayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/f3f4520ee564512a33016f551862e3f7/transformed/drawerlayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/89d463f0a71f100a8e9fa97b2b6b2b86/transformed/coordinatorlayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/89d463f0a71f100a8e9fa97b2b6b2b86/transformed/coordinatorlayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview:1.1.0] /Users/ferasmachta/.gradle/caches/transforms-3/dec63b9fec50f8fece67e0f9f0211f2a/transformed/customview-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.customview:customview:1.1.0] /Users/ferasmachta/.gradle/caches/transforms-3/dec63b9fec50f8fece67e0f9f0211f2a/transformed/customview-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.transition:transition:1.4.1] /Users/ferasmachta/.gradle/caches/transforms-3/7bb84e52036aa2708b8fc233be42af4f/transformed/transition-1.4.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.transition:transition:1.4.1] /Users/ferasmachta/.gradle/caches/transforms-3/7bb84e52036aa2708b8fc233be42af4f/transformed/transition-1.4.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /Users/ferasmachta/.gradle/caches/transforms-3/2fcfd1fa369b05c8770aef3a11510844/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /Users/ferasmachta/.gradle/caches/transforms-3/2fcfd1fa369b05c8770aef3a11510844/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /Users/ferasmachta/.gradle/caches/transforms-3/1eec08d50d9c0afc5b2c14b92b089a74/transformed/vectordrawable-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /Users/ferasmachta/.gradle/caches/transforms-3/1eec08d50d9c0afc5b2c14b92b089a74/transformed/vectordrawable-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/6027b37d7186b396e47cf4f8ed3afce0/transformed/swiperefreshlayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/6027b37d7186b396e47cf4f8ed3afce0/transformed/swiperefreshlayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/b4985f3f84d086d1eb6f03699fb06d0d/transformed/asynclayoutinflater-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/b4985f3f84d086d1eb6f03699fb06d0d/transformed/asynclayoutinflater-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.13.1] /Users/ferasmachta/.gradle/caches/transforms-3/25cf3a390b9c71bf17593562629fb892/transformed/core-1.13.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.13.1] /Users/ferasmachta/.gradle/caches/transforms-3/25cf3a390b9c71bf17593562629fb892/transformed/core-1.13.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/1177d5b957406b63102275ba97872c1f/transformed/lifecycle-runtime-2.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/1177d5b957406b63102275ba97872c1f/transformed/lifecycle-runtime-2.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/e162af6e8ed161fd7461567f670d306f/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/e162af6e8ed161fd7461567f670d306f/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] /Users/ferasmachta/.gradle/caches/transforms-3/1b33309f2f031c8436b6b21aefd87dc3/transformed/jetified-savedstate-ktx-1.2.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] /Users/ferasmachta/.gradle/caches/transforms-3/1b33309f2f031c8436b6b21aefd87dc3/transformed/jetified-savedstate-ktx-1.2.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] /Users/ferasmachta/.gradle/caches/transforms-3/d5317f18628b098357fcc3396c1e7523/transformed/jetified-savedstate-1.2.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] /Users/ferasmachta/.gradle/caches/transforms-3/d5317f18628b098357fcc3396c1e7523/transformed/jetified-savedstate-1.2.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:21:5-44
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:21:5-44
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/ferasmachta/.gradle/caches/transforms-3/11e5856f816b9c1ab00d53faff14fc23/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/ferasmachta/.gradle/caches/transforms-3/11e5856f816b9c1ab00d53faff14fc23/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.tracing:tracing:1.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/7e841fa0e00638f43422a0870913654d/transformed/jetified-tracing-1.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.tracing:tracing:1.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/7e841fa0e00638f43422a0870913654d/transformed/jetified-tracing-1.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.datastore:datastore-core-android:1.1.3] /Users/ferasmachta/.gradle/caches/transforms-3/a703a2727741d92b0fb90ec2ff1f663e/transformed/jetified-datastore-core-release/AndroidManifest.xml:5:5-44
+MERGED from [androidx.datastore:datastore-core-android:1.1.3] /Users/ferasmachta/.gradle/caches/transforms-3/a703a2727741d92b0fb90ec2ff1f663e/transformed/jetified-datastore-core-release/AndroidManifest.xml:5:5-44
+MERGED from [androidx.datastore:datastore-preferences-android:1.1.3] /Users/ferasmachta/.gradle/caches/transforms-3/060c6ab0e9bf4fa5546c3182c55b6c3c/transformed/jetified-datastore-preferences-release/AndroidManifest.xml:20:5-44
+MERGED from [androidx.datastore:datastore-preferences-android:1.1.3] /Users/ferasmachta/.gradle/caches/transforms-3/060c6ab0e9bf4fa5546c3182c55b6c3c/transformed/jetified-datastore-preferences-release/AndroidManifest.xml:20:5-44
+MERGED from [androidx.datastore:datastore-android:1.1.3] /Users/ferasmachta/.gradle/caches/transforms-3/9e6f8973de07ea43a2124e576b9c9b70/transformed/jetified-datastore-release/AndroidManifest.xml:20:5-44
+MERGED from [androidx.datastore:datastore-android:1.1.3] /Users/ferasmachta/.gradle/caches/transforms-3/9e6f8973de07ea43a2124e576b9c9b70/transformed/jetified-datastore-release/AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/768485bcb679d30fdcdb6c3c0986032b/transformed/core-runtime-2.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/768485bcb679d30fdcdb6c3c0986032b/transformed/core-runtime-2.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /Users/ferasmachta/.gradle/caches/transforms-3/d17b55404edce87bd4caab79dd8db34f/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /Users/ferasmachta/.gradle/caches/transforms-3/d17b55404edce87bd4caab79dd8db34f/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.interpolator:interpolator:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/f4db716680b2cc4090aa649f8e66f302/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/f4db716680b2cc4090aa649f8e66f302/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/2655bfa11c448179a5168b9dbf028ef4/transformed/cursoradapter-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/2655bfa11c448179a5168b9dbf028ef4/transformed/cursoradapter-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.window.extensions.core:core:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/d96f22aed55f6fb3c50da780b7e5f747/transformed/jetified-core-1.0.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.window.extensions.core:core:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/d96f22aed55f6fb3c50da780b7e5f747/transformed/jetified-core-1.0.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.documentfile:documentfile:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/aaa70b7e81c0a7b63650fbd6ae610d24/transformed/documentfile-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.documentfile:documentfile:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/aaa70b7e81c0a7b63650fbd6ae610d24/transformed/documentfile-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/d2a9c9bc5b7b0f20e23166c058806bdc/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/d2a9c9bc5b7b0f20e23166c058806bdc/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.print:print:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/abe191155c3a60c2a0bc4b42b94f93e5/transformed/print-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.print:print:1.0.0] /Users/ferasmachta/.gradle/caches/transforms-3/abe191155c3a60c2a0bc4b42b94f93e5/transformed/print-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.4.0] /Users/ferasmachta/.gradle/caches/transforms-3/a031d87a7d01e890037f574b92486bc6/transformed/jetified-annotation-experimental-1.4.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.4.0] /Users/ferasmachta/.gradle/caches/transforms-3/a031d87a7d01e890037f574b92486bc6/transformed/jetified-annotation-experimental-1.4.0/AndroidManifest.xml:5:5-44
+MERGED from [com.getkeepsafe.relinker:relinker:1.4.5] /Users/ferasmachta/.gradle/caches/transforms-3/61fc022a96a1f41e52755df7e83f6fb6/transformed/jetified-relinker-1.4.5/AndroidManifest.xml:5:5-43
+MERGED from [com.getkeepsafe.relinker:relinker:1.4.5] /Users/ferasmachta/.gradle/caches/transforms-3/61fc022a96a1f41e52755df7e83f6fb6/transformed/jetified-relinker-1.4.5/AndroidManifest.xml:5:5-43
+	android:targetSdkVersion
+		INJECTED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/debug/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/debug/AndroidManifest.xml
+uses-library#androidx.window.extensions
+ADDED from [androidx.window:window:1.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/37f26d50dc9e8fd6d76af0909beadc16/transformed/jetified-window-1.2.0/AndroidManifest.xml:23:9-25:40
+	android:required
+		ADDED from [androidx.window:window:1.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/37f26d50dc9e8fd6d76af0909beadc16/transformed/jetified-window-1.2.0/AndroidManifest.xml:25:13-37
+	android:name
+		ADDED from [androidx.window:window:1.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/37f26d50dc9e8fd6d76af0909beadc16/transformed/jetified-window-1.2.0/AndroidManifest.xml:24:13-54
+uses-library#androidx.window.sidecar
+ADDED from [androidx.window:window:1.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/37f26d50dc9e8fd6d76af0909beadc16/transformed/jetified-window-1.2.0/AndroidManifest.xml:26:9-28:40
+	android:required
+		ADDED from [androidx.window:window:1.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/37f26d50dc9e8fd6d76af0909beadc16/transformed/jetified-window-1.2.0/AndroidManifest.xml:28:13-37
+	android:name
+		ADDED from [androidx.window:window:1.2.0] /Users/ferasmachta/.gradle/caches/transforms-3/37f26d50dc9e8fd6d76af0909beadc16/transformed/jetified-window-1.2.0/AndroidManifest.xml:27:13-51
+permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.13.1] /Users/ferasmachta/.gradle/caches/transforms-3/25cf3a390b9c71bf17593562629fb892/transformed/core-1.13.1/AndroidManifest.xml:22:5-24:47
+	android:protectionLevel
+		ADDED from [androidx.core:core:1.13.1] /Users/ferasmachta/.gradle/caches/transforms-3/25cf3a390b9c71bf17593562629fb892/transformed/core-1.13.1/AndroidManifest.xml:24:9-44
+	android:name
+		ADDED from [androidx.core:core:1.13.1] /Users/ferasmachta/.gradle/caches/transforms-3/25cf3a390b9c71bf17593562629fb892/transformed/core-1.13.1/AndroidManifest.xml:23:9-81
+permission#com.example.weight_watcher_ai.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.13.1] /Users/ferasmachta/.gradle/caches/transforms-3/25cf3a390b9c71bf17593562629fb892/transformed/core-1.13.1/AndroidManifest.xml:22:5-24:47
+	android:protectionLevel
+		ADDED from [androidx.core:core:1.13.1] /Users/ferasmachta/.gradle/caches/transforms-3/25cf3a390b9c71bf17593562629fb892/transformed/core-1.13.1/AndroidManifest.xml:24:9-44
+	android:name
+		ADDED from [androidx.core:core:1.13.1] /Users/ferasmachta/.gradle/caches/transforms-3/25cf3a390b9c71bf17593562629fb892/transformed/core-1.13.1/AndroidManifest.xml:23:9-81
+uses-permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.13.1] /Users/ferasmachta/.gradle/caches/transforms-3/25cf3a390b9c71bf17593562629fb892/transformed/core-1.13.1/AndroidManifest.xml:26:5-97
+	android:name
+		ADDED from [androidx.core:core:1.13.1] /Users/ferasmachta/.gradle/caches/transforms-3/25cf3a390b9c71bf17593562629fb892/transformed/core-1.13.1/AndroidManifest.xml:26:22-94
+uses-permission#com.example.weight_watcher_ai.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.13.1] /Users/ferasmachta/.gradle/caches/transforms-3/25cf3a390b9c71bf17593562629fb892/transformed/core-1.13.1/AndroidManifest.xml:26:5-97
+	android:name
+		ADDED from [androidx.core:core:1.13.1] /Users/ferasmachta/.gradle/caches/transforms-3/25cf3a390b9c71bf17593562629fb892/transformed/core-1.13.1/AndroidManifest.xml:26:22-94
+provider#androidx.startup.InitializationProvider
+ADDED from [androidx.lifecycle:lifecycle-process:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/e162af6e8ed161fd7461567f670d306f/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/ferasmachta/.gradle/caches/transforms-3/11e5856f816b9c1ab00d53faff14fc23/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/ferasmachta/.gradle/caches/transforms-3/11e5856f816b9c1ab00d53faff14fc23/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
+	tools:node
+		ADDED from [androidx.lifecycle:lifecycle-process:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/e162af6e8ed161fd7461567f670d306f/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:28:13-31
+	android:authorities
+		ADDED from [androidx.lifecycle:lifecycle-process:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/e162af6e8ed161fd7461567f670d306f/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:26:13-68
+	android:exported
+		ADDED from [androidx.lifecycle:lifecycle-process:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/e162af6e8ed161fd7461567f670d306f/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:27:13-37
+	android:name
+		ADDED from [androidx.lifecycle:lifecycle-process:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/e162af6e8ed161fd7461567f670d306f/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:25:13-67
+meta-data#androidx.lifecycle.ProcessLifecycleInitializer
+ADDED from [androidx.lifecycle:lifecycle-process:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/e162af6e8ed161fd7461567f670d306f/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.lifecycle:lifecycle-process:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/e162af6e8ed161fd7461567f670d306f/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.lifecycle:lifecycle-process:2.7.0] /Users/ferasmachta/.gradle/caches/transforms-3/e162af6e8ed161fd7461567f670d306f/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:30:17-78
+meta-data#androidx.profileinstaller.ProfileInstallerInitializer
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:30:17-85
+receiver#androidx.profileinstaller.ProfileInstallReceiver
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:34:9-52:20
+	android:enabled
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:37:13-35
+	android:exported
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:38:13-36
+	android:permission
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:39:13-57
+	android:directBootAware
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:36:13-44
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:35:13-76
+intent-filter#action:name:androidx.profileinstaller.action.INSTALL_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:40:13-42:29
+action#androidx.profileinstaller.action.INSTALL_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:41:17-91
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:41:25-88
+intent-filter#action:name:androidx.profileinstaller.action.SKIP_FILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:43:13-45:29
+action#androidx.profileinstaller.action.SKIP_FILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:44:17-85
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:44:25-82
+intent-filter#action:name:androidx.profileinstaller.action.SAVE_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:46:13-48:29
+action#androidx.profileinstaller.action.SAVE_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:47:17-88
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:47:25-85
+intent-filter#action:name:androidx.profileinstaller.action.BENCHMARK_OPERATION
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:49:13-51:29
+action#androidx.profileinstaller.action.BENCHMARK_OPERATION
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:50:17-95
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /Users/ferasmachta/.gradle/caches/transforms-3/d80e5e8165cedb84fd752f731db1ca39/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:50:25-92
