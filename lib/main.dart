@@ -5,6 +5,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 //import Firebase
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Import FirebaseAuth
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Cloud Firestore
 import 'firebase_options.dart';
 
 // Import screens
@@ -13,6 +15,8 @@ import 'screens/calorie_tracker_screen.dart';
 import 'screens/workout_tracker_screen.dart';
 import 'screens/ai_trainer_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/login_screen.dart'; // Import LoginScreen
+import 'screens/sign_up_screen.dart'; // Import SignUpScreen
 
 // Import models
 import 'models/user_profile.dart';
@@ -80,7 +84,8 @@ class WeightWatcherAI extends StatelessWidget {
         textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
       ),
       themeMode: ThemeMode.system,
-      home: const SplashScreen(),
+      // home: const SplashScreen(), // Remove SplashScreen as the direct home.
+      home: const AuthGate(), // Set AuthGate as the new home.
     );
   }
 }
@@ -165,22 +170,24 @@ class _SplashScreenState extends State<SplashScreen> {
       // Navigate to main screen after 1.5 seconds to show splash screen
       if (mounted) {
         Future.delayed(const Duration(milliseconds: 1500), () {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const MainScreen()),
-          );
+          // Removed the direct navigation to MainScreen()
+          // Navigator.of(context).pushReplacement(
+          //   MaterialPageRoute(builder: (_) => const MainScreen()),
+          // );
         });
       }
     } catch (e, stackTrace) {
       // Log error and show error message
       print('Error initializing app: $e');
       print(stackTrace);
-      
+
       // Still navigate to main screen after a delay
       if (mounted) {
         Future.delayed(const Duration(milliseconds: 1500), () {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const MainScreen()),
-          );
+          // Removed the direct navigation to MainScreen()
+          // Navigator.of(context).pushReplacement(
+          //   MaterialPageRoute(builder: (_) => const MainScreen()),
+          // );
         });
       }
     }
@@ -426,6 +433,102 @@ extension ColorExtension on Color {
       red ?? this.red,
       green ?? this.green,
       blue ?? this.blue,
+    );
+  }
+}
+
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
+        }
+
+        if (snapshot.hasData) {
+          // User is logged in, fetch user data from Firestore
+          return FutureBuilder<DocumentSnapshot>(
+            future: FirebaseFirestore.instance
+                .collection('users')
+                .doc(snapshot.data!.uid)
+                .get(),
+            builder: (context, firestoreSnapshot) {
+              if (firestoreSnapshot.connectionState ==
+                  ConnectionState.waiting) {
+                return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()));
+              }
+
+              if (firestoreSnapshot.hasData &&
+                  firestoreSnapshot.data!.exists) {
+                // Document exists, create UserProfile and set it in UserProvider
+                final userData =
+                firestoreSnapshot.data!.data() as Map<String, dynamic>;
+                final userProfile = UserProfile.fromJson(userData);
+                Provider.of<UserProvider>(context, listen: false)
+                    .userProfile = userProfile;
+
+                return const MainScreen(); // Go to main screen
+              } else {
+                // Document doesn't exist (or error), handle as needed
+                // For example:
+                // 1.  Go to a "Complete Profile" screen
+                // 2.  Show an error message
+                // 3.  Go to MainScreen with a null profile (and handle nulls in your UI)
+
+                // For now, let's go to the MainScreen:
+                return const MainScreen();
+              }
+            },
+          );
+        } else {
+          // User is not logged in, show the Home screen
+          return const HomeScreen();
+        }
+      },
+    );
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Home'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                );
+              },
+              child: const Text('Go to Login'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SignUpScreen()),
+                );
+              },
+              child: const Text('Go to Sign Up'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -11,6 +11,10 @@ class UserProvider with ChangeNotifier {
   bool _isLoading = false;
 
   UserProfile? get userProfile => _userProfile;
+  set userProfile(UserProfile? value) { // Setter
+    _userProfile = value;
+    notifyListeners(); // Important: Notify listeners of the change
+  }
   List<BodyMeasurement> get bodyMeasurements => _bodyMeasurements;
   bool get isLoading => _isLoading;
 

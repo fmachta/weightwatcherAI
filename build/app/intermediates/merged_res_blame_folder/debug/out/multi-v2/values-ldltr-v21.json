@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.weight_watcher_ai.app-mergeDebugResources-42:/values-ldltr-v21/values-ldltr-v21.xml",
+            "outputFile": "com.example.weight_watcher_ai.app-mergeDebugResources-44:/values-ldltr-v21/values-ldltr-v21.xml",
             "map": [
                 {
                     "source": "/Users/jalfaro/.gradle/caches/transforms-3/658b0568dc599ea515c557ecf8b74889/transformed/appcompat-1.1.0/res/values-ldltr-v21/values-ldltr-v21.xml",
