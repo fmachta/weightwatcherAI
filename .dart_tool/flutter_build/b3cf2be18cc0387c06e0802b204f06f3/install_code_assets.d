@@ -1,0 +1,1 @@
+ /Users/jalfaro/weightwatcherAI/.dart_tool/flutter_build/b3cf2be18cc0387c06e0802b204f06f3/native_assets.json: 

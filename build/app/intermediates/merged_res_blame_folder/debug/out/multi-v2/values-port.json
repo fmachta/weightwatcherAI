@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.weight_watcher_ai.app-mergeDebugResources-39:/values-port/values-port.xml",
+            "outputFile": "com.example.weight_watcher_ai.app-mergeDebugResources-42:/values-port/values-port.xml",
             "map": [
                 {
-                    "source": "/Users/jalfaro/.gradle/caches/transforms-3/fe7906fd73a432699ce2baacde8f11a8/transformed/appcompat-1.1.0/res/values-port/values-port.xml",
+                    "source": "/Users/jalfaro/.gradle/caches/transforms-3/658b0568dc599ea515c557ecf8b74889/transformed/appcompat-1.1.0/res/values-port/values-port.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

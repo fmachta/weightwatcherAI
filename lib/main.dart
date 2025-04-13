@@ -3,6 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+//import Firebase
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 // Import screens
 import 'screens/dashboard_screen.dart';
 import 'screens/calorie_tracker_screen.dart';
@@ -32,6 +36,10 @@ void main() async {
 
   // Load environment variables from .env file
   await dotenv.load(fileName: ".env");
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   // Run the app with providers
   runApp(

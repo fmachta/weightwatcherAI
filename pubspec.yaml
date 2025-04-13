@@ -29,6 +29,7 @@ dependencies:
   # OpenAI Integration
   dart_openai: ^5.0.0
   flutter_dotenv: ^5.1.0
+  firebase_core: ^3.13.0
 
 dev_dependencies:
   flutter_test:

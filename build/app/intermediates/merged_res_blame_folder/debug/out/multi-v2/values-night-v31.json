@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.weight_watcher_ai.app-mergeDebugResources-39:/values-night-v31/values-night-v31.xml",
+            "outputFile": "com.example.weight_watcher_ai.app-mergeDebugResources-42:/values-night-v31/values-night-v31.xml",
             "map": [
                 {
                     "source": "/Users/jalfaro/weightwatcherAI/android/app/src/main/res/values-night-v31/styles.xml",
