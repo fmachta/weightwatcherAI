@@ -9,7 +9,9 @@ import '../models/food_item.dart';
 import '../models/daily_nutrition.dart';
 import '../providers/nutrition_provider.dart';
 import '../providers/user_provider.dart';
+import 'login_screen.dart'; // Import LoginScreen
 import 'package:uuid/uuid.dart';
+
 
 class CalorieTrackerScreen extends StatefulWidget {
   const CalorieTrackerScreen({super.key});
@@ -74,6 +76,18 @@ class _CalorieTrackerScreenState extends State<CalorieTrackerScreen> {
       }
     }
   }
+
+  // Helper function to prompt login
+  void _promptLogin(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+    );
+    // Optionally show a message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Please log in to perform this action.')),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -200,6 +214,11 @@ class _CalorieTrackerScreenState extends State<CalorieTrackerScreen> {
   }
 
   void _navigateToAddMeal(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (!userProvider.isLoggedIn) {
+      _promptLogin(context);
+      return;
+    }
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => AddMealScreen(selectedDate: _selectedDate),
@@ -208,6 +227,11 @@ class _CalorieTrackerScreenState extends State<CalorieTrackerScreen> {
   }
 
   void _navigateToEditMeal(BuildContext context, Meal meal) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (!userProvider.isLoggedIn) {
+      _promptLogin(context);
+      return;
+    }
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => EditMealScreen(meal: meal),
@@ -216,6 +240,12 @@ class _CalorieTrackerScreenState extends State<CalorieTrackerScreen> {
   }
 
   Future<void> _deleteMeal(BuildContext context, String mealId) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (!userProvider.isLoggedIn) {
+      _promptLogin(context);
+      return;
+    }
+
     // Show confirmation dialog
     final shouldDelete = await showDialog<bool>(
       context: context,

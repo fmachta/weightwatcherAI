@@ -470,8 +470,11 @@ class AuthGate extends StatelessWidget {
                 final userData =
                 firestoreSnapshot.data!.data() as Map<String, dynamic>;
                 final userProfile = UserProfile.fromJson(userData);
-                Provider.of<UserProvider>(context, listen: false)
-                    .userProfile = userProfile;
+                // Update the provider state *after* the build phase
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Provider.of<UserProvider>(context, listen: false)
+                      .userProfile = userProfile;
+                });
 
                 return const MainScreen(); // Go to main screen
               } else {
@@ -487,8 +490,12 @@ class AuthGate extends StatelessWidget {
             },
           );
         } else {
-          // User is not logged in, show the Home screen
-          return const HomeScreen();
+          // User is not logged in, show the MainScreen for guest browsing
+          // Clear any existing user profile in the provider for the guest session
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+             Provider.of<UserProvider>(context, listen: false).clearUserProfile();
+          });
+          return const MainScreen();
         }
       },
     );

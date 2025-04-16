@@ -4,7 +4,7 @@
             "outputFile": "com.example.weight_watcher_ai.app-mergeDebugResources-44:/values-night-v31/values-night-v31.xml",
             "map": [
                 {
-                    "source": "/Users/jalfaro/weightwatcherAI/android/app/src/main/res/values-night-v31/styles.xml",
+                    "source": "/Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/main/res/values-night-v31/styles.xml",
                     "from": {
                         "startLines": "3,17",
                         "startColumns": "4,4",

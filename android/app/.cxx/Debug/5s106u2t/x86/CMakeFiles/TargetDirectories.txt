@@ -1,0 +1,2 @@
+/Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/.cxx/Debug/5s106u2t/x86/CMakeFiles/edit_cache.dir
+/Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/.cxx/Debug/5s106u2t/x86/CMakeFiles/rebuild_cache.dir

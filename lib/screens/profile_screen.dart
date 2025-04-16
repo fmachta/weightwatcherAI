@@ -1,9 +1,14 @@
 // screens/profile_screen.dart
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../models/user_profile.dart';
 import '../models/body_measurement.dart';
+import 'login_screen.dart'; // Import LoginScreen for navigation after logout
+// import 'dashboard_screen.dart'; // No longer needed here
+import '../main.dart'; // Import main.dart to access AuthGate
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -13,17 +18,88 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+
+  Future<void> _logout() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      // Navigate back to the AuthGate which handles the initial screen logic
+      // pushAndRemoveUntil removes all previous routes
+      Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const AuthGate()), // Navigate to AuthGate
+        (Route<dynamic> route) => false,
+      );
+    } catch (e) {
+      // Handle potential errors during sign out
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error logging out: ${e.toString()}')),
+      );
+    }
+  }
+
+  @override
+  // Helper function to navigate to LoginScreen
+  void _navigateToLogin(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<UserProvider>(
       builder: (context, userProvider, child) {
-        final userProfile = userProvider.userProfile;
+        final bool isLoggedIn = userProvider.isLoggedIn;
+        final UserProfile? userProfile = userProvider.userProfile;
 
-        if (userProfile == null) {
-          return const Center(
-            child: CircularProgressIndicator(),
+        // --- Guest View ---
+        if (!isLoggedIn) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.person_off_outlined,
+                    size: 80,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Login Required',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Please log in or sign up to manage your profile and track your progress.',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
+                  ElevatedButton(
+                    onPressed: () => _navigateToLogin(context),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(200, 50),
+                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    ),
+                    child: const Text('Login / Sign Up'),
+                  ),
+                ],
+              ),
+            ),
           );
         }
+
+        // --- Logged-in View ---
+        // At this point, isLoggedIn is true, so userProfile should not be null.
+        // Add an assertion for safety, though AuthGate logic should prevent this.
+        assert(userProfile != null, 'UserProfile is null despite being logged in.');
+        if (userProfile == null) {
+           // Fallback in case assertion fails in production
+           return const Center(child: Text('Error: User profile not loaded.'));
+        }
+
 
         return SafeArea(
           child: SingleChildScrollView(
@@ -140,12 +216,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   subtitle: 'Data sharing, permissions, etc.',
                   onTap: () {},
                 ),
+                const SizedBox(height: 8), // Add space before logout
+                _SettingsCard(
+                  icon: Icons.logout,
+                  title: 'Logout',
+                  subtitle: 'Sign out of your account',
+                  onTap: _logout, // Call the logout function
+                ),
 
                 const SizedBox(height: 24),
 
-                // Edit profile button
+                // Edit profile button (Only shown when logged in)
                 ElevatedButton(
-                  onPressed: () => _showEditProfileSheet(context, userProfile),
+                  onPressed: () => _showEditProfileSheet(context, userProfile), // No need for null check here due to earlier check
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 50),
                   ),

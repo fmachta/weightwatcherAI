@@ -1,4 +1,4 @@
-// screens/ai_trainer_screen.dart (updated)
+// screens/ai_trainer_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -8,7 +8,10 @@ import '../providers/ai_trainer_provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/nutrition_provider.dart';
 import '../providers/workout_provider.dart';
-import '../models/meal.dart';
+import '../models/meal.dart'; // Keep if PlanDetailsScreen needs it, otherwise remove
+import '../models/workout.dart'; // Keep if PlanDetailsScreen needs it, otherwise remove
+import '../models/exercise.dart'; // Keep if PlanDetailsScreen needs it, otherwise remove
+import 'login_screen.dart'; // Import LoginScreen
 
 class AITrainerScreen extends StatefulWidget {
   const AITrainerScreen({super.key});
@@ -18,53 +21,89 @@ class AITrainerScreen extends StatefulWidget {
 }
 
 class _AITrainerScreenState extends State<AITrainerScreen> {
+  // --- Member Variables ---
   final TextEditingController _questionController = TextEditingController();
   bool _isAnalyzing = false;
   bool _isAskingQuestion = false;
   final List<Map<String, dynamic>> _chatMessages = [];
   String _aiInsight = '';
 
+  // --- initState ---
   @override
   void initState() {
     super.initState();
-    // Get an initial AI insight when the screen loads
-    _getInitialInsight();
+    // Load initial insight only if logged in, after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Ensure the widget is still mounted before accessing context/providers
+      if (!mounted) return;
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      if (userProvider.isLoggedIn) {
+        _getInitialInsight();
+      } else {
+        // Use mounted check before calling setState
+        if (mounted) {
+          setState(() {
+            _aiInsight = 'Log in to get personalized AI insights and plans.';
+          });
+        }
+      }
+    });
   }
 
+  // --- dispose ---
   @override
   void dispose() {
     _questionController.dispose();
     super.dispose();
   }
 
+  // --- Helper Methods ---
+  void _promptLogin(BuildContext context) {
+    // Use mounted check before navigation/snackbar
+    if (!mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Please log in to use AI features.')),
+    );
+  }
+
   Future<void> _getInitialInsight() async {
+    if (!mounted) return; // Check if widget is still in the tree
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (!userProvider.isLoggedIn) {
+      if (mounted) {
+        setState(() {
+          _aiInsight = 'Log in to get personalized AI insights.';
+        });
+      }
+      return;
+    }
+
+    // Proceed only if logged in
     final nutritionProvider = Provider.of<NutritionProvider>(context, listen: false);
     final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
     final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
 
-    if (userProvider.userProfile != null) {
-      setState(() {
-        _isAnalyzing = true;
-      });
+    assert(userProvider.userProfile != null, 'UserProfile is null despite being logged in.');
+    if (userProvider.userProfile == null) return; // Added safety check
 
-      try {
-        // Get recent workouts and meals
-        final recentWorkouts = workoutProvider.workouts;
-        final recentMeals = nutritionProvider.meals;
+    if (mounted) {
+      setState(() { _isAnalyzing = true; });
+    }
 
-        // Get an AI-generated insight
-        final insight = await aiTrainerProvider.getAIInsight(
-          userProvider.userProfile!,
-          recentWorkouts,
-          recentMeals,
-        );
-
-        setState(() {
-          _aiInsight = insight;
-          _isAnalyzing = false;
-        });
-      } catch (e) {
+    try {
+      final recentWorkouts = workoutProvider.workouts;
+      final recentMeals = nutritionProvider.meals;
+      final insight = await aiTrainerProvider.getAIInsight(
+        userProvider.userProfile!, recentWorkouts, recentMeals,
+      );
+      if (mounted) {
+        setState(() { _aiInsight = insight; _isAnalyzing = false; });
+      }
+    } catch (e) {
+      if (mounted) {
         setState(() {
           _aiInsight = 'Based on your recent activity, consider focusing on consistency and recovery to reach your fitness goals.';
           _isAnalyzing = false;
@@ -74,41 +113,55 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
   }
 
   Future<void> _analyzeUserData() async {
-    // Re-get the insight
+    if (!mounted) return;
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (!userProvider.isLoggedIn) {
+      _promptLogin(context);
+      return;
+    }
     await _getInitialInsight();
   }
 
   void _askQuestion() async {
+    if (!mounted) return;
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (!userProvider.isLoggedIn) {
+      _promptLogin(context);
+      return;
+    }
+
     final question = _questionController.text.trim();
     if (question.isEmpty) return;
 
-    setState(() {
-      _chatMessages.add({
-        'message': question,
-        'isUser': true,
+    if (mounted) {
+      setState(() {
+        _chatMessages.add({'message': question, 'isUser': true});
+        _isAskingQuestion = true;
       });
-      _isAskingQuestion = true;
-    });
+    }
 
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
     final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
+    assert(userProvider.userProfile != null, 'UserProfile is null despite being logged in.');
+     if (userProvider.userProfile == null) { // Added safety check
+       if (mounted) {
+         setState(() { _isAskingQuestion = false; });
+       }
+       return;
+     }
 
-    if (userProvider.userProfile != null) {
-      try {
-        // Get AI-generated answer to the question
-        final answer = await aiTrainerProvider.answerQuestion(
-          question,
-          userProvider.userProfile!,
-        );
 
+    try {
+      final answer = await aiTrainerProvider.answerQuestion(
+        question, userProvider.userProfile!,
+      );
+      if (mounted) {
         setState(() {
-          _chatMessages.add({
-            'message': answer,
-            'isUser': false,
-          });
+          _chatMessages.add({'message': answer, 'isUser': false});
           _isAskingQuestion = false;
         });
-      } catch (e) {
+      }
+    } catch (e) {
+      if (mounted) {
         setState(() {
           _chatMessages.add({
             'message': 'I apologize, but I\'m having trouble processing your question at the moment. Please try again later.',
@@ -117,118 +170,112 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
           _isAskingQuestion = false;
         });
       }
-    } else {
-      setState(() {
-        _chatMessages.add({
-          'message': 'Please complete your profile first so I can provide personalized advice.',
-          'isUser': false,
-        });
-        _isAskingQuestion = false;
-      });
     }
-
     _questionController.clear();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Consumer2<AITrainerProvider, UserProvider>(
-      builder: (context, aiTrainerProvider, userProvider, child) {
-        final plans = aiTrainerProvider.plans;
-        final currentPlan = aiTrainerProvider.currentPlan;
-        final isLoading = aiTrainerProvider.isLoading;
-        final userProfile = userProvider.userProfile;
+  Future<void> _generateWorkoutPlan(BuildContext context, UserProfile userProfile) async {
+    if (!mounted) return;
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (!userProvider.isLoggedIn) {
+      _promptLogin(context);
+      return;
+    }
+    final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
 
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'AI Trainer',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Your personalized fitness assistant',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 24),
+    // Show dialog safely
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => const AlertDialog( // Use dialogContext
+        title: Text('Generating Your Plan'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Creating your personalized workout plan using AI...'),
+          ],
+        ),
+      ),
+    );
 
-                // AI Insight Card - Now using OpenAI-generated content
-                AIInsightCard(
-                  isAnalyzing: _isAnalyzing,
-                  onAnalyze: _analyzeUserData,
-                  userProfile: userProfile,
-                  insightText: _aiInsight,
-                ),
-
-                const SizedBox(height: 24),
-
-                // Plans section
-                Expanded(
-                  child: ListView(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Your Plans',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          if (plans.isNotEmpty)
-                            TextButton.icon(
-                              onPressed: () => _navigateToAllPlans(context),
-                              icon: const Icon(Icons.list),
-                              label: const Text('View All'),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Current plan or generate plan buttons
-                      if (isLoading)
-                        const Center(child: CircularProgressIndicator())
-                      else if (currentPlan != null)
-                        PlanCard(
-                          plan: currentPlan,
-                          onView: () => _navigateToPlanDetails(context, currentPlan),
-                        )
-                      else
-                        _buildGeneratePlanButtons(context, userProfile),
-
-                      const SizedBox(height: 24),
-
-                      // Ask AI section - Now using OpenAI for responses
-                      AskAICard(
-                        controller: _questionController,
-                        onAsk: _askQuestion,
-                        chatMessages: _chatMessages,
-                        isLoading: _isAskingQuestion,
-                        onSuggestionTap: (suggestion) {
-                          _questionController.text = suggestion;
-                          _askQuestion();
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+    try {
+      await aiTrainerProvider.generateWorkoutPlan(userProfile);
+      if (mounted) Navigator.of(context, rootNavigator: true).pop(); // Close dialog
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop(); // Close dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to generate workout plan. Please try again.'),
           ),
         );
-      },
+      }
+    }
+  }
+
+  Future<void> _generateMealPlan(BuildContext context, UserProfile userProfile) async {
+    if (!mounted) return;
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (!userProvider.isLoggedIn) {
+      _promptLogin(context);
+      return;
+    }
+    final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
+
+    // Show dialog safely
+     showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => const AlertDialog( // Use dialogContext
+        title: Text('Generating Your Plan'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Creating your personalized meal plan using AI...'),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      await aiTrainerProvider.generateMealPlan(userProfile);
+      if (mounted) Navigator.of(context, rootNavigator: true).pop(); // Close dialog
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop(); // Close dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to generate meal plan. Please try again.'),
+          ),
+        );
+      }
+    }
+  }
+
+  void _navigateToPlanDetails(BuildContext context, AIPlan plan) {
+    if (!mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PlanDetailsScreen(plan: plan),
+      ),
+    );
+  }
+
+  void _navigateToAllPlans(BuildContext context) {
+    if (!mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const AllPlansScreen(),
+      ),
     );
   }
 
   Widget _buildGeneratePlanButtons(BuildContext context, UserProfile? userProfile) {
+    // This check is technically redundant now due to the main build check, but safe to keep.
     if (userProfile == null) {
       return const Center(
         child: Text('Please complete your profile to generate plans'),
@@ -260,102 +307,153 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
     );
   }
 
-  Future<void> _generateWorkoutPlan(BuildContext context, UserProfile userProfile) async {
-    final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
+  // --- build Method ---
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<AITrainerProvider, UserProvider>(
+      builder: (context, aiTrainerProvider, userProvider, child) {
+        final bool isLoggedIn = userProvider.isLoggedIn;
+        final UserProfile? userProfile = userProvider.userProfile;
+        final plans = aiTrainerProvider.plans;
+        final currentPlan = aiTrainerProvider.currentPlan;
+        final isLoading = aiTrainerProvider.isLoading;
 
-    // Show a dialog to indicate generation is in progress
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const AlertDialog(
-        title: Text('Generating Your Plan'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Creating your personalized workout plan using AI...'),
-          ],
-        ),
-      ),
-    );
+        // --- Guest View ---
+        if (!isLoggedIn) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.smart_toy_outlined,
+                    size: 80,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'AI Features Locked',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Log in or sign up to access personalized AI insights, plans, and chat features.',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
+                  ElevatedButton(
+                    onPressed: () => _promptLogin(context),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(200, 50),
+                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    ),
+                    child: const Text('Login / Sign Up'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
 
-    try {
-      await aiTrainerProvider.generateWorkoutPlan(userProfile);
+        // --- Logged-in View ---
+        assert(userProfile != null, 'UserProfile is null despite being logged in.');
+        if (userProfile == null) {
+          // Fallback in case assertion fails in production or data loading issue
+          return const Center(child: Text('Error: User profile not loaded. Please restart the app.'));
+        }
 
-      // Close the dialog
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
-    } catch (e) {
-      // Close the dialog and show error
-      if (mounted) {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to generate workout plan. Please try again.'),
+        // Main content for logged-in users
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'AI Trainer',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Your personalized fitness assistant',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                AIInsightCard(
+                  isAnalyzing: _isAnalyzing,
+                  onAnalyze: _analyzeUserData,
+                  userProfile: userProfile,
+                  insightText: _aiInsight,
+                ),
+
+                const SizedBox(height: 24),
+
+                Expanded(
+                  child: ListView(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Your Plans',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (plans.isNotEmpty)
+                            TextButton.icon(
+                              onPressed: () => _navigateToAllPlans(context),
+                              icon: const Icon(Icons.list),
+                              label: const Text('View All'),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      if (isLoading)
+                        const Center(child: CircularProgressIndicator())
+                      else if (currentPlan != null)
+                        PlanCard(
+                          plan: currentPlan,
+                          onView: () => _navigateToPlanDetails(context, currentPlan),
+                        )
+                      else
+                        _buildGeneratePlanButtons(context, userProfile),
+
+                      const SizedBox(height: 24),
+
+                      AskAICard(
+                        controller: _questionController,
+                        onAsk: _askQuestion,
+                        chatMessages: _chatMessages,
+                        isLoading: _isAskingQuestion,
+                        onSuggestionTap: (suggestion) {
+                          _questionController.text = suggestion;
+                          _askQuestion();
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         );
-      }
-    }
-  }
-
-  Future<void> _generateMealPlan(BuildContext context, UserProfile userProfile) async {
-    final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
-
-    // Show a dialog to indicate generation is in progress
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const AlertDialog(
-        title: Text('Generating Your Plan'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Creating your personalized meal plan using AI...'),
-          ],
-        ),
-      ),
-    );
-
-    try {
-      await aiTrainerProvider.generateMealPlan(userProfile);
-
-      // Close the dialog
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
-    } catch (e) {
-      // Close the dialog and show error
-      if (mounted) {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to generate meal plan. Please try again.'),
-          ),
-        );
-      }
-    }
-  }
-
-  void _navigateToPlanDetails(BuildContext context, AIPlan plan) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => PlanDetailsScreen(plan: plan),
-      ),
+      },
     );
   }
+} // End of _AITrainerScreenState class
 
-  void _navigateToAllPlans(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const AllPlansScreen(),
-      ),
-    );
-  }
-}
+// --- Other Widgets (AIInsightCard, PlanCard, AskAICard, etc.) ---
+// Ensure these are defined outside the _AITrainerScreenState class
 
 class AIInsightCard extends StatelessWidget {
   final bool isAnalyzing;
@@ -373,18 +471,17 @@ class AIInsightCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Default insight if none is provided
     final displayInsight = insightText.isEmpty
         ? 'Let me analyze your data to provide personalized insights.'
         : insightText;
 
-    // Action button text based on user profile
     String actionButtonText = 'Analyze My Data';
-
     if (userProfile != null) {
-      if (userProfile!.fitnessGoal.name == 'Muscle Gain') {
+      // Assuming FitnessGoal is an enum or similar structure
+      // Adjust the condition based on your actual FitnessGoal implementation
+      if (userProfile!.fitnessGoal.toString().contains('Muscle Gain')) {
         actionButtonText = 'Get Muscle Gain Tips';
-      } else if (userProfile!.fitnessGoal.name == 'Weight Loss') {
+      } else if (userProfile!.fitnessGoal.toString().contains('Weight Loss')) {
         actionButtonText = 'Get Weight Loss Tips';
       } else {
         actionButtonText = 'Get Fitness Tips';
@@ -572,28 +669,19 @@ class PlanCard extends StatelessWidget {
 
   double _calculateProgress(AIPlan plan) {
     final now = DateTime.now();
-
-    if (now.isBefore(plan.startDate)) {
-      return 0.0;
-    }
-
-    if (now.isAfter(plan.endDate)) {
-      return 1.0;
-    }
-
+    if (now.isBefore(plan.startDate)) return 0.0;
+    if (now.isAfter(plan.endDate)) return 1.0;
     final totalDuration = plan.endDate.difference(plan.startDate).inDays;
+    if (totalDuration <= 0) return 1.0; // Avoid division by zero
     final elapsed = now.difference(plan.startDate).inDays;
-
-    return elapsed / totalDuration;
+    return (elapsed / totalDuration).clamp(0.0, 1.0);
   }
 
   String _getProgressText(AIPlan plan) {
     final now = DateTime.now();
-
     if (now.isBefore(plan.startDate)) {
       return 'Starts ${DateFormat('MMM d').format(plan.startDate)}';
     }
-
     final progress = _calculateProgress(plan);
     return '${(progress * 100).toInt()}% Complete';
   }
@@ -644,10 +732,9 @@ class AskAICard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Chat messages
             if (chatMessages.isNotEmpty)
               Container(
-                height: 200,
+                height: 200, // Constrain height
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(12),
@@ -655,9 +742,11 @@ class AskAICard extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ListView.builder(
+                    reverse: true, // Show latest messages at the bottom
                     itemCount: chatMessages.length,
                     itemBuilder: (context, index) {
-                      final message = chatMessages[index];
+                      // Display messages in reverse order
+                      final message = chatMessages[chatMessages.length - 1 - index];
                       return ChatMessage(
                         text: message['message'],
                         isUser: message['isUser'],
@@ -766,7 +855,7 @@ class ChatMessage extends StatelessWidget {
                 color: Colors.white,
               ),
             ),
-          const SizedBox(width: 8),
+          if (!isUser) const SizedBox(width: 8), // Add space only for AI messages
           Flexible(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -786,7 +875,7 @@ class ChatMessage extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          if (isUser) const SizedBox(width: 8), // Add space only for user messages
           if (isUser)
             CircleAvatar(
               backgroundColor: Theme.of(context).colorScheme.tertiary,
@@ -826,7 +915,9 @@ class _SuggestionChip extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant) // Add subtle border
         ),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Adjust padding
       ),
     );
   }
@@ -991,7 +1082,6 @@ class PlanDetailsScreen extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // Plan days
           Text(
             'Daily Plan',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -1000,7 +1090,6 @@ class PlanDetailsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // List of days
           ...plan.days.map((day) => _buildDayCard(context, day, plan.type)),
         ],
       ),
@@ -1008,6 +1097,57 @@ class PlanDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildDayCard(BuildContext context, PlanDay day, PlanType planType) {
+    // Build the list of meal widgets separately with proper type checking
+    List<Widget> mealWidgets = [];
+    if (day.meals != null && day.meals!.isNotEmpty) {
+      mealWidgets.add(
+        Padding(
+          padding: EdgeInsets.only(top: (day.notes != null || day.workout != null) ? 16.0 : 0.0),
+          child: Text(
+            'Meals',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        )
+      );
+      mealWidgets.add(const SizedBox(height: 8));
+
+      for (var mealObj in day.meals!) {
+        // Assuming mealObj is actually a Meal object based on the build error
+        if (mealObj is Meal) {
+          final Map<String, dynamic> mealMap = mealObj.toJson(); // Call toJson()
+          final mealName = mealMap['name']?.toString() ?? 'Meal';
+          // Type needs to be parsed from the map now (it's a String from toJson)
+          final mealType = mealMap['type']?.toString() ?? '';
+          final calories = (mealMap['totalCalories'] as num?)?.toDouble() ?? 0.0;
+          final protein = (mealMap['totalProtein'] as num?)?.toDouble() ?? 0.0;
+          final carbs = (mealMap['totalCarbs'] as num?)?.toDouble() ?? 0.0;
+          final fat = (mealMap['totalFat'] as num?)?.toDouble() ?? 0.0;
+
+          mealWidgets.add(
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(
+                _getMealIcon(mealType),
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              title: Text(mealName),
+              subtitle: Text(
+                '${calories.toInt()} kcal | P: ${protein.toInt()}g | C: ${carbs.toInt()}g | F: ${fat.toInt()}g',
+              ),
+            )
+          );
+        } else {
+          // Log error or handle unexpected type
+          print('Error: Unexpected meal object type in PlanDetailsScreen: ${mealObj.runtimeType}');
+          // Optionally add a placeholder widget for the error case
+          // mealWidgets.add(const Text('Error loading meal data'));
+        }
+      }
+    }
+
+
     return Card(
       elevation: 0,
       margin: const EdgeInsets.only(bottom: 16),
@@ -1032,18 +1172,16 @@ class PlanDetailsScreen extends StatelessWidget {
                   _buildDayTypeChip(context, day.workout != null ? 'Workout' : 'Rest')
                 else if (planType == PlanType.nutrition)
                   _buildDayTypeChip(context, 'Nutrition')
-                else
+                else // Combined plan type
                   _buildDayTypeChip(context, day.workout != null ? 'Workout' : 'Nutrition'),
               ],
             ),
             const SizedBox(height: 16),
 
-            // Plan content
-            if (day.notes != null)
-              Text(day.notes!),
+            if (day.notes != null) Text(day.notes!),
 
             if (day.workout != null) ...[
-              const SizedBox(height: 16),
+              if (day.notes != null) const SizedBox(height: 16),
               Text(
                 'Workout: ${day.workout!.name}',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -1055,17 +1193,12 @@ class PlanDetailsScreen extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.circle,
-                      size: 8,
-                    ),
+                    const Icon(Icons.circle, size: 8),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        exercise.sets != null && exercise.sets!.isNotEmpty
-                            ? '${exercise.name}: ${exercise.sets!.length} × ${exercise.sets!.first.reps}${exercise.sets!.first.weight != null ? ' (${exercise.sets!.first.weight}kg)' : ''}'
-                            : exercise.name,
-                        maxLines: 1,
+                        _formatExerciseDetails(exercise),
+                        maxLines: 2, // Allow wrapping
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -1074,49 +1207,33 @@ class PlanDetailsScreen extends StatelessWidget {
               )),
             ],
 
-            if (day.meals != null && day.meals!.isNotEmpty)
-              Text(
-                'Meals',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            if (day.meals != null && day.meals!.isNotEmpty)
-              const SizedBox(height: 8),
-            if (day.meals != null)
-              ...day.meals!.map((mealObj) {
-                // Convert to map to safely access properties
-                final mealMap = mealObj is Map<dynamic, dynamic> ? mealObj as Map<dynamic, dynamic> : <dynamic, dynamic>{};
-                final mealName = mealMap['name']?.toString() ?? 'Meal';
-                final mealType = mealMap['type']?.toString() ?? '';
-                final calories = (mealMap['totalCalories'] as num?) ?? 0;
-                final protein = (mealMap['totalProtein'] as num?) ?? 0;
-                final carbs = (mealMap['totalCarbs'] as num?) ?? 0;
-                final fat = (mealMap['totalFat'] as num?) ?? 0;
-                
-                return ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(
-                    mealType.contains('breakfast')
-                        ? Icons.wb_sunny
-                        : mealType.contains('lunch')
-                        ? Icons.wb_twilight
-                        : mealType.contains('dinner')
-                        ? Icons.nights_stay
-                        : Icons.fastfood,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  title: Text(mealName),
-                  subtitle: Text(
-                    '${calories.toInt()} kcal | P: ${protein.toInt()}g | C: ${carbs.toInt()}g | F: ${fat.toInt()}g',
-                  ),
-                );
-              }),
+            // Spread the pre-built meal widgets here
+            ...mealWidgets,
+
           ],
         ),
       ),
     );
   }
+
+  String _formatExerciseDetails(Exercise exercise) {
+    if (exercise.sets != null && exercise.sets!.isNotEmpty) {
+      final firstSet = exercise.sets!.first;
+      final weightString = firstSet.weight != null ? ' (${firstSet.weight}kg)' : '';
+      return '${exercise.name}: ${exercise.sets!.length} × ${firstSet.reps}$weightString';
+    } else if (exercise.duration != null) {
+       return '${exercise.name}: ${exercise.duration!.inMinutes} min';
+    }
+    return exercise.name;
+  }
+
+  IconData _getMealIcon(String mealType) {
+     if (mealType.toLowerCase().contains('breakfast')) return Icons.wb_sunny;
+     if (mealType.toLowerCase().contains('lunch')) return Icons.wb_twilight;
+     if (mealType.toLowerCase().contains('dinner')) return Icons.nights_stay;
+     return Icons.fastfood; // Default for snacks or other
+  }
+
 
   Widget _buildDayTypeChip(BuildContext context, String label) {
     return Container(
