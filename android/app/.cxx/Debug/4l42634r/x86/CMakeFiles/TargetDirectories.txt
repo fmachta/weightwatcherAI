@@ -1,0 +1,2 @@
+/Users/jalfaro/weightwatcherAI/android/app/.cxx/Debug/4l42634r/x86/CMakeFiles/edit_cache.dir
+/Users/jalfaro/weightwatcherAI/android/app/.cxx/Debug/4l42634r/x86/CMakeFiles/rebuild_cache.dir

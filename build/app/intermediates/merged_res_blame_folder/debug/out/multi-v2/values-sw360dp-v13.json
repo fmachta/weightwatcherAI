@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.weight_watcher_ai.app-mergeDebugResources-39:/values-sw360dp-v13/values-sw360dp-v13.xml",
+            "outputFile": "com.example.weight_watcher_ai.app-mergeDebugResources-44:/values-sw360dp-v13/values-sw360dp-v13.xml",
             "map": [
                 {
-                    "source": "/Users/ferasmachta/.gradle/caches/transforms-3/8cd68a37250c9141fc35c648b18f4c16/transformed/preference-1.2.1/res/values-sw360dp-v13/values-sw360dp-v13.xml",
+                    "source": "/Users/ferasmachta/.gradle/caches/transforms-3/89a14217559c89fb4f76fe17d65e2fba/transformed/preference-1.2.1/res/values-sw360dp-v13/values-sw360dp-v13.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

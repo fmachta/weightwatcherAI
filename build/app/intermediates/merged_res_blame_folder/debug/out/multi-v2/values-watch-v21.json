@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.weight_watcher_ai.app-mergeDebugResources-39:/values-watch-v21/values-watch-v21.xml",
+            "outputFile": "com.example.weight_watcher_ai.app-mergeDebugResources-44:/values-watch-v21/values-watch-v21.xml",
             "map": [
                 {
-                    "source": "/Users/ferasmachta/.gradle/caches/transforms-3/1ccfe90965a69838ac989a8eaa5bc26a/transformed/appcompat-1.1.0/res/values-watch-v21/values-watch-v21.xml",
+                    "source": "/Users/ferasmachta/.gradle/caches/transforms-3/f78f1337285dcebcf4e11c84bd1ca19e/transformed/appcompat-1.1.0/res/values-watch-v21/values-watch-v21.xml",
                     "from": {
                         "startLines": "2,6,10",
                         "startColumns": "4,4,4",

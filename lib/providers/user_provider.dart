@@ -11,8 +11,20 @@ class UserProvider with ChangeNotifier {
   bool _isLoading = false;
 
   UserProfile? get userProfile => _userProfile;
+  set userProfile(UserProfile? value) { // Setter
+    _userProfile = value;
+    notifyListeners(); // Important: Notify listeners of the change
+  }
   List<BodyMeasurement> get bodyMeasurements => _bodyMeasurements;
   bool get isLoading => _isLoading;
+  bool get isLoggedIn => _userProfile != null; // Getter to check login status
+
+  // Clear user data for guest sessions or logout
+  void clearUserProfile() {
+    _userProfile = null;
+    _bodyMeasurements = [];
+    notifyListeners(); // Notify listeners about the cleared state
+  }
 
   // Initialize user data
   Future<void> initialize() async {
