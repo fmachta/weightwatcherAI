@@ -1,1 +1,0 @@
- /Users/ferasmachta/Documents/GitHub/weightwatcherAI/.dart_tool/flutter_build/ecd3c7f0474e95b834fafe0ad49ff047/native_assets.yaml: 

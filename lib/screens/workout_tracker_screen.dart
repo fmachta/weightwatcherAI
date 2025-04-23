@@ -6,6 +6,9 @@ import 'package:uuid/uuid.dart';
 import '../models/workout.dart';
 import '../models/exercise.dart';
 import '../providers/workout_provider.dart';
+import '../providers/user_provider.dart'; // Import UserProvider
+import 'login_screen.dart'; // Import LoginScreen
+
 
 class WorkoutTrackerScreen extends StatefulWidget {
   const WorkoutTrackerScreen({super.key});
@@ -48,6 +51,17 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
       final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
       await workoutProvider.changeSelectedDate(_selectedDate);
     }
+  }
+
+  // Helper function to prompt login
+  void _promptLogin(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+    );
+    // Optionally show a message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Please log in to perform this action.')),
+    );
   }
 
   @override
@@ -172,6 +186,11 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
   }
 
   void _navigateToAddWorkout(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (!userProvider.isLoggedIn) {
+      _promptLogin(context);
+      return;
+    }
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => AddWorkoutScreen(selectedDate: _selectedDate),
@@ -180,6 +199,11 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
   }
 
   void _navigateToEditWorkout(BuildContext context, Workout workout) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (!userProvider.isLoggedIn) {
+      _promptLogin(context);
+      return;
+    }
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => EditWorkoutScreen(workout: workout),
@@ -188,6 +212,12 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
   }
 
   Future<void> _deleteWorkout(BuildContext context, String workoutId) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (!userProvider.isLoggedIn) {
+      _promptLogin(context);
+      return;
+    }
+
     // Show confirmation dialog
     final shouldDelete = await showDialog<bool>(
       context: context,

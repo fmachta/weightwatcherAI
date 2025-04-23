@@ -1,1 +1,0 @@
-weight_watcher_ai.debug.dylib

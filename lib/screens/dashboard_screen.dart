@@ -9,6 +9,8 @@ import '../providers/workout_provider.dart';
 import '../models/body_measurement.dart';
 import '../models/workout.dart';
 import '../models/daily_nutrition.dart';
+import 'login_screen.dart'; // Import LoginScreen
+
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -19,18 +21,71 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   @override
+  // Helper function to prompt login
+  void _promptLogin(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Consumer3<UserProvider, NutritionProvider, WorkoutProvider>(
       builder: (context, userProvider, nutritionProvider, workoutProvider, child) {
+        final bool isLoggedIn = userProvider.isLoggedIn;
         final userProfile = userProvider.userProfile;
         final bodyMeasurements = userProvider.bodyMeasurements;
         final recentWorkouts = workoutProvider.workouts;
         final dailyNutrition = nutritionProvider.dailyNutrition;
 
-        if (userProfile == null) {
-          return const Center(
-            child: CircularProgressIndicator(),
+        // --- Guest View ---
+        if (!isLoggedIn) {
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.dashboard_customize_outlined,
+                      size: 80,
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Welcome to Weight Watcher AI!',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Log in or sign up to see your personalized dashboard, track progress, and get AI insights.',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 32),
+                    ElevatedButton(
+                      onPressed: () => _promptLogin(context),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(200, 50),
+                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                      ),
+                      child: const Text('Login / Sign Up'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           );
+        }
+
+        // --- Logged-in View ---
+        // At this point, isLoggedIn is true, so userProfile should not be null.
+        assert(userProfile != null, 'UserProfile is null despite being logged in.');
+         if (userProfile == null) {
+           // Fallback in case assertion fails in production
+           return const Center(child: Text('Error: User profile not loaded.'));
         }
 
         return SafeArea(
