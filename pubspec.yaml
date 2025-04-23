@@ -52,6 +52,7 @@ flutter:
   assets:
     - .env
     - assets/images/
+    - assets/data/ # Added data directory
 
   # The following section is for flutter_launcher_icons configuration
 # Run this command to generate app icons:

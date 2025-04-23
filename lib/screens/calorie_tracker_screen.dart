@@ -11,6 +11,7 @@ import '../providers/nutrition_provider.dart';
 import '../providers/user_provider.dart';
 import 'login_screen.dart'; // Import LoginScreen
 import 'package:uuid/uuid.dart';
+import 'dart:async'; // Import async library for Timer
 
 
 class CalorieTrackerScreen extends StatefulWidget {
@@ -1144,6 +1145,7 @@ class AddFoodItemScreen extends StatefulWidget {
 class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController(text: '1.0');
+  Timer? _debounce; // Timer for debouncing search
 
   FoodItem? _selectedFoodItem;
   List<FoodItem> _searchResults = [];
@@ -1185,6 +1187,7 @@ class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
     _proteinController.dispose();
     _carbsController.dispose();
     _fatController.dispose();
+    _debounce?.cancel(); // Cancel the timer if it's active
     super.dispose();
   }
 
@@ -1218,15 +1221,18 @@ class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
           padding: const EdgeInsets.all(16.0),
           child: TextField(
             controller: _searchController,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Search Food',
-              border: const OutlineInputBorder(),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: _searchFood,
-              ),
+              border: OutlineInputBorder(),
+              suffixIcon: Icon(Icons.search), // Keep icon for visual cue
             ),
-            onSubmitted: (_) => _searchFood(),
+            onChanged: (query) {
+              if (_debounce?.isActive ?? false) _debounce!.cancel();
+              _debounce = Timer(const Duration(milliseconds: 500), () {
+                 _searchFood(query); // Pass the query to search function
+              });
+            },
+            // Removed onSubmitted and IconButton onPressed
           ),
         ),
 
@@ -1343,13 +1349,29 @@ class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
     );
   }
 
-  void _searchFood() async {
+  // Modified to accept query
+  void _searchFood(String query) async {
+    // Only search if query is not empty, otherwise maybe clear results or show initial list
+    if (query.isEmpty) {
+       // Optionally clear results or load initial items again
+       // await _loadInitialFoodItems(); // Example: reload initial if query is empty
+       setState(() {
+         _searchResults = []; // Clear results for empty query
+         _isLoading = false;
+       });
+       return;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
     final nutritionProvider = Provider.of<NutritionProvider>(context, listen: false);
-    _searchResults = await nutritionProvider.searchFoodItems(_searchController.text);
+    // Use the passed query instead of controller text directly
+    _searchResults = await nutritionProvider.searchFoodItems(query);
+
+    // Check if the widget is still mounted before calling setState
+    if (!mounted) return;
 
     setState(() {
       _isLoading = false;

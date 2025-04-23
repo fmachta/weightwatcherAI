@@ -1,106 +1,13 @@
 import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle; // For loading assets
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/food_item.dart';
 
 class FoodRepository {
-  static const String _foodItemsKey = 'food_items';
   static const String _customFoodItemsKey = 'custom_food_items';
 
-  // Load predefined food items
-  List<FoodItem> _getPredefinedFoodItems() {
-    return [
-      FoodItem(
-        id: 'apple',
-        name: 'Apple',
-        calories: 52,
-        protein: 0.3,
-        carbs: 14,
-        fat: 0.2,
-        description: 'A medium-sized apple',
-      ),
-      FoodItem(
-        id: 'banana',
-        name: 'Banana',
-        calories: 96,
-        protein: 1.2,
-        carbs: 23,
-        fat: 0.2,
-        description: 'A medium-sized banana',
-      ),
-      FoodItem(
-        id: 'chicken_breast',
-        name: 'Chicken Breast',
-        calories: 165,
-        protein: 31,
-        carbs: 0,
-        fat: 3.6,
-        description: '100g of boneless, skinless chicken breast',
-      ),
-      FoodItem(
-        id: 'oatmeal',
-        name: 'Oatmeal',
-        calories: 68,
-        protein: 2.5,
-        carbs: 12,
-        fat: 1.4,
-        description: '100g of cooked oatmeal',
-      ),
-      FoodItem(
-        id: 'salmon',
-        name: 'Salmon',
-        calories: 206,
-        protein: 22,
-        carbs: 0,
-        fat: 13,
-        description: '100g of cooked salmon',
-      ),
-      FoodItem(
-        id: 'broccoli',
-        name: 'Broccoli',
-        calories: 55,
-        protein: 3.7,
-        carbs: 11.2,
-        fat: 0.6,
-        description: '100g of cooked broccoli',
-      ),
-      FoodItem(
-        id: 'brown_rice',
-        name: 'Brown Rice',
-        calories: 112,
-        protein: 2.6,
-        carbs: 23.5,
-        fat: 0.9,
-        description: '100g of cooked brown rice',
-      ),
-      FoodItem(
-        id: 'eggs',
-        name: 'Eggs',
-        calories: 155,
-        protein: 12.6,
-        carbs: 0.6,
-        fat: 11.5,
-        description: '100g of whole eggs (about 2 large eggs)',
-      ),
-      FoodItem(
-        id: 'greek_yogurt',
-        name: 'Greek Yogurt',
-        calories: 59,
-        protein: 10,
-        carbs: 3.6,
-        fat: 0.4,
-        description: '100g of non-fat Greek yogurt',
-      ),
-      FoodItem(
-        id: 'almonds',
-        name: 'Almonds',
-        calories: 579,
-        protein: 21.2,
-        carbs: 21.7,
-        fat: 49.9,
-        description: '100g of almonds',
-      ),
-    ];
-  }
+  List<FoodItem>? _foundationFoods; // Cache for loaded foundation foods
+  bool _isLoadingFoundation = false; // Flag to prevent concurrent loading
 
   // Save a custom food item
   Future<void> saveCustomFoodItem(FoodItem foodItem) async {
@@ -113,12 +20,14 @@ class FoodRepository {
     await prefs.setStringList(_customFoodItemsKey, customFoodItemsJson);
   }
 
-  // Get all food items (predefined + custom)
+  // Get all food items (foundation + custom)
   Future<List<FoodItem>> getAllFoodItems() async {
-    final predefinedFoodItems = _getPredefinedFoodItems();
-    final customFoodItems = await getCustomFoodItems();
+    // Ensure foundation foods are loaded
+    await _ensureFoundationFoodsLoaded();
 
-    return [...predefinedFoodItems, ...customFoodItems];
+    final customFoodItems = await getCustomFoodItems();
+    // Combine foundation (or empty list if loading failed) and custom items
+    return [...(_foundationFoods ?? []), ...customFoodItems];
   }
 
   // Get custom food items
@@ -127,22 +36,161 @@ class FoodRepository {
     final customFoodItemsJson = prefs.getStringList(_customFoodItemsKey) ?? [];
 
     return customFoodItemsJson
-        .map((json) => FoodItem.fromJson(jsonDecode(json)))
+        .map((json) {
+          try {
+            // Added try-catch for robustness
+            return FoodItem.fromJson(jsonDecode(json));
+          } catch (e) {
+            print("Error decoding custom food item from JSON: $json Error: $e");
+            return null; // Return null for invalid items
+          }
+        })
+        .whereType<FoodItem>() // Filter out nulls
         .toList();
   }
 
-  // Find food item by name (for search)
+  // --- Foundation Foods Loading ---
+
+  // Helper to ensure foundation foods are loaded before use
+  Future<void> _ensureFoundationFoodsLoaded() async {
+     if (_foundationFoods == null && !_isLoadingFoundation) {
+      await _loadFoundationFoods();
+    }
+    // Wait if loading is in progress (basic handling)
+    while (_isLoadingFoundation) {
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+  }
+
+  // Load and parse foundation foods from local JSON asset
+  Future<void> _loadFoundationFoods() async {
+    // Prevent multiple loads and return if already loaded
+    if (_isLoadingFoundation || _foundationFoods != null) return;
+    _isLoadingFoundation = true;
+
+    print("Loading foundation foods from asset..."); // Log start
+
+    try {
+      final String jsonString = await rootBundle.loadString('assets/data/foundation_foods.json');
+      final Map<String, dynamic> jsonData = jsonDecode(jsonString);
+      final List<dynamic> foundationFoodsList = jsonData['FoundationFoods'] ?? [];
+
+      final List<FoodItem> loadedItems = [];
+      int skippedCount = 0; // Count skipped items
+
+      for (var foodData in foundationFoodsList) {
+        if (foodData is Map<String, dynamic>) {
+          final String? name = foodData['description'];
+          // Explicitly check if fdcId is an int
+          final dynamic fdcIdRaw = foodData['fdcId'];
+          final int? fdcId = (fdcIdRaw is int) ? fdcIdRaw : null;
+
+          final List<dynamic> nutrients = foodData['foodNutrients'] ?? [];
+
+          if (name != null && fdcId != null) { // Check if fdcId is a valid integer
+            double calories = 0;
+            double protein = 0;
+            double carbs = 0;
+            double fat = 0;
+
+            for (var nutrientData in nutrients) {
+              if (nutrientData is Map<String, dynamic>) {
+                final Map<String, dynamic>? nutrientInfo = nutrientData['nutrient'];
+                final num? amount = nutrientData['amount']; // Use num? for flexibility
+
+                if (nutrientInfo != null && amount != null) {
+                  final String? nutrientName = nutrientInfo['name'];
+                  final String? unitName = nutrientInfo['unitName'];
+
+                  // Using lowercase contains for names, exact match for units
+                  final lowerNutrientName = nutrientName?.toLowerCase() ?? '';
+
+                  if (lowerNutrientName.contains('energy') && unitName == 'kcal') {
+                    calories = amount.toDouble();
+                  } else if (lowerNutrientName.contains('protein') && unitName == 'g') {
+                    protein = amount.toDouble();
+                  } else if (lowerNutrientName.contains('carbohydrate') && unitName == 'g') { // More robust carb match
+                    carbs = amount.toDouble();
+                  } else if (lowerNutrientName.contains('fat') && unitName == 'g') { // More robust fat match (e.g., 'total lipid (fat)')
+                    fat = amount.toDouble();
+                  }
+                }
+              }
+            } // End nutrient loop
+
+            // Only add if we have a name and valid ID
+            loadedItems.add(FoodItem(
+              id: 'foundation_$fdcId', // Prefix ID
+              name: name,
+              calories: calories,
+              protein: protein,
+              carbs: carbs,
+              fat: fat,
+              description: name, // Use name as description for now
+            ));
+          } else if (name != null && fdcId == null) {
+             // Log if an item has a name but invalid/missing fdcId
+             print("Skipping item '$name' due to missing or invalid fdcId: $fdcIdRaw");
+             skippedCount++;
+          }
+        } // End if foodData is Map
+      } // End foodData loop
+
+      _foundationFoods = loadedItems;
+      print("Successfully loaded ${_foundationFoods?.length ?? 0} foundation foods.");
+      if (skippedCount > 0) {
+        print("Skipped $skippedCount items due to missing/invalid fdcId.");
+      }
+    } catch (e, stacktrace) { // Catch stacktrace too
+      print('Error loading foundation foods: $e'); // Log error
+      print('Stacktrace: $stacktrace');
+      _foundationFoods = []; // Set to empty list on error to prevent repeated load attempts
+    } finally {
+      _isLoadingFoundation = false; // Release lock
+    }
+  }
+
+
+  // Find food item by name (local foundation + custom)
   Future<List<FoodItem>> findFoodItemsByName(String query) async {
-    final allFoodItems = await getAllFoodItems();
+    // 1. Ensure foundation foods are loaded
+    await _ensureFoundationFoodsLoaded();
+
+    final lowerCaseQuery = query.toLowerCase();
+
+    // 2. Get custom items
+    final customFoodItems = await getCustomFoodItems();
+
+    // 3. Combine foundation and custom items
+    // Use ?? [] to handle potential loading errors where _foundationFoods might still be null
+    final allLocalItems = [...(_foundationFoods ?? []), ...customFoodItems];
+
+    // 4. Filter combined list
+    final Set<String> foundIds = {}; // Avoid duplicates if custom matches foundation
+    final List<FoodItem> filteredResults = [];
 
     if (query.isEmpty) {
-      return allFoodItems;
+      // Return all local items without duplicates if query is empty
+      for (var item in allLocalItems) {
+        if (foundIds.add(item.id)) {
+          filteredResults.add(item);
+        }
+      }
+    } else {
+      // Filter by name if query is not empty
+      for (var item in allLocalItems) {
+        if (item.name.toLowerCase().contains(lowerCaseQuery)) {
+           if (foundIds.add(item.id)) {
+             filteredResults.add(item);
+           }
+        }
+      }
     }
 
-    return allFoodItems
-        .where((foodItem) =>
-        foodItem.name.toLowerCase().contains(query.toLowerCase()))
-        .toList();
+    // Optional: Sort results
+    filteredResults.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
+    return filteredResults;
   }
 
   // Delete a custom food item
@@ -151,11 +199,22 @@ class FoodRepository {
     final customFoodItemsJson = prefs.getStringList(_customFoodItemsKey) ?? [];
 
     final customFoodItems = customFoodItemsJson
-        .map((json) => FoodItem.fromJson(jsonDecode(json)))
+        .map((json) {
+          try {
+            // Added try-catch for robustness
+            return FoodItem.fromJson(jsonDecode(json));
+          } catch (e) {
+            print("Error decoding custom food item from JSON: $json Error: $e");
+            return null; // Return null for invalid items
+          }
+        })
+        .whereType<FoodItem>() // Filter out nulls
         .toList();
 
+
     // Remove the food item with the given id
-    customFoodItems.removeWhere((item) => item.id == id);
+    // Ensure we only try to remove custom items (IDs starting with 'custom_')
+    customFoodItems.removeWhere((item) => item.id == id && item.id.startsWith('custom_'));
 
     // Save the updated list
     await prefs.setStringList(
