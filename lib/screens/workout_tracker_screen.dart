@@ -400,8 +400,11 @@ class WorkoutCard extends StatelessWidget {
         return 'Balance';
       case WorkoutType.sports:
         return 'Sports';
+      case WorkoutType.rest:
+        return 'Rest';
       case WorkoutType.other:
         return 'Other';
+
     }
   }
 
@@ -858,6 +861,8 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
         return 'Sports';
       case WorkoutType.other:
         return 'Other';
+      case WorkoutType.rest:
+        return 'Rest';
     }
   }
 
@@ -875,6 +880,8 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
         return 'Balance and stability exercises';
       case WorkoutType.sports:
         return 'Sports-specific training';
+      case WorkoutType.rest:
+        return 'Rest and recovery';
       case WorkoutType.other:
         return 'Other types of physical activity';
     }
@@ -894,6 +901,8 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
         return 4.0;
       case WorkoutType.sports:
         return 9.0;
+      case WorkoutType.rest:
+        return 1.0;
       case WorkoutType.other:
         return 6.0;
     }
@@ -1216,6 +1225,8 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
         return 'Balance';
       case WorkoutType.sports:
         return 'Sports';
+      case WorkoutType.rest:
+        return 'Rest';
       case WorkoutType.other:
         return 'Other';
     }
@@ -1688,6 +1699,8 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
         return '⚖️';
       case WorkoutType.sports:
         return '⚽';
+      case WorkoutType.rest:
+        return '😴';
       case WorkoutType.other:
         return '🏋️';
     }
@@ -1707,6 +1720,8 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
         return 'Balance';
       case WorkoutType.sports:
         return 'Sports';
+      case WorkoutType.rest:
+        return 'Rest';
       case WorkoutType.other:
         return 'Other';
     }
@@ -1726,6 +1741,8 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
         return 'Balance and stability exercises';
       case WorkoutType.sports:
         return 'Sports-specific training';
+      case WorkoutType.rest:
+        return 'Rest and recovery';
       case WorkoutType.other:
         return 'Other types of physical activity';
     }
@@ -1745,6 +1762,8 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
         return 4.0;
       case WorkoutType.sports:
         return 9.0;
+      case WorkoutType.rest:
+        return 1.0; // Minimal calorie burn for rest
       case WorkoutType.other:
         return 6.0;
     }

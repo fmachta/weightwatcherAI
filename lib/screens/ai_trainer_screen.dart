@@ -1168,14 +1168,24 @@ class PlanDetailsScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                if (planType == PlanType.workout)
-                  _buildDayTypeChip(context, day.workout != null ? 'Workout' : 'Rest')
-                else if (planType == PlanType.nutrition)
-                  _buildDayTypeChip(context, 'Nutrition')
-                else // Combined plan type
-                  _buildDayTypeChip(context, day.workout != null ? 'Workout' : 'Nutrition'),
+                _buildDayTypeChip(
+                  context,
+                      () {
+                    if (planType == PlanType.workout) {
+                      return (day.workout == null || day.workout!.type == WorkoutType.rest)
+                          ? 'Rest'
+                          : 'Workout';
+                    } else if (planType == PlanType.nutrition) {
+                      return 'Nutrition';
+                    } else {
+                      return day.workout != null ? 'Workout' : 'Nutrition';
+                    }
+                  }(),
+                ),
               ],
             ),
+
+
             const SizedBox(height: 16),
 
             if (day.notes != null) Text(day.notes!),

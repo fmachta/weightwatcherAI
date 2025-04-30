@@ -68,38 +68,45 @@ enum PlanType {
   other
 }
 
-// Plan day model
+
 class PlanDay {
   final int dayNumber;
+  final String notes;
+  final String summary;
   final List<Meal>? meals;
   final Workout? workout;
-  final String? notes;
 
   PlanDay({
     required this.dayNumber,
+    required this.notes,
+    this.summary = '',
     this.meals,
     this.workout,
-    this.notes,
   });
 
-  // Convert to and from JSON for persistence
   Map<String, dynamic> toJson() {
     return {
       'dayNumber': dayNumber,
+      'notes': notes,
+      'summary': summary,
       'meals': meals?.map((meal) => meal.toJson()).toList(),
       'workout': workout?.toJson(),
-      'notes': notes,
     };
   }
 
   factory PlanDay.fromJson(Map<String, dynamic> json) {
     return PlanDay(
       dayNumber: json['dayNumber'],
+      notes: json['notes'] ?? '',
+      summary: json['summary'] ?? '',
       meals: json['meals'] != null
-          ? (json['meals'] as List).map((mealJson) => Meal.fromJson(mealJson)).toList()
+          ? (json['meals'] as List)
+          .map((mealJson) => Meal.fromJson(mealJson))
+          .toList()
           : null,
-      workout: json['workout'] != null ? Workout.fromJson(json['workout']) : null,
-      notes: json['notes'],
+      workout: json['workout'] != null
+          ? Workout.fromJson(json['workout'])
+          : null,
     );
   }
 }

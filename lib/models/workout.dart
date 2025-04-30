@@ -63,5 +63,6 @@ enum WorkoutType {
   flexibility,
   balance,
   sports,
-  other
+  other,
+  rest,
 }

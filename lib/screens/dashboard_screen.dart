@@ -10,6 +10,8 @@ import '../models/body_measurement.dart';
 import '../models/workout.dart';
 import '../models/daily_nutrition.dart';
 import 'login_screen.dart'; // Import LoginScreen
+import '../providers/ai_trainer_provider.dart';
+
 
 
 class DashboardScreen extends StatefulWidget {
@@ -169,6 +171,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
+
+                Consumer<AITrainerProvider>(
+                  builder: (context, provider, _) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (provider.aiInsight != null)
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.pink.shade200.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: const [
+                                    Icon(Icons.lightbulb, color: Colors.pink),
+                                    SizedBox(width: 8),
+                                    Text('AI Insight', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Text(provider.aiInsight!, style: TextStyle(fontSize: 14)),
+                              ],
+                            ),
+                          )
+                        else
+                          ElevatedButton(
+                            onPressed: () async {
+                              await Provider.of<AITrainerProvider>(context, listen: false)
+                                  .fetchAIInsight(userProfile, recentWorkouts, [dailyNutrition]);
+                            },
+                            child: const Text("Get Fitness Tips"),
+                          ),
+                        const SizedBox(height: 24),
+                      ],
+                    );
+                  },
+                ),
+
 
                 // Calorie summary
                 if (dailyNutrition != null)

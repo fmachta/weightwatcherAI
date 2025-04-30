@@ -22,8 +22,20 @@ class OpenAIService {
 
   // Generate a workout plan based on user profile
   Future<AIPlan> generateWorkoutPlan(UserProfile userProfile) async {
-    // Create a prompt that describes the user and their fitness goals
-    final prompt = _createWorkoutPlanPrompt(userProfile);
+    final prompt = """
+You are a professional fitness coach. Create a 4-week workout plan for the following user:
+
+Age: ${userProfile.age}
+Gender: ${userProfile.gender}
+Current weight: ${userProfile.currentWeight} kg
+Goal: ${userProfile.targetWeight} kg goal weight
+
+Return the plan as a JSON array of 28 days. Each item should look like:
+{ "day": 1, "notes": "Upper body push workout", "summary": "Bench press, shoulder press, triceps dips" }
+
+Make sure there is rest at least once per week.
+Only return the JSON array.
+""";
 
     try {
       final response = await http.post(
@@ -33,38 +45,57 @@ class OpenAIService {
           'Authorization': 'Bearer $_apiKey',
         },
         body: jsonEncode({
-          'model': 'gpt-4-turbo', // Use the most appropriate model
+          'model': 'gpt-4o',
+          'temperature': 0.7,
           'messages': [
             {
               'role': 'system',
-              'content': 'You are a professional fitness trainer with expertise in creating personalized workout plans. Provide detailed, actionable workouts tailored to the user\'s goals and fitness level. Format your response as JSON.'
+              'content': 'You are a fitness coach AI that generates structured, safe workout plans.'
             },
             {
               'role': 'user',
               'content': prompt
             }
-          ],
-          'temperature': 0.7,
-          'max_tokens': 2500,
+          ]
         }),
       );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final content = data['choices'][0]['message']['content'];
+      final result = jsonDecode(response.body);
 
-        // Parse the workout plan from the response
-        return _parseWorkoutPlanResponse(content, userProfile);
-      } else {
-        // If API call fails, fall back to a default plan
-        return _createDefaultWorkoutPlan(userProfile);
+      if (response.statusCode != 200 || result['choices'] == null) {
+        throw Exception("Invalid response from OpenAI.");
       }
+
+      final content = result['choices'][0]['message']['content'];
+      final jsonStart = content.indexOf('[');
+      final jsonEnd = content.lastIndexOf(']');
+      final jsonString = content.substring(jsonStart, jsonEnd + 1);
+      final parsed = jsonDecode(jsonString);
+
+      final days = (parsed as List).map<PlanDay>((e) => PlanDay(
+        dayNumber: e['day'],
+        notes: e['notes'] ?? 'No notes provided', // ✅ Required
+        summary: e['summary'] ?? '',
+      )).toList();
+
+
+      return AIPlan(
+        id: _uuid.v4(),
+        title: "Custom Workout Plan",
+        description: "Personalized workout plan based on your profile",
+        type: PlanType.workout,
+        startDate: DateTime.now(),
+        endDate: DateTime.now().add(const Duration(days: 28)),
+        days: days,
+        targetProfile: userProfile,
+      );
     } catch (e) {
-      print('Error generating workout plan: $e');
-      // If there's an error, return a default plan
+      print("Error generating workout plan: $e");
       return _createDefaultWorkoutPlan(userProfile);
     }
   }
+
+
 
   // Generate a meal plan based on user profile
   Future<AIPlan> generateMealPlan(UserProfile userProfile) async {
@@ -356,7 +387,6 @@ class OpenAIService {
     }
   }
 
-  // Parse the OpenAI response for workout plan
   AIPlan _parseWorkoutPlanResponse(String jsonResponse, UserProfile userProfile) {
     try {
       // Extract JSON from the response (in case there's markdown or other text)
@@ -374,15 +404,29 @@ class OpenAIService {
       final List<PlanDay> planDays = [];
       for (var dayData in data['days']) {
         final dayNumber = dayData['day'];
+        final notes = dayData['notes'] ?? 'No notes provided.';
+        final summary = dayData['summary'] ?? '';
 
         // If it's a rest day
         if (dayData['workout'] == null || dayData['workout']['type'] == 'rest') {
           planDays.add(PlanDay(
             dayNumber: dayNumber,
-            notes: 'Rest day - focus on recovery and mobility.',
+            notes: notes,
+            summary: summary,
+            workout: Workout(
+              id: _uuid.v4(),
+              name: 'Rest Day',
+              dateTime: DateTime.now().add(Duration(days: dayNumber - 1)),
+              duration: Duration.zero,
+              type: WorkoutType.rest,
+              exercises: [],
+              caloriesBurned: 0,
+              notes: notes,
+            ),
           ));
           continue;
         }
+
 
         // Create workout
         final workoutData = dayData['workout'];
@@ -414,15 +458,27 @@ class OpenAIService {
           id: _uuid.v4(),
           name: workoutData['name'] ?? 'Day $dayNumber Workout',
           dateTime: DateTime.now().add(Duration(days: dayNumber - 1)),
-          duration: Duration(minutes: workoutData['duration'] != null ? (workoutData['duration'] as num).toInt() : 45),
+          duration: Duration(
+            minutes: workoutData['duration'] != null
+                ? (workoutData['duration'] as num).toInt()
+                : 45,
+          ),
           type: _parseWorkoutType(workoutData['type']),
           exercises: exercises,
-          caloriesBurned: (_estimateCaloriesBurned(exercises, workoutData['duration'] != null ? (workoutData['duration'] as num).toInt() : 45, userProfile)).toInt(),
-          notes: workoutData['notes'],
+          caloriesBurned: _estimateCaloriesBurned(
+            exercises,
+            workoutData['duration'] != null
+                ? (workoutData['duration'] as num).toInt()
+                : 45,
+            userProfile,
+          ).toInt(),
+          notes: workoutData['notes'] ?? '',
         );
 
         planDays.add(PlanDay(
           dayNumber: dayNumber,
+          notes: notes,
+          summary: summary,
           workout: workout,
         ));
       }
@@ -443,7 +499,7 @@ class OpenAIService {
     }
   }
 
-  // Parse the OpenAI response for meal plan
+
   AIPlan _parseMealPlanResponse(String jsonResponse, UserProfile userProfile) {
     try {
       // Extract JSON from the response (in case there's markdown or other text)
@@ -461,8 +517,7 @@ class OpenAIService {
       final List<PlanDay> planDays = [];
       for (var dayData in data['days']) {
         final dayNumber = dayData['day'];
-
-        // Create meals for the day
+        final notes = dayData['notes'] ?? 'Nutrition-focused day';
         final meals = <Meal>[];
 
         for (var mealData in dayData['meals'] ?? []) {
@@ -482,7 +537,7 @@ class OpenAIService {
 
             mealItems.add(MealItem(
               foodItem: foodItem,
-              quantity: 1.0, // Default to 1 serving
+              quantity: 1.0,
               servingSize: foodData['quantity'],
             ));
           }
@@ -499,6 +554,7 @@ class OpenAIService {
 
         planDays.add(PlanDay(
           dayNumber: dayNumber,
+          notes: notes,
           meals: meals,
         ));
       }
@@ -549,6 +605,8 @@ class OpenAIService {
         return WorkoutType.balance;
       case 'sports':
         return WorkoutType.sports;
+      case 'rest':
+        return WorkoutType.rest;
       default:
         return WorkoutType.other;
     }
@@ -567,6 +625,7 @@ class OpenAIService {
       case WorkoutType.flexibility:
       case WorkoutType.balance:
       case WorkoutType.sports:
+      case WorkoutType.rest:
       case WorkoutType.other:
         return 5 * userProfile.currentWeight * (durationMinutes / 60);
     }
@@ -795,7 +854,9 @@ class OpenAIService {
       planDays.add(PlanDay(
         dayNumber: day,
         workout: workout,
+          notes: workout.notes ?? '', // Passes required parameter
       ));
+
     }
 
     String planTitle;
