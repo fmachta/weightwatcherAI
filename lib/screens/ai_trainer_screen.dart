@@ -12,6 +12,9 @@ import '../models/meal.dart'; // Keep if PlanDetailsScreen needs it, otherwise r
 import '../models/workout.dart'; // Keep if PlanDetailsScreen needs it, otherwise remove
 import '../models/exercise.dart'; // Keep if PlanDetailsScreen needs it, otherwise remove
 import 'login_screen.dart'; // Import LoginScreen
+import 'workout_plan_preferences_screen.dart'; // Import WorkoutPlanPreferencesScreen
+import 'meal_plan_preferences_screen.dart'; // Import MealPlanPreferencesScreen
+import 'meal_detail_screen.dart'; // Import MealDetailScreen
 
 class AITrainerScreen extends StatefulWidget {
   const AITrainerScreen({super.key});
@@ -27,6 +30,7 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
   bool _isAskingQuestion = false;
   final List<Map<String, dynamic>> _chatMessages = [];
   String _aiInsight = '';
+  List<String> _suggestedQuestions = [];
 
   // --- initState ---
   @override
@@ -39,15 +43,38 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       if (userProvider.isLoggedIn) {
         _getInitialInsight();
+        _loadSuggestedQuestions();
       } else {
         // Use mounted check before calling setState
         if (mounted) {
           setState(() {
             _aiInsight = 'Log in to get personalized AI insights and plans.';
+            // Load generic questions for non-logged in users
+            final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
+            _suggestedQuestions = aiTrainerProvider.getRandomSuggestedQuestions();
           });
         }
       }
     });
+  }
+
+  // Load suggested questions based on user profile
+  void _loadSuggestedQuestions() {
+    if (!mounted) return;
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
+    
+    if (userProvider.isLoggedIn && userProvider.userProfile != null) {
+      // Get personalized questions for logged-in user
+      setState(() {
+        _suggestedQuestions = aiTrainerProvider.getSuggestedQuestionsForUser(userProvider.userProfile!);
+      });
+    } else {
+      // Get random questions for non-logged in users
+      setState(() {
+        _suggestedQuestions = aiTrainerProvider.getRandomSuggestedQuestions();
+      });
+    }
   }
 
   // --- dispose ---
@@ -181,38 +208,51 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
       _promptLogin(context);
       return;
     }
-    final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
-
-    // Show dialog safely
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => const AlertDialog( // Use dialogContext
-        title: Text('Generating Your Plan'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Creating your personalized workout plan using AI...'),
-          ],
+    
+    // Navigate to workout preferences screen instead of immediately generating
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => WorkoutPlanPreferencesScreen(
+          userProfile: userProfile,
+          onComplete: (preferenceData) async {
+            // First, close the preferences screen to return to the AI trainer screen
+            Navigator.of(context).pop();
+            
+            // Then show loading dialog
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (dialogContext) => const AlertDialog(
+                title: Text('Generating Your Plan'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Creating your personalized workout plan using AI...'),
+                  ],
+                ),
+              ),
+            );
+            
+            final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
+            try {
+              await aiTrainerProvider.generateWorkoutPlan(userProfile, preferenceData);
+              if (mounted) Navigator.of(context, rootNavigator: true).pop(); // Close dialog
+            } catch (e) {
+              if (mounted) {
+                Navigator.of(context, rootNavigator: true).pop(); // Close dialog
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Failed to generate workout plan. Please try again.'),
+                  ),
+                );
+              }
+            }
+          },
         ),
       ),
     );
-
-    try {
-      await aiTrainerProvider.generateWorkoutPlan(userProfile);
-      if (mounted) Navigator.of(context, rootNavigator: true).pop(); // Close dialog
-    } catch (e) {
-      if (mounted) {
-        Navigator.of(context, rootNavigator: true).pop(); // Close dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to generate workout plan. Please try again.'),
-          ),
-        );
-      }
-    }
   }
 
   Future<void> _generateMealPlan(BuildContext context, UserProfile userProfile) async {
@@ -222,38 +262,51 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
       _promptLogin(context);
       return;
     }
-    final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
-
-    // Show dialog safely
-     showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => const AlertDialog( // Use dialogContext
-        title: Text('Generating Your Plan'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Creating your personalized meal plan using AI...'),
-          ],
+    
+    // Navigate to meal plan preferences screen instead of immediately generating
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => MealPlanPreferencesScreen(
+          userProfile: userProfile,
+          onComplete: (preferenceData) async {
+            // First, close the preferences screen to return to the AI trainer screen
+            Navigator.of(context).pop();
+            
+            // Then show loading dialog
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (dialogContext) => const AlertDialog(
+                title: Text('Generating Your Plan'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Creating your personalized meal plan using AI...'),
+                  ],
+                ),
+              ),
+            );
+            
+            final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
+            try {
+              await aiTrainerProvider.generateMealPlan(userProfile, preferenceData);
+              if (mounted) Navigator.of(context, rootNavigator: true).pop(); // Close dialog
+            } catch (e) {
+              if (mounted) {
+                Navigator.of(context, rootNavigator: true).pop(); // Close dialog
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Failed to generate meal plan. Please try again.'),
+                  ),
+                );
+              }
+            }
+          },
         ),
       ),
     );
-
-    try {
-      await aiTrainerProvider.generateMealPlan(userProfile);
-      if (mounted) Navigator.of(context, rootNavigator: true).pop(); // Close dialog
-    } catch (e) {
-      if (mounted) {
-        Navigator.of(context, rootNavigator: true).pop(); // Close dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to generate meal plan. Please try again.'),
-          ),
-        );
-      }
-    }
   }
 
   void _navigateToPlanDetails(BuildContext context, AIPlan plan) {
@@ -366,8 +419,14 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
         }
 
         // Main content for logged-in users
-        return SafeArea(
-          child: Padding(
+        return RefreshIndicator(
+          onRefresh: () async {
+            await aiTrainerProvider.initialize();
+            await _getInitialInsight();
+            _loadSuggestedQuestions();
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -396,8 +455,15 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
 
                 const SizedBox(height: 24),
 
-                Expanded(
+                Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  padding: const EdgeInsets.all(16),
                   child: ListView(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -424,6 +490,7 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
                         PlanCard(
                           plan: currentPlan,
                           onView: () => _navigateToPlanDetails(context, currentPlan),
+                          onDelete: () => _showDeleteConfirmation(context, currentPlan),
                         )
                       else
                         _buildGeneratePlanButtons(context, userProfile),
@@ -439,6 +506,7 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
                           _questionController.text = suggestion;
                           _askQuestion();
                         },
+                        suggestedQuestions: _suggestedQuestions,
                       ),
                     ],
                   ),
@@ -446,6 +514,38 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
               ],
             ),
           ),
+        );
+      },
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, AIPlan plan) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Plan'),
+          content: Text('Are you sure you want to delete "${plan.title}"? This cannot be undone.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Get the provider and delete the plan
+                final provider = Provider.of<AITrainerProvider>(context, listen: false);
+                provider.deletePlan(plan.id);
+                
+                // Pop the dialog
+                Navigator.of(context).pop();
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
         );
       },
     );
@@ -561,11 +661,13 @@ class AIInsightCard extends StatelessWidget {
 class PlanCard extends StatelessWidget {
   final AIPlan plan;
   final VoidCallback onView;
+  final VoidCallback onDelete;
 
   const PlanCard({
     super.key,
     required this.plan,
     required this.onView,
+    required this.onDelete,
   });
 
   @override
@@ -659,6 +761,14 @@ class PlanCard extends StatelessWidget {
                   onPressed: onView,
                   child: const Text('View Plan'),
                 ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: onDelete,
+                  child: const Text('Delete'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  ),
+                ),
               ],
             ),
           ],
@@ -693,6 +803,7 @@ class AskAICard extends StatelessWidget {
   final List<Map<String, dynamic>> chatMessages;
   final bool isLoading;
   final Function(String) onSuggestionTap;
+  final List<String> suggestedQuestions;
 
   const AskAICard({
     super.key,
@@ -701,75 +812,67 @@ class AskAICard extends StatelessWidget {
     required this.chatMessages,
     required this.isLoading,
     required this.onSuggestionTap,
+    this.suggestedQuestions = const [],
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 0,
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Ask AI Trainer',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Get personalized advice on your fitness journey',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            if (chatMessages.isNotEmpty)
-              Container(
-                height: 200, // Constrain height
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ListView.builder(
-                    reverse: true, // Show latest messages at the bottom
-                    itemCount: chatMessages.length,
-                    itemBuilder: (context, index) {
-                      // Display messages in reverse order
-                      final message = chatMessages[chatMessages.length - 1 - index];
-                      return ChatMessage(
-                        text: message['message'],
-                        isUser: message['isUser'],
-                      );
-                    },
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.tertiary,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.question_answer,
+                    color: Theme.of(context).colorScheme.onTertiary,
                   ),
                 ),
-              ),
-
+                const SizedBox(width: 12),
+                Text(
+                  'Ask AI Trainer',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 16),
+            if (chatMessages.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Column(
+                  children: chatMessages.map((msg) => ChatMessage(
+                    text: msg['message'].toString(),
+                    isUser: msg['isUser'] as bool,
+                  )).toList(),
+                ),
+              ),
+            ],
             Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: controller,
                     decoration: InputDecoration(
-                      hintText: 'Type your fitness question...',
+                      hintText: 'Ask a fitness or nutrition question',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.surface,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
                     onSubmitted: (_) => onAsk(),
                   ),
@@ -783,43 +886,24 @@ class AskAICard extends StatelessWidget {
                     height: 24,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                      : Icon(
-                    Icons.send,
-                    color: Theme.of(context).colorScheme.primary,
+                      : const Icon(Icons.send),
+                  style: IconButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   ),
                 ),
               ],
-            ),
-
-            const SizedBox(height: 16),
-            Text(
-              'Suggested questions:',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
             ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: [
+              children: suggestedQuestions.map((suggestion) => 
                 _SuggestionChip(
-                  label: 'How to improve my bench press?',
-                  onTap: () => onSuggestionTap('How to improve my bench press?'),
-                ),
-                _SuggestionChip(
-                  label: 'What should I eat before workout?',
-                  onTap: () => onSuggestionTap('What should I eat before workout?'),
-                ),
-                _SuggestionChip(
-                  label: 'How to reduce muscle soreness?',
-                  onTap: () => onSuggestionTap('How to reduce muscle soreness?'),
-                ),
-                _SuggestionChip(
-                  label: 'How much protein should I eat daily?',
-                  onTap: () => onSuggestionTap('How much protein should I eat daily?'),
-                ),
-              ],
+                  label: suggestion,
+                  onTap: () => onSuggestionTap(suggestion),
+                )
+              ).toList(),
             ),
           ],
         ),
@@ -955,6 +1039,7 @@ class AllPlansScreen extends StatelessWidget {
               return PlanCard(
                 plan: plans[index],
                 onView: () => _navigateToPlanDetails(context, plans[index]),
+                onDelete: () => _showDeleteConfirmation(context, plans[index], aiTrainerProvider),
               );
             },
           );
@@ -968,6 +1053,37 @@ class AllPlansScreen extends StatelessWidget {
       MaterialPageRoute(
         builder: (_) => PlanDetailsScreen(plan: plan),
       ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, AIPlan plan, AITrainerProvider provider) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Plan'),
+          content: Text('Are you sure you want to delete "${plan.title}"? This cannot be undone.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Delete the plan
+                provider.deletePlan(plan.id);
+                
+                // Pop the dialog
+                Navigator.of(context).pop();
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -986,6 +1102,13 @@ class PlanDetailsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(plan.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete),
+            tooltip: 'Delete Plan',
+            onPressed: () => _showDeleteConfirmation(context),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -1096,7 +1219,57 @@ class PlanDetailsScreen extends StatelessWidget {
     );
   }
 
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Plan'),
+          content: Text('Are you sure you want to delete "${plan.title}"? This cannot be undone.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Get the provider and delete the plan
+                final provider = Provider.of<AITrainerProvider>(context, listen: false);
+                provider.deletePlan(plan.id);
+                
+                // Pop the dialog and then the details screen
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildDayCard(BuildContext context, PlanDay day, PlanType planType) {
+    // Calculate total daily macros if there are meals
+    double totalDailyCalories = 0;
+    double totalDailyProtein = 0;
+    double totalDailyCarbs = 0;
+    double totalDailyFat = 0;
+    
+    if (day.meals != null && day.meals!.isNotEmpty) {
+      for (var meal in day.meals!) {
+        if (meal is Meal) {
+          totalDailyCalories += meal.totalCalories;
+          totalDailyProtein += meal.totalProtein;
+          totalDailyCarbs += meal.totalCarbs;
+          totalDailyFat += meal.totalFat;
+        }
+      }
+    }
+    
     // Build the list of meal widgets separately with proper type checking
     List<Widget> mealWidgets = [];
     if (day.meals != null && day.meals!.isNotEmpty) {
@@ -1120,10 +1293,12 @@ class PlanDetailsScreen extends StatelessWidget {
           final mealName = mealMap['name']?.toString() ?? 'Meal';
           // Type needs to be parsed from the map now (it's a String from toJson)
           final mealType = mealMap['type']?.toString() ?? '';
-          final calories = (mealMap['totalCalories'] as num?)?.toDouble() ?? 0.0;
-          final protein = (mealMap['totalProtein'] as num?)?.toDouble() ?? 0.0;
-          final carbs = (mealMap['totalCarbs'] as num?)?.toDouble() ?? 0.0;
-          final fat = (mealMap['totalFat'] as num?)?.toDouble() ?? 0.0;
+          
+          // Calculate total calories and macros directly from the meal object
+          final calories = mealObj.totalCalories;
+          final protein = mealObj.totalProtein;
+          final carbs = mealObj.totalCarbs;
+          final fat = mealObj.totalFat;
 
           mealWidgets.add(
             ListTile(
@@ -1136,6 +1311,15 @@ class PlanDetailsScreen extends StatelessWidget {
               subtitle: Text(
                 '${calories.toInt()} kcal | P: ${protein.toInt()}g | C: ${carbs.toInt()}g | F: ${fat.toInt()}g',
               ),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MealDetailScreen(meal: mealObj),
+                  ),
+                );
+              },
             )
           );
         } else {
@@ -1185,6 +1369,42 @@ class PlanDetailsScreen extends StatelessWidget {
               ],
             ),
 
+            // Add daily macros summary if there are meals
+            if (day.meals != null && day.meals!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Card(
+                elevation: 0,
+                color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Daily Nutrition Totals',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onSecondaryContainer,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _buildMacroInfo(context, '${totalDailyCalories.toInt()}', 'kcal'),
+                          _buildMacroInfo(context, '${totalDailyProtein.toInt()}g', 'Protein'),
+                          _buildMacroInfo(context, '${totalDailyCarbs.toInt()}g', 'Carbs'),
+                          _buildMacroInfo(context, '${totalDailyFat.toInt()}g', 'Fat'),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
 
             const SizedBox(height: 16),
 
@@ -1223,6 +1443,27 @@ class PlanDetailsScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+  
+  // Helper method to build macro info widgets
+  Widget _buildMacroInfo(BuildContext context, String value, String label) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onSecondaryContainer,
+          ),
+        ),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSecondaryContainer,
+          ),
+        ),
+      ],
     );
   }
 

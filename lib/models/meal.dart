@@ -7,6 +7,8 @@ class Meal {
   final DateTime dateTime;
   final List<MealItem> items;
   final String? notes;
+  final List<String>? ingredients;
+  final String? cookingInstructions;
 
   Meal({
     required this.id,
@@ -15,6 +17,8 @@ class Meal {
     required this.dateTime,
     required this.items,
     this.notes,
+    this.ingredients,
+    this.cookingInstructions,
   });
 
   // Calculate total nutritional values
@@ -39,6 +43,8 @@ class Meal {
       'dateTime': dateTime.toIso8601String(),
       'items': items.map((item) => item.toJson()).toList(),
       'notes': notes,
+      'ingredients': ingredients,
+      'cookingInstructions': cookingInstructions,
     };
   }
 
@@ -55,6 +61,10 @@ class Meal {
           .map((itemJson) => MealItem.fromJson(itemJson))
           .toList(),
       notes: json['notes'],
+      ingredients: json['ingredients'] != null 
+          ? List<String>.from(json['ingredients']) 
+          : null,
+      cookingInstructions: json['cookingInstructions'],
     );
   }
 }

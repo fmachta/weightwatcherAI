@@ -32,7 +32,8 @@ dependencies:
   http: ^1.1.2
 
   # OpenAI Integration
-  dart_openai: ^5.0.0
+  # dart_openai: ^5.0.0  # Commenting out or removing the old one
+  google_generative_ai: ^0.4.7 # Add Gemini SDK (check for latest version if needed)
   flutter_dotenv: ^5.1.0
   firebase_core: ^2.32.0
 

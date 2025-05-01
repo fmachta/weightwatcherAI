@@ -20,7 +20,7 @@ A comprehensive Flutter fitness application that helps users track calories, wor
 
 - Flutter (latest stable version)
 - Dart SDK
-- An OpenAI API key (for AI features)
+- A Google Gemini API key (for AI features). You can obtain one from [Google AI Studio](https://aistudio.google.com/app/apikey).
 
 ### Installation
 
@@ -35,9 +35,10 @@ cd weightwatcherAI
 flutter pub get
 ```
 
-3. Create a `.env` file in the root directory and add your OpenAI API key:
+3. Create a `.env` file in the root directory (you can copy `.env_template`) and add your Google Gemini API key:
 ```
-OPENAI_API_KEY=your-api-key-here
+# .env
+GEMINI_API_KEY=your-google-api-key-here
 ```
 
 4. Run the application
@@ -49,7 +50,7 @@ flutter run
 
 - **Flutter**: UI framework
 - **Provider**: State management
-- **OpenAI API**: For AI-generated fitness plans and insights
+- **Google Gemini API**: For AI-generated fitness plans and insights (via `google_generative_ai` package)
 - **Shared Preferences**: Local data storage
 - **Material 3**: Modern UI design
 - **Charts**: Visualize fitness progress
@@ -79,4 +80,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Acknowledgments
 
 - Flutter team for the amazing framework
-- OpenAI for the powerful API
+- Google AI for the powerful Gemini API
