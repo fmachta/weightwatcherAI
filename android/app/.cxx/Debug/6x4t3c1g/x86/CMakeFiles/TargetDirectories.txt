@@ -1,0 +1,2 @@
+C:/Users/erick/AndroidStudioProjects/weightwatcherAI/android/app/.cxx/Debug/6x4t3c1g/x86/CMakeFiles/edit_cache.dir
+C:/Users/erick/AndroidStudioProjects/weightwatcherAI/android/app/.cxx/Debug/6x4t3c1g/x86/CMakeFiles/rebuild_cache.dir

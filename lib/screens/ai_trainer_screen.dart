@@ -8,7 +8,7 @@ import '../providers/ai_trainer_provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/nutrition_provider.dart';
 import '../providers/workout_provider.dart';
-import '../models/meal.dart'; // Keep if PlanDetailsScreen needs it, otherwise remove
+// Keep if PlanDetailsScreen needs it, otherwise remove
 import '../models/workout.dart'; // Keep if PlanDetailsScreen needs it, otherwise remove
 import '../models/exercise.dart'; // Keep if PlanDetailsScreen needs it, otherwise remove
 import 'login_screen.dart'; // Import LoginScreen
@@ -50,8 +50,10 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
           setState(() {
             _aiInsight = 'Log in to get personalized AI insights and plans.';
             // Load generic questions for non-logged in users
-            final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
-            _suggestedQuestions = aiTrainerProvider.getRandomSuggestedQuestions();
+            final aiTrainerProvider =
+                Provider.of<AITrainerProvider>(context, listen: false);
+            _suggestedQuestions =
+                aiTrainerProvider.getRandomSuggestedQuestions();
           });
         }
       }
@@ -62,12 +64,14 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
   void _loadSuggestedQuestions() {
     if (!mounted) return;
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
-    
+    final aiTrainerProvider =
+        Provider.of<AITrainerProvider>(context, listen: false);
+
     if (userProvider.isLoggedIn && userProvider.userProfile != null) {
       // Get personalized questions for logged-in user
       setState(() {
-        _suggestedQuestions = aiTrainerProvider.getSuggestedQuestionsForUser(userProvider.userProfile!);
+        _suggestedQuestions = aiTrainerProvider
+            .getSuggestedQuestionsForUser(userProvider.userProfile!);
       });
     } else {
       // Get random questions for non-logged in users
@@ -89,7 +93,7 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
     // Use mounted check before navigation/snackbar
     if (!mounted) return;
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => LoginScreen()),
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Please log in to use AI features.')),
@@ -109,30 +113,42 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
     }
 
     // Proceed only if logged in
-    final nutritionProvider = Provider.of<NutritionProvider>(context, listen: false);
-    final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
-    final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
+    final nutritionProvider =
+        Provider.of<NutritionProvider>(context, listen: false);
+    final workoutProvider =
+        Provider.of<WorkoutProvider>(context, listen: false);
+    final aiTrainerProvider =
+        Provider.of<AITrainerProvider>(context, listen: false);
 
-    assert(userProvider.userProfile != null, 'UserProfile is null despite being logged in.');
+    assert(userProvider.userProfile != null,
+        'UserProfile is null despite being logged in.');
     if (userProvider.userProfile == null) return; // Added safety check
 
     if (mounted) {
-      setState(() { _isAnalyzing = true; });
+      setState(() {
+        _isAnalyzing = true;
+      });
     }
 
     try {
       final recentWorkouts = workoutProvider.workouts;
       final recentMeals = nutritionProvider.meals;
       final insight = await aiTrainerProvider.getAIInsight(
-        userProvider.userProfile!, recentWorkouts, recentMeals,
+        userProvider.userProfile!,
+        recentWorkouts,
+        recentMeals,
       );
       if (mounted) {
-        setState(() { _aiInsight = insight; _isAnalyzing = false; });
+        setState(() {
+          _aiInsight = insight;
+          _isAnalyzing = false;
+        });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _aiInsight = 'Based on your recent activity, consider focusing on consistency and recovery to reach your fitness goals.';
+          _aiInsight =
+              'Based on your recent activity, consider focusing on consistency and recovery to reach your fitness goals.';
           _isAnalyzing = false;
         });
       }
@@ -167,19 +183,24 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
       });
     }
 
-    final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
-    assert(userProvider.userProfile != null, 'UserProfile is null despite being logged in.');
-     if (userProvider.userProfile == null) { // Added safety check
-       if (mounted) {
-         setState(() { _isAskingQuestion = false; });
-       }
-       return;
-     }
-
+    final aiTrainerProvider =
+        Provider.of<AITrainerProvider>(context, listen: false);
+    assert(userProvider.userProfile != null,
+        'UserProfile is null despite being logged in.');
+    if (userProvider.userProfile == null) {
+      // Added safety check
+      if (mounted) {
+        setState(() {
+          _isAskingQuestion = false;
+        });
+      }
+      return;
+    }
 
     try {
       final answer = await aiTrainerProvider.answerQuestion(
-        question, userProvider.userProfile!,
+        question,
+        userProvider.userProfile!,
       );
       if (mounted) {
         setState(() {
@@ -191,7 +212,8 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
       if (mounted) {
         setState(() {
           _chatMessages.add({
-            'message': 'I apologize, but I\'m having trouble processing your question at the moment. Please try again later.',
+            'message':
+                'I apologize, but I\'m having trouble processing your question at the moment. Please try again later.',
             'isUser': false,
           });
           _isAskingQuestion = false;
@@ -201,14 +223,15 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
     _questionController.clear();
   }
 
-  Future<void> _generateWorkoutPlan(BuildContext context, UserProfile userProfile) async {
+  Future<void> _generateWorkoutPlan(
+      BuildContext context, UserProfile userProfile) async {
     if (!mounted) return;
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     if (!userProvider.isLoggedIn) {
       _promptLogin(context);
       return;
     }
-    
+
     // Navigate to workout preferences screen instead of immediately generating
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -217,7 +240,7 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
           onComplete: (preferenceData) async {
             // First, close the preferences screen to return to the AI trainer screen
             Navigator.of(context).pop();
-            
+
             // Then show loading dialog
             showDialog(
               context: context,
@@ -234,17 +257,24 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
                 ),
               ),
             );
-            
-            final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
+
+            final aiTrainerProvider =
+                Provider.of<AITrainerProvider>(context, listen: false);
             try {
-              await aiTrainerProvider.generateWorkoutPlan(userProfile, preferenceData);
-              if (mounted) Navigator.of(context, rootNavigator: true).pop(); // Close dialog
+              await aiTrainerProvider.generateWorkoutPlan(
+                  userProfile, preferenceData);
+              if (mounted) {
+                Navigator.of(context, rootNavigator: true)
+                    .pop(); // Close dialog
+              }
             } catch (e) {
               if (mounted) {
-                Navigator.of(context, rootNavigator: true).pop(); // Close dialog
+                Navigator.of(context, rootNavigator: true)
+                    .pop(); // Close dialog
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Failed to generate workout plan. Please try again.'),
+                    content: Text(
+                        'Failed to generate workout plan. Please try again.'),
                   ),
                 );
               }
@@ -255,14 +285,15 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
     );
   }
 
-  Future<void> _generateMealPlan(BuildContext context, UserProfile userProfile) async {
+  Future<void> _generateMealPlan(
+      BuildContext context, UserProfile userProfile) async {
     if (!mounted) return;
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     if (!userProvider.isLoggedIn) {
       _promptLogin(context);
       return;
     }
-    
+
     // Navigate to meal plan preferences screen instead of immediately generating
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -271,7 +302,7 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
           onComplete: (preferenceData) async {
             // First, close the preferences screen to return to the AI trainer screen
             Navigator.of(context).pop();
-            
+
             // Then show loading dialog
             showDialog(
               context: context,
@@ -288,17 +319,24 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
                 ),
               ),
             );
-            
-            final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
+
+            final aiTrainerProvider =
+                Provider.of<AITrainerProvider>(context, listen: false);
             try {
-              await aiTrainerProvider.generateMealPlan(userProfile, preferenceData);
-              if (mounted) Navigator.of(context, rootNavigator: true).pop(); // Close dialog
+              await aiTrainerProvider.generateMealPlan(
+                  userProfile, preferenceData);
+              if (mounted) {
+                Navigator.of(context, rootNavigator: true)
+                    .pop(); // Close dialog
+              }
             } catch (e) {
               if (mounted) {
-                Navigator.of(context, rootNavigator: true).pop(); // Close dialog
+                Navigator.of(context, rootNavigator: true)
+                    .pop(); // Close dialog
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Failed to generate meal plan. Please try again.'),
+                    content:
+                        Text('Failed to generate meal plan. Please try again.'),
                   ),
                 );
               }
@@ -327,7 +365,8 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
     );
   }
 
-  Widget _buildGeneratePlanButtons(BuildContext context, UserProfile? userProfile) {
+  Widget _buildGeneratePlanButtons(
+      BuildContext context, UserProfile? userProfile) {
     // This check is technically redundant now due to the main build check, but safe to keep.
     if (userProfile == null) {
       return const Center(
@@ -387,7 +426,10 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
                   const SizedBox(height: 24),
                   Text(
                     'AI Features Locked',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall
+                        ?.copyWith(fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
@@ -401,7 +443,8 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
                     onPressed: () => _promptLogin(context),
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(200, 50),
-                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 30, vertical: 15),
                     ),
                     child: const Text('Login / Sign Up'),
                   ),
@@ -412,10 +455,13 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
         }
 
         // --- Logged-in View ---
-        assert(userProfile != null, 'UserProfile is null despite being logged in.');
+        assert(userProfile != null,
+            'UserProfile is null despite being logged in.');
         if (userProfile == null) {
           // Fallback in case assertion fails in production or data loading issue
-          return const Center(child: Text('Error: User profile not loaded. Please restart the app.'));
+          return const Center(
+              child: Text(
+                  'Error: User profile not loaded. Please restart the app.'));
         }
 
         // Main content for logged-in users
@@ -434,27 +480,24 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
                 Text(
                   'AI Trainer',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Your personalized fitness assistant',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
                 const SizedBox(height: 24),
-
                 AIInsightCard(
                   isAnalyzing: _isAnalyzing,
                   onAnalyze: _analyzeUserData,
                   userProfile: userProfile,
                   insightText: _aiInsight,
                 ),
-
                 const SizedBox(height: 24),
-
                 Container(
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surface,
@@ -470,9 +513,12 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
                         children: [
                           Text(
                             'Your Plans',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                           if (plans.isNotEmpty)
                             TextButton.icon(
@@ -483,20 +529,19 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
                         ],
                       ),
                       const SizedBox(height: 16),
-
                       if (isLoading)
                         const Center(child: CircularProgressIndicator())
                       else if (currentPlan != null)
                         PlanCard(
                           plan: currentPlan,
-                          onView: () => _navigateToPlanDetails(context, currentPlan),
-                          onDelete: () => _showDeleteConfirmation(context, currentPlan),
+                          onView: () =>
+                              _navigateToPlanDetails(context, currentPlan),
+                          onDelete: () =>
+                              _showDeleteConfirmation(context, currentPlan),
                         )
                       else
                         _buildGeneratePlanButtons(context, userProfile),
-
                       const SizedBox(height: 24),
-
                       AskAICard(
                         controller: _questionController,
                         onAsk: _askQuestion,
@@ -525,7 +570,8 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Delete Plan'),
-          content: Text('Are you sure you want to delete "${plan.title}"? This cannot be undone.'),
+          content: Text(
+              'Are you sure you want to delete "${plan.title}"? This cannot be undone.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -534,9 +580,10 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
             TextButton(
               onPressed: () {
                 // Get the provider and delete the plan
-                final provider = Provider.of<AITrainerProvider>(context, listen: false);
+                final provider =
+                    Provider.of<AITrainerProvider>(context, listen: false);
                 provider.deletePlan(plan.id);
-                
+
                 // Pop the dialog
                 Navigator.of(context).pop();
               },
@@ -615,32 +662,36 @@ class AIInsightCard extends StatelessWidget {
                 Text(
                   'AI Insight',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onTertiaryContainer,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color:
+                            Theme.of(context).colorScheme.onTertiaryContainer,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             isAnalyzing
                 ? Column(
-              children: [
-                const CircularProgressIndicator(),
-                const SizedBox(height: 16),
-                Text(
-                  'Analyzing your data...',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onTertiaryContainer,
-                  ),
-                ),
-              ],
-            )
+                    children: [
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Analyzing your data...',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onTertiaryContainer,
+                            ),
+                      ),
+                    ],
+                  )
                 : Text(
-              displayInsight,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onTertiaryContainer,
-              ),
-            ),
+                    displayInsight,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color:
+                              Theme.of(context).colorScheme.onTertiaryContainer,
+                        ),
+                  ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: isAnalyzing ? null : onAnalyze,
@@ -695,8 +746,8 @@ class PlanCard extends StatelessWidget {
                     plan.type == PlanType.workout
                         ? Icons.fitness_center
                         : plan.type == PlanType.nutrition
-                        ? Icons.restaurant_menu
-                        : Icons.insights,
+                            ? Icons.restaurant_menu
+                            : Icons.insights,
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
                   ),
                 ),
@@ -707,17 +758,20 @@ class PlanCard extends StatelessWidget {
                     children: [
                       Text(
                         plan.title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                       Text(
                         plan.type == PlanType.workout
                             ? '${plan.durationInWeeks}-week workout plan'
                             : '${plan.durationInWeeks}-week meal plan',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
                       ),
                     ],
                   ),
@@ -734,7 +788,8 @@ class PlanCard extends StatelessWidget {
             const SizedBox(height: 8),
             LinearProgressIndicator(
               value: _calculateProgress(plan),
-              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              backgroundColor:
+                  Theme.of(context).colorScheme.surfaceContainerHighest,
               valueColor: AlwaysStoppedAnimation<Color>(
                 Theme.of(context).colorScheme.primary,
               ),
@@ -764,10 +819,10 @@ class PlanCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: onDelete,
-                  child: const Text('Delete'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.error,
                   ),
+                  child: const Text('Delete'),
                 ),
               ],
             ),
@@ -845,8 +900,8 @@ class AskAICard extends StatelessWidget {
                 Text(
                   'Ask AI Trainer',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),
@@ -855,10 +910,12 @@ class AskAICard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: Column(
-                  children: chatMessages.map((msg) => ChatMessage(
-                    text: msg['message'].toString(),
-                    isUser: msg['isUser'] as bool,
-                  )).toList(),
+                  children: chatMessages
+                      .map((msg) => ChatMessage(
+                            text: msg['message'].toString(),
+                            isUser: msg['isUser'] as bool,
+                          ))
+                      .toList(),
                 ),
               ),
             ],
@@ -872,7 +929,8 @@ class AskAICard extends StatelessWidget {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                     ),
                     onSubmitted: (_) => onAsk(),
                   ),
@@ -882,10 +940,10 @@ class AskAICard extends StatelessWidget {
                   onPressed: isLoading ? null : onAsk,
                   icon: isLoading
                       ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : const Icon(Icons.send),
                   style: IconButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.primary,
@@ -898,12 +956,12 @@ class AskAICard extends StatelessWidget {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: suggestedQuestions.map((suggestion) => 
-                _SuggestionChip(
-                  label: suggestion,
-                  onTap: () => onSuggestionTap(suggestion),
-                )
-              ).toList(),
+              children: suggestedQuestions
+                  .map((suggestion) => _SuggestionChip(
+                        label: suggestion,
+                        onTap: () => onSuggestionTap(suggestion),
+                      ))
+                  .toList(),
             ),
           ],
         ),
@@ -927,7 +985,8 @@ class ChatMessage extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
-        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           if (!isUser)
             CircleAvatar(
@@ -939,7 +998,8 @@ class ChatMessage extends StatelessWidget {
                 color: Colors.white,
               ),
             ),
-          if (!isUser) const SizedBox(width: 8), // Add space only for AI messages
+          if (!isUser)
+            const SizedBox(width: 8), // Add space only for AI messages
           Flexible(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -959,7 +1019,8 @@ class ChatMessage extends StatelessWidget {
               ),
             ),
           ),
-          if (isUser) const SizedBox(width: 8), // Add space only for user messages
+          if (isUser)
+            const SizedBox(width: 8), // Add space only for user messages
           if (isUser)
             CircleAvatar(
               backgroundColor: Theme.of(context).colorScheme.tertiary,
@@ -993,15 +1054,19 @@ class _SuggestionChip extends StatelessWidget {
         label: Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
         ),
         backgroundColor: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant) // Add subtle border
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Adjust padding
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+                color: Theme.of(context)
+                    .colorScheme
+                    .outlineVariant) // Add subtle border
+            ),
+        padding: const EdgeInsets.symmetric(
+            horizontal: 8, vertical: 4), // Adjust padding
       ),
     );
   }
@@ -1039,7 +1104,8 @@ class AllPlansScreen extends StatelessWidget {
               return PlanCard(
                 plan: plans[index],
                 onView: () => _navigateToPlanDetails(context, plans[index]),
-                onDelete: () => _showDeleteConfirmation(context, plans[index], aiTrainerProvider),
+                onDelete: () => _showDeleteConfirmation(
+                    context, plans[index], aiTrainerProvider),
               );
             },
           );
@@ -1056,13 +1122,15 @@ class AllPlansScreen extends StatelessWidget {
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context, AIPlan plan, AITrainerProvider provider) {
+  void _showDeleteConfirmation(
+      BuildContext context, AIPlan plan, AITrainerProvider provider) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Delete Plan'),
-          content: Text('Are you sure you want to delete "${plan.title}"? This cannot be undone.'),
+          content: Text(
+              'Are you sure you want to delete "${plan.title}"? This cannot be undone.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -1072,7 +1140,7 @@ class AllPlansScreen extends StatelessWidget {
               onPressed: () {
                 // Delete the plan
                 provider.deletePlan(plan.id);
-                
+
                 // Pop the dialog
                 Navigator.of(context).pop();
               },
@@ -1137,8 +1205,8 @@ class PlanDetailsScreen extends StatelessWidget {
                           plan.type == PlanType.workout
                               ? Icons.fitness_center
                               : plan.type == PlanType.nutrition
-                              ? Icons.restaurant_menu
-                              : Icons.insights,
+                                  ? Icons.restaurant_menu
+                                  : Icons.insights,
                           color: Theme.of(context).colorScheme.onPrimary,
                         ),
                       ),
@@ -1149,16 +1217,26 @@ class PlanDetailsScreen extends StatelessWidget {
                           children: [
                             Text(
                               plan.title,
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onPrimaryContainer,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer,
+                                  ),
                             ),
                             Text(
                               '${plan.durationInWeeks}-week plan',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.onPrimaryContainer,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer,
+                                  ),
                             ),
                           ],
                         ),
@@ -1169,8 +1247,9 @@ class PlanDetailsScreen extends StatelessWidget {
                   Text(
                     plan.description,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    ),
+                          color:
+                              Theme.of(context).colorScheme.onPrimaryContainer,
+                        ),
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -1179,9 +1258,12 @@ class PlanDetailsScreen extends StatelessWidget {
                       Expanded(
                         child: Text(
                           'Start: ${DateFormat('MMM d, yyyy').format(plan.startDate)}',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer,
+                                  ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -1189,9 +1271,12 @@ class PlanDetailsScreen extends StatelessWidget {
                       Expanded(
                         child: Text(
                           'End: ${DateFormat('MMM d, yyyy').format(plan.endDate)}',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer,
+                                  ),
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.end,
                         ),
@@ -1208,8 +1293,8 @@ class PlanDetailsScreen extends StatelessWidget {
           Text(
             'Daily Plan',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
 
@@ -1225,7 +1310,8 @@ class PlanDetailsScreen extends StatelessWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Delete Plan'),
-          content: Text('Are you sure you want to delete "${plan.title}"? This cannot be undone.'),
+          content: Text(
+              'Are you sure you want to delete "${plan.title}"? This cannot be undone.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -1234,9 +1320,10 @@ class PlanDetailsScreen extends StatelessWidget {
             TextButton(
               onPressed: () {
                 // Get the provider and delete the plan
-                final provider = Provider.of<AITrainerProvider>(context, listen: false);
+                final provider =
+                    Provider.of<AITrainerProvider>(context, listen: false);
                 provider.deletePlan(plan.id);
-                
+
                 // Pop the dialog and then the details screen
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
@@ -1258,79 +1345,66 @@ class PlanDetailsScreen extends StatelessWidget {
     double totalDailyProtein = 0;
     double totalDailyCarbs = 0;
     double totalDailyFat = 0;
-    
+
     if (day.meals != null && day.meals!.isNotEmpty) {
       for (var meal in day.meals!) {
-        if (meal is Meal) {
-          totalDailyCalories += meal.totalCalories;
-          totalDailyProtein += meal.totalProtein;
-          totalDailyCarbs += meal.totalCarbs;
-          totalDailyFat += meal.totalFat;
-        }
+        totalDailyCalories += meal.totalCalories;
+        totalDailyProtein += meal.totalProtein;
+        totalDailyCarbs += meal.totalCarbs;
+        totalDailyFat += meal.totalFat;
       }
     }
-    
+
     // Build the list of meal widgets separately with proper type checking
     List<Widget> mealWidgets = [];
     if (day.meals != null && day.meals!.isNotEmpty) {
-      mealWidgets.add(
-        Padding(
-          padding: EdgeInsets.only(top: (day.notes != null || day.workout != null) ? 16.0 : 0.0),
-          child: Text(
-            'Meals',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        )
-      );
+      mealWidgets.add(Padding(
+        padding: EdgeInsets.only(
+            top: (day.notes != null || day.workout != null) ? 16.0 : 0.0),
+        child: Text(
+          'Meals',
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+      ));
       mealWidgets.add(const SizedBox(height: 8));
 
       for (var mealObj in day.meals!) {
         // Assuming mealObj is actually a Meal object based on the build error
-        if (mealObj is Meal) {
-          final Map<String, dynamic> mealMap = mealObj.toJson(); // Call toJson()
-          final mealName = mealMap['name']?.toString() ?? 'Meal';
-          // Type needs to be parsed from the map now (it's a String from toJson)
-          final mealType = mealMap['type']?.toString() ?? '';
-          
-          // Calculate total calories and macros directly from the meal object
-          final calories = mealObj.totalCalories;
-          final protein = mealObj.totalProtein;
-          final carbs = mealObj.totalCarbs;
-          final fat = mealObj.totalFat;
+        final Map<String, dynamic> mealMap = mealObj.toJson(); // Call toJson()
+        final mealName = mealMap['name']?.toString() ?? 'Meal';
+        // Type needs to be parsed from the map now (it's a String from toJson)
+        final mealType = mealMap['type']?.toString() ?? '';
 
-          mealWidgets.add(
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(
-                _getMealIcon(mealType),
-                color: Theme.of(context).colorScheme.primary,
+        // Calculate total calories and macros directly from the meal object
+        final calories = mealObj.totalCalories;
+        final protein = mealObj.totalProtein;
+        final carbs = mealObj.totalCarbs;
+        final fat = mealObj.totalFat;
+
+        mealWidgets.add(ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: Icon(
+            _getMealIcon(mealType),
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          title: Text(mealName),
+          subtitle: Text(
+            '${calories.toInt()} kcal | P: ${protein.toInt()}g | C: ${carbs.toInt()}g | F: ${fat.toInt()}g',
+          ),
+          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MealDetailScreen(meal: mealObj),
               ),
-              title: Text(mealName),
-              subtitle: Text(
-                '${calories.toInt()} kcal | P: ${protein.toInt()}g | C: ${carbs.toInt()}g | F: ${fat.toInt()}g',
-              ),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MealDetailScreen(meal: mealObj),
-                  ),
-                );
-              },
-            )
-          );
-        } else {
-          // Log error or handle unexpected type
-          print('Error: Unexpected meal object type in PlanDetailsScreen: ${mealObj.runtimeType}');
-          // Optionally add a placeholder widget for the error case
-          // mealWidgets.add(const Text('Error loading meal data'));
-        }
+            );
+          },
+        ));
       }
     }
-
 
     return Card(
       elevation: 0,
@@ -1349,14 +1423,15 @@ class PlanDetailsScreen extends StatelessWidget {
                 Text(
                   'Day ${day.dayNumber}',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 _buildDayTypeChip(
                   context,
-                      () {
+                  () {
                     if (planType == PlanType.workout) {
-                      return (day.workout == null || day.workout!.type == WorkoutType.rest)
+                      return (day.workout == null ||
+                              day.workout!.type == WorkoutType.rest)
                           ? 'Rest'
                           : 'Workout';
                     } else if (planType == PlanType.nutrition) {
@@ -1374,7 +1449,10 @@ class PlanDetailsScreen extends StatelessWidget {
               const SizedBox(height: 12),
               Card(
                 elevation: 0,
-                color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5),
+                color: Theme.of(context)
+                    .colorScheme
+                    .secondaryContainer
+                    .withOpacity(0.5),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -1386,18 +1464,24 @@ class PlanDetailsScreen extends StatelessWidget {
                       Text(
                         'Daily Nutrition Totals',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onSecondaryContainer,
-                        ),
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSecondaryContainer,
+                            ),
                       ),
                       const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          _buildMacroInfo(context, '${totalDailyCalories.toInt()}', 'kcal'),
-                          _buildMacroInfo(context, '${totalDailyProtein.toInt()}g', 'Protein'),
-                          _buildMacroInfo(context, '${totalDailyCarbs.toInt()}g', 'Carbs'),
-                          _buildMacroInfo(context, '${totalDailyFat.toInt()}g', 'Fat'),
+                          _buildMacroInfo(
+                              context, '${totalDailyCalories.toInt()}', 'kcal'),
+                          _buildMacroInfo(context,
+                              '${totalDailyProtein.toInt()}g', 'Protein'),
+                          _buildMacroInfo(
+                              context, '${totalDailyCarbs.toInt()}g', 'Carbs'),
+                          _buildMacroInfo(
+                              context, '${totalDailyFat.toInt()}g', 'Fat'),
                         ],
                       ),
                     ],
@@ -1408,44 +1492,43 @@ class PlanDetailsScreen extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            if (day.notes != null) Text(day.notes!),
+            Text(day.notes),
 
             if (day.workout != null) ...[
-              if (day.notes != null) const SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 'Workout: ${day.workout!.name}',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 8),
               ...day.workout!.exercises.map((exercise) => Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: Row(
-                  children: [
-                    const Icon(Icons.circle, size: 8),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _formatExerciseDetails(exercise),
-                        maxLines: 2, // Allow wrapping
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.circle, size: 8),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _formatExerciseDetails(exercise),
+                            maxLines: 2, // Allow wrapping
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              )),
+                  )),
             ],
 
             // Spread the pre-built meal widgets here
             ...mealWidgets,
-
           ],
         ),
       ),
     );
   }
-  
+
   // Helper method to build macro info widgets
   Widget _buildMacroInfo(BuildContext context, String value, String label) {
     return Column(
@@ -1453,15 +1536,15 @@ class PlanDetailsScreen extends StatelessWidget {
         Text(
           value,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSecondaryContainer,
-          ),
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSecondaryContainer,
+              ),
         ),
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSecondaryContainer,
-          ),
+                color: Theme.of(context).colorScheme.onSecondaryContainer,
+              ),
         ),
       ],
     );
@@ -1470,21 +1553,21 @@ class PlanDetailsScreen extends StatelessWidget {
   String _formatExerciseDetails(Exercise exercise) {
     if (exercise.sets != null && exercise.sets!.isNotEmpty) {
       final firstSet = exercise.sets!.first;
-      final weightString = firstSet.weight != null ? ' (${firstSet.weight}kg)' : '';
+      final weightString =
+          firstSet.weight != null ? ' (${firstSet.weight}kg)' : '';
       return '${exercise.name}: ${exercise.sets!.length} × ${firstSet.reps}$weightString';
     } else if (exercise.duration != null) {
-       return '${exercise.name}: ${exercise.duration!.inMinutes} min';
+      return '${exercise.name}: ${exercise.duration!.inMinutes} min';
     }
     return exercise.name;
   }
 
   IconData _getMealIcon(String mealType) {
-     if (mealType.toLowerCase().contains('breakfast')) return Icons.wb_sunny;
-     if (mealType.toLowerCase().contains('lunch')) return Icons.wb_twilight;
-     if (mealType.toLowerCase().contains('dinner')) return Icons.nights_stay;
-     return Icons.fastfood; // Default for snacks or other
+    if (mealType.toLowerCase().contains('breakfast')) return Icons.wb_sunny;
+    if (mealType.toLowerCase().contains('lunch')) return Icons.wb_twilight;
+    if (mealType.toLowerCase().contains('dinner')) return Icons.nights_stay;
+    return Icons.fastfood; // Default for snacks or other
   }
-
 
   Widget _buildDayTypeChip(BuildContext context, String label) {
     return Container(
@@ -1496,8 +1579,8 @@ class PlanDetailsScreen extends StatelessWidget {
       child: Text(
         label,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSecondaryContainer,
-        ),
+              color: Theme.of(context).colorScheme.onSecondaryContainer,
+            ),
       ),
     );
   }

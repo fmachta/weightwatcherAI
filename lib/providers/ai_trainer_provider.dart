@@ -2,8 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import '../models/ai_plan.dart';
 import '../models/user_profile.dart';
-import '../models/meal.dart';
-import '../models/workout.dart';
 import '../services/gemini_service.dart';
 import '../repositories/ai_plan_repository.dart';
 
@@ -48,24 +46,29 @@ class AITrainerProvider with ChangeNotifier {
   List<String> getRandomSuggestedQuestions({int count = 3}) {
     return _aiService.getRandomSuggestedQuestions(count: count);
   }
-  
+
   // Get personalized questions based on user profile (forwards to GeminiService)
-  List<String> getSuggestedQuestionsForUser(UserProfile userProfile, {int count = 3}) {
+  List<String> getSuggestedQuestionsForUser(UserProfile userProfile,
+      {int count = 3}) {
     return _aiService.getSuggestedQuestionsForUser(userProfile, count: count);
   }
 
-  Future<void> fetchAIInsight(UserProfile user, List recentWorkouts, List recentMeals) async {
-    _aiInsight = await _aiService.getAIInsight(user, recentWorkouts, recentMeals);
+  Future<void> fetchAIInsight(
+      UserProfile user, List recentWorkouts, List recentMeals) async {
+    _aiInsight =
+        await _aiService.getAIInsight(user, recentWorkouts, recentMeals);
     notifyListeners();
   }
 
-  Future<AIPlan> generateWorkoutPlan(UserProfile userProfile, [Map<String, dynamic>? preferenceData]) async {
+  Future<AIPlan> generateWorkoutPlan(UserProfile userProfile,
+      [Map<String, dynamic>? preferenceData]) async {
     _isLoading = true;
     notifyListeners();
 
     final id = _uuid.v4();
 
-    final plan = await _aiService.generateWorkoutPlan(userProfile, preferenceData);
+    final plan =
+        await _aiService.generateWorkoutPlan(userProfile, preferenceData);
 
     /*final plan = AIPlan(
       id: id,
@@ -88,7 +91,8 @@ class AITrainerProvider with ChangeNotifier {
     return plan;
   }
 
-  Future<AIPlan> generateMealPlan(UserProfile userProfile, [Map<String, dynamic>? preferenceData]) async {
+  Future<AIPlan> generateMealPlan(UserProfile userProfile,
+      [Map<String, dynamic>? preferenceData]) async {
     _isLoading = true;
     notifyListeners();
 
@@ -118,17 +122,18 @@ class AITrainerProvider with ChangeNotifier {
   }
 
   Future<String> getAIInsight(
-      UserProfile userProfile,
-      List<dynamic> recentWorkouts,
-      List<dynamic> recentMeals,
-      ) async {
-    return await _aiService.getAIInsight(userProfile, recentWorkouts, recentMeals);
+    UserProfile userProfile,
+    List<dynamic> recentWorkouts,
+    List<dynamic> recentMeals,
+  ) async {
+    return await _aiService.getAIInsight(
+        userProfile, recentWorkouts, recentMeals);
   }
 
   Future<String> answerQuestion(
-      String question,
-      UserProfile userProfile,
-      ) async {
+    String question,
+    UserProfile userProfile,
+  ) async {
     return await _aiService.answerQuestion(question, userProfile);
   }
 

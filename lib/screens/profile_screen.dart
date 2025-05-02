@@ -1,7 +1,6 @@
 // screens/profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../models/user_profile.dart';
@@ -18,14 +17,14 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-
   Future<void> _logout() async {
     try {
       await FirebaseAuth.instance.signOut();
       // Navigate back to the AuthGate which handles the initial screen logic
       // pushAndRemoveUntil removes all previous routes
       Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const AuthGate()), // Navigate to AuthGate
+        MaterialPageRoute(
+            builder: (context) => const AuthGate()), // Navigate to AuthGate
         (Route<dynamic> route) => false,
       );
     } catch (e) {
@@ -40,7 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // Helper function to navigate to LoginScreen
   void _navigateToLogin(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => LoginScreen()),
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
   }
 
@@ -67,7 +66,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 24),
                   Text(
                     'Login Required',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall
+                        ?.copyWith(fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
@@ -81,7 +83,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onPressed: () => _navigateToLogin(context),
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(200, 50),
-                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 30, vertical: 15),
                     ),
                     child: const Text('Login / Sign Up'),
                   ),
@@ -94,12 +97,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         // --- Logged-in View ---
         // At this point, isLoggedIn is true, so userProfile should not be null.
         // Add an assertion for safety, though AuthGate logic should prevent this.
-        assert(userProfile != null, 'UserProfile is null despite being logged in.');
+        assert(userProfile != null,
+            'UserProfile is null despite being logged in.');
         if (userProfile == null) {
-           // Fallback in case assertion fails in production
-           return const Center(child: Text('Error: User profile not loaded.'));
+          // Fallback in case assertion fails in production
+          return const Center(child: Text('Error: User profile not loaded.'));
         }
-
 
         return SafeArea(
           child: SingleChildScrollView(
@@ -110,15 +113,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Text(
                   'Profile',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Manage your profile and preferences',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
                 const SizedBox(height: 24),
 
@@ -134,8 +137,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Text(
                         'Current Measurements',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                              fontWeight: FontWeight.bold,
+                            ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -154,7 +157,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Expanded(
                       child: _MeasurementCard(
                         title: 'Weight',
-                        value: '${userProfile.currentWeight.toStringAsFixed(1)} kg',
+                        value:
+                            '${userProfile.currentWeight.toStringAsFixed(1)} kg',
                         icon: Icons.monitor_weight,
                       ),
                     ),
@@ -183,8 +187,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Text(
                   'Settings',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 16),
 
@@ -200,7 +204,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   icon: Icons.restaurant_menu,
                   title: 'Nutritional Preferences',
                   subtitle: 'Macros, dietary restrictions, etc.',
-                  onTap: () => _showNutritionPreferencesSheet(context, userProfile),
+                  onTap: () =>
+                      _showNutritionPreferencesSheet(context, userProfile),
                 ),
                 const SizedBox(height: 8),
                 _SettingsCard(
@@ -228,7 +233,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 // Edit profile button (Only shown when logged in)
                 ElevatedButton(
-                  onPressed: () => _showEditProfileSheet(context, userProfile), // No need for null check here due to earlier check
+                  onPressed: () => _showEditProfileSheet(context,
+                      userProfile), // No need for null check here due to earlier check
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 50),
                   ),
@@ -266,7 +272,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _showNutritionPreferencesSheet(BuildContext context, UserProfile userProfile) {
+  void _showNutritionPreferencesSheet(
+      BuildContext context, UserProfile userProfile) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -298,10 +305,12 @@ class _ProfileCard extends StatelessWidget {
               radius: 40,
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
               child: Text(
-                userProfile.name.isNotEmpty ? userProfile.name[0].toUpperCase() : '?',
+                userProfile.name.isNotEmpty
+                    ? userProfile.name[0].toUpperCase()
+                    : '?',
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
               ),
             ),
             const SizedBox(width: 16),
@@ -314,14 +323,14 @@ class _ProfileCard extends StatelessWidget {
                   Text(
                     userProfile.name,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   Text(
                     userProfile.email,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                   ),
                   const SizedBox(height: 8),
                   SingleChildScrollView(
@@ -385,15 +394,15 @@ class _MeasurementCard extends StatelessWidget {
             Text(
               title,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
             const SizedBox(height: 4),
             Text(
               value,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ],
         ),
@@ -448,14 +457,15 @@ class _SettingsCard extends StatelessWidget {
                     Text(
                       title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                     ),
                   ],
                 ),
@@ -502,8 +512,8 @@ class _ProfileInfoChip extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
         ],
       ),
@@ -554,8 +564,8 @@ class _AddMeasurementSheetState extends State<AddMeasurementSheet> {
                 Text(
                   'Add Measurement',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
@@ -572,7 +582,8 @@ class _AddMeasurementSheetState extends State<AddMeasurementSheet> {
                 labelText: 'Weight (kg)',
                 border: OutlineInputBorder(),
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your weight';
@@ -589,7 +600,8 @@ class _AddMeasurementSheetState extends State<AddMeasurementSheet> {
                 labelText: 'Body Fat (%)',
                 border: OutlineInputBorder(),
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
             ),
             const SizedBox(height: 16),
 
@@ -600,7 +612,8 @@ class _AddMeasurementSheetState extends State<AddMeasurementSheet> {
                 labelText: 'Muscle Mass (%)',
                 border: OutlineInputBorder(),
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
             ),
             const SizedBox(height: 24),
 
@@ -689,8 +702,10 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
     super.initState();
     _nameController = TextEditingController(text: widget.userProfile.name);
     _emailController = TextEditingController(text: widget.userProfile.email);
-    _heightController = TextEditingController(text: widget.userProfile.height.toString());
-    _ageController = TextEditingController(text: widget.userProfile.age.toString());
+    _heightController =
+        TextEditingController(text: widget.userProfile.height.toString());
+    _ageController =
+        TextEditingController(text: widget.userProfile.age.toString());
     _gender = widget.userProfile.gender;
   }
 
@@ -723,8 +738,8 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                 Text(
                   'Edit Profile',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
@@ -776,7 +791,8 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                 labelText: 'Height (cm)',
                 border: OutlineInputBorder(),
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your height';
@@ -900,7 +916,8 @@ class _EditGoalsSheetState extends State<EditGoalsSheet> {
   @override
   void initState() {
     super.initState();
-    _targetWeightController = TextEditingController(text: widget.userProfile.targetWeight.toString());
+    _targetWeightController =
+        TextEditingController(text: widget.userProfile.targetWeight.toString());
     _activityLevel = widget.userProfile.activityLevel;
     _fitnessGoal = widget.userProfile.fitnessGoal;
   }
@@ -931,8 +948,8 @@ class _EditGoalsSheetState extends State<EditGoalsSheet> {
                 Text(
                   'Edit Fitness Goals',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
@@ -949,7 +966,8 @@ class _EditGoalsSheetState extends State<EditGoalsSheet> {
                 labelText: 'Target Weight (kg)',
                 border: OutlineInputBorder(),
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your target weight';
@@ -1056,7 +1074,8 @@ class NutritionPreferencesSheet extends StatefulWidget {
   });
 
   @override
-  State<NutritionPreferencesSheet> createState() => _NutritionPreferencesSheetState();
+  State<NutritionPreferencesSheet> createState() =>
+      _NutritionPreferencesSheetState();
 }
 
 class _NutritionPreferencesSheetState extends State<NutritionPreferencesSheet> {
@@ -1068,10 +1087,14 @@ class _NutritionPreferencesSheetState extends State<NutritionPreferencesSheet> {
   @override
   void initState() {
     super.initState();
-    final macros = widget.userProfile.macroDistribution ?? widget.userProfile.defaultMacroDistribution;
-    _proteinController = TextEditingController(text: (macros['protein']! * 100).toStringAsFixed(0));
-    _carbsController = TextEditingController(text: (macros['carbs']! * 100).toStringAsFixed(0));
-    _fatController = TextEditingController(text: (macros['fat']! * 100).toStringAsFixed(0));
+    final macros = widget.userProfile.macroDistribution ??
+        widget.userProfile.defaultMacroDistribution;
+    _proteinController = TextEditingController(
+        text: (macros['protein']! * 100).toStringAsFixed(0));
+    _carbsController = TextEditingController(
+        text: (macros['carbs']! * 100).toStringAsFixed(0));
+    _fatController =
+        TextEditingController(text: (macros['fat']! * 100).toStringAsFixed(0));
   }
 
   @override
@@ -1102,8 +1125,8 @@ class _NutritionPreferencesSheetState extends State<NutritionPreferencesSheet> {
                 Text(
                   'Nutrition Preferences',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
@@ -1116,8 +1139,8 @@ class _NutritionPreferencesSheetState extends State<NutritionPreferencesSheet> {
             Text(
               'Macro Distribution (%)',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 8),
 
@@ -1175,8 +1198,8 @@ class _NutritionPreferencesSheetState extends State<NutritionPreferencesSheet> {
             Text(
               'Note: Percentages should add up to 100%',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.error,
-              ),
+                    color: Theme.of(context).colorScheme.error,
+                  ),
             ),
             const SizedBox(height: 24),
 

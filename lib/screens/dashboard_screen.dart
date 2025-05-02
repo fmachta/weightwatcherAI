@@ -12,8 +12,6 @@ import '../models/daily_nutrition.dart';
 import 'login_screen.dart'; // Import LoginScreen
 import '../providers/ai_trainer_provider.dart';
 
-
-
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -26,14 +24,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // Helper function to prompt login
   void _promptLogin(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => LoginScreen()),
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer3<UserProvider, NutritionProvider, WorkoutProvider>(
-      builder: (context, userProvider, nutritionProvider, workoutProvider, child) {
+      builder:
+          (context, userProvider, nutritionProvider, workoutProvider, child) {
         final bool isLoggedIn = userProvider.isLoggedIn;
         final userProfile = userProvider.userProfile;
         final bodyMeasurements = userProvider.bodyMeasurements;
@@ -57,7 +56,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     const SizedBox(height: 24),
                     Text(
                       'Welcome to Weight Watcher AI!',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
@@ -71,7 +73,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       onPressed: () => _promptLogin(context),
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(200, 50),
-                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 30, vertical: 15),
                       ),
                       child: const Text('Login / Sign Up'),
                     ),
@@ -84,10 +87,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
         // --- Logged-in View ---
         // At this point, isLoggedIn is true, so userProfile should not be null.
-        assert(userProfile != null, 'UserProfile is null despite being logged in.');
-         if (userProfile == null) {
-           // Fallback in case assertion fails in production
-           return const Center(child: Text('Error: User profile not loaded.'));
+        assert(userProfile != null,
+            'UserProfile is null despite being logged in.');
+        if (userProfile == null) {
+          // Fallback in case assertion fails in production
+          return const Center(child: Text('Error: User profile not loaded.'));
         }
 
         return SafeArea(
@@ -100,14 +104,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Text(
                   'Hello, ${userProfile.name}',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 Text(
                   'Here\'s your fitness summary',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
                 const SizedBox(height: 24),
 
@@ -117,7 +121,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Expanded(
                       child: _SummaryCard(
                         title: 'Current Weight',
-                        value: '${userProfile.currentWeight.toStringAsFixed(1)} kg',
+                        value:
+                            '${userProfile.currentWeight.toStringAsFixed(1)} kg',
                         icon: Icons.monitor_weight,
                         color: Theme.of(context).colorScheme.primaryContainer,
                       ),
@@ -126,7 +131,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Expanded(
                       child: _SummaryCard(
                         title: 'Target Weight',
-                        value: '${userProfile.targetWeight.toStringAsFixed(1)} kg',
+                        value:
+                            '${userProfile.targetWeight.toStringAsFixed(1)} kg',
                         icon: Icons.flag,
                         color: Theme.of(context).colorScheme.secondaryContainer,
                       ),
@@ -150,7 +156,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         title: 'Muscle Mass',
                         value: '${userProfile.muscleMass.toStringAsFixed(1)}%',
                         icon: Icons.fitness_center,
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
                       ),
                     ),
                   ],
@@ -167,8 +175,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Text(
                   'Today\'s Summary',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 16),
 
@@ -187,23 +195,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  children: const [
+                                const Row(
+                                  children: [
                                     Icon(Icons.lightbulb, color: Colors.pink),
                                     SizedBox(width: 8),
-                                    Text('AI Insight', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                    Text('AI Insight',
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold)),
                                   ],
                                 ),
                                 const SizedBox(height: 12),
-                                Text(provider.aiInsight!, style: TextStyle(fontSize: 14)),
+                                Text(provider.aiInsight!,
+                                    style: const TextStyle(fontSize: 14)),
                               ],
                             ),
                           )
                         else
                           ElevatedButton(
                             onPressed: () async {
-                              await Provider.of<AITrainerProvider>(context, listen: false)
-                                  .fetchAIInsight(userProfile, recentWorkouts, [dailyNutrition]);
+                              await Provider.of<AITrainerProvider>(context,
+                                      listen: false)
+                                  .fetchAIInsight(userProfile, recentWorkouts,
+                                      [dailyNutrition]);
                             },
                             child: const Text("Get Fitness Tips"),
                           ),
@@ -212,7 +226,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     );
                   },
                 ),
-
 
                 // Calorie summary
                 if (dailyNutrition != null)
@@ -224,8 +237,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Text(
                   'Recent Workouts',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 16),
 
@@ -234,7 +247,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     child: Text('No recent workouts'),
                   )
                 else
-                  _RecentWorkoutsCard(workouts: recentWorkouts.take(3).toList()),
+                  _RecentWorkoutsCard(
+                      workouts: recentWorkouts.take(3).toList()),
               ],
             ),
           ),
@@ -278,16 +292,16 @@ class _SummaryCard extends StatelessWidget {
             Text(
               title,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
             const SizedBox(height: 4),
             Text(
               value,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
             ),
           ],
         ),
@@ -336,8 +350,8 @@ class _WeightProgressChart extends StatelessWidget {
             Text(
               'Weight Progress',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -366,8 +380,10 @@ class _WeightProgressChart extends StatelessWidget {
                         showTitles: true,
                         reservedSize: 30,
                         getTitlesWidget: (value, meta) {
-                          if (value.toInt() >= 0 && value.toInt() < displayedMeasurements.length) {
-                            final date = displayedMeasurements[value.toInt()].date;
+                          if (value.toInt() >= 0 &&
+                              value.toInt() < displayedMeasurements.length) {
+                            final date =
+                                displayedMeasurements[value.toInt()].date;
                             return Padding(
                               padding: const EdgeInsets.only(top: 8.0),
                               child: Text(
@@ -398,7 +414,7 @@ class _WeightProgressChart extends StatelessWidget {
                     LineChartBarData(
                       spots: List.generate(
                         displayedMeasurements.length,
-                            (index) => FlSpot(
+                        (index) => FlSpot(
                           index.toDouble(),
                           displayedMeasurements[index].weight,
                         ),
@@ -411,15 +427,18 @@ class _WeightProgressChart extends StatelessWidget {
                         show: true,
                         getDotPainter: (spot, percent, barData, index) =>
                             FlDotCirclePainter(
-                              radius: 4,
-                              color: Theme.of(context).colorScheme.primary,
-                              strokeWidth: 1,
-                              strokeColor: Theme.of(context).colorScheme.surface,
-                            ),
+                          radius: 4,
+                          color: Theme.of(context).colorScheme.primary,
+                          strokeWidth: 1,
+                          strokeColor: Theme.of(context).colorScheme.surface,
+                        ),
                       ),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withOpacity(0.2),
                       ),
                     ),
                   ],
@@ -458,15 +477,15 @@ class _CalorieSummaryCard extends StatelessWidget {
                 Text(
                   'Calories',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 Text(
                   '${dailyNutrition.totalCalories.toInt()} / ${dailyNutrition.calorieGoal.toInt()} kcal',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                 ),
               ],
             ),
@@ -527,15 +546,15 @@ class _NutrientIndicator extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
         ),
         const SizedBox(height: 4),
         Text(
           value,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 4),
         SizedBox(
@@ -585,8 +604,8 @@ class _RecentWorkoutsCard extends StatelessWidget {
                       workout.type == WorkoutType.strength
                           ? Icons.fitness_center
                           : workout.type == WorkoutType.cardio
-                          ? Icons.directions_run
-                          : Icons.sports_gymnastics,
+                              ? Icons.directions_run
+                              : Icons.sports_gymnastics,
                       color: Theme.of(context).colorScheme.onPrimaryContainer,
                     ),
                   ),
@@ -597,15 +616,19 @@ class _RecentWorkoutsCard extends StatelessWidget {
                       children: [
                         Text(
                           workout.name,
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                         Text(
                           DateFormat('MMM d, yyyy').format(workout.dateTime),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                         ),
                       ],
                     ),
@@ -616,14 +639,14 @@ class _RecentWorkoutsCard extends StatelessWidget {
                       Text(
                         '${workout.duration.inMinutes} min',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       Text(
                         '${workout.caloriesBurned} kcal',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                       ),
                     ],
                   ),

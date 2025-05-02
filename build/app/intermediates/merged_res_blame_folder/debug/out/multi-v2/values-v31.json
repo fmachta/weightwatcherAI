@@ -4,14 +4,14 @@
             "outputFile": "com.example.weight_watcher_ai.app-mergeDebugResources-44:/values-v31/values-v31.xml",
             "map": [
                 {
-                    "source": "/Users/ferasmachta/Documents/GitHub/weightwatcherAI/android/app/src/main/res/values-v31/styles.xml",
+                    "source": "C:\\Users\\erick\\AndroidStudioProjects\\weightwatcherAI\\android\\app\\src\\main\\res\\values-v31\\styles.xml",
                     "from": {
                         "startLines": "3,17",
                         "startColumns": "4,4",
-                        "startOffsets": "173,1047",
+                        "startOffsets": "176,1064",
                         "endLines": "10,19",
                         "endColumns": "12,12",
-                        "endOffsets": "696,1211"
+                        "endOffsets": "706,1230"
                     },
                     "to": {
                         "startLines": "2,10",

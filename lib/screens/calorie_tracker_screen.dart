@@ -13,7 +13,6 @@ import 'login_screen.dart'; // Import LoginScreen
 import 'package:uuid/uuid.dart';
 import 'dart:async'; // Import async library for Timer
 
-
 class CalorieTrackerScreen extends StatefulWidget {
   const CalorieTrackerScreen({super.key});
 
@@ -35,7 +34,8 @@ class _CalorieTrackerScreenState extends State<CalorieTrackerScreen> {
   }
 
   Future<void> _loadData() async {
-    final nutritionProvider = Provider.of<NutritionProvider>(context, listen: false);
+    final nutritionProvider =
+        Provider.of<NutritionProvider>(context, listen: false);
     await nutritionProvider.changeSelectedDate(_selectedDate);
 
     // Update nutrition goals based on user profile
@@ -62,7 +62,8 @@ class _CalorieTrackerScreenState extends State<CalorieTrackerScreen> {
         _selectedDate = picked;
       });
 
-      final nutritionProvider = Provider.of<NutritionProvider>(context, listen: false);
+      final nutritionProvider =
+          Provider.of<NutritionProvider>(context, listen: false);
       await nutritionProvider.changeSelectedDate(_selectedDate);
 
       // Update nutrition goals based on user profile
@@ -81,14 +82,13 @@ class _CalorieTrackerScreenState extends State<CalorieTrackerScreen> {
   // Helper function to prompt login
   void _promptLogin(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => LoginScreen()),
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
     // Optionally show a message
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Please log in to perform this action.')),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -112,18 +112,24 @@ class _CalorieTrackerScreenState extends State<CalorieTrackerScreen> {
                       children: [
                         Text(
                           'Calorie Tracker',
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                         TextButton.icon(
                           onPressed: () => _selectDate(context),
                           icon: const Icon(Icons.calendar_today, size: 16),
                           label: Text(
                             DateFormat('MMMM d, yyyy').format(_selectedDate),
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyLarge
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
                           ),
                           style: TextButton.styleFrom(
                             padding: EdgeInsets.zero,
@@ -154,8 +160,8 @@ class _CalorieTrackerScreenState extends State<CalorieTrackerScreen> {
                     Text(
                       'Today\'s Meals',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     TextButton.icon(
                       onPressed: () => _navigateToAddMeal(context),
@@ -171,40 +177,49 @@ class _CalorieTrackerScreenState extends State<CalorieTrackerScreen> {
                   child: isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : meals.isEmpty
-                      ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.no_food,
-                          size: 64,
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No meals added yet',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.outline,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        ElevatedButton(
-                          onPressed: () => _navigateToAddMeal(context),
-                          child: const Text('Add Your First Meal'),
-                        ),
-                      ],
-                    ),
-                  )
-                      : ListView.builder(
-                    itemCount: meals.length,
-                    itemBuilder: (context, index) {
-                      return MealCard(
-                        meal: meals[index],
-                        onEdit: () => _navigateToEditMeal(context, meals[index]),
-                        onDelete: () => _deleteMeal(context, meals[index].id),
-                      );
-                    },
-                  ),
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.no_food,
+                                    size: 64,
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'No meals added yet',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .outline,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  ElevatedButton(
+                                    onPressed: () =>
+                                        _navigateToAddMeal(context),
+                                    child: const Text('Add Your First Meal'),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : ListView.builder(
+                              itemCount: meals.length,
+                              itemBuilder: (context, index) {
+                                return MealCard(
+                                  meal: meals[index],
+                                  onEdit: () => _navigateToEditMeal(
+                                      context, meals[index]),
+                                  onDelete: () =>
+                                      _deleteMeal(context, meals[index].id),
+                                );
+                              },
+                            ),
                 ),
               ],
             ),
@@ -249,25 +264,27 @@ class _CalorieTrackerScreenState extends State<CalorieTrackerScreen> {
 
     // Show confirmation dialog
     final shouldDelete = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Meal'),
-        content: const Text('Are you sure you want to delete this meal?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Delete Meal'),
+            content: const Text('Are you sure you want to delete this meal?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Delete'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
 
     if (shouldDelete) {
-      final nutritionProvider = Provider.of<NutritionProvider>(context, listen: false);
+      final nutritionProvider =
+          Provider.of<NutritionProvider>(context, listen: false);
       await nutritionProvider.deleteMeal(mealId);
 
       // Update daily nutrition after deleting
@@ -310,24 +327,29 @@ class CalorieProgressCard extends StatelessWidget {
                 Text(
                   'Daily Goal',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 Row(
                   children: [
                     Text(
                       dailyNutrition.totalCalories.toInt().toString(),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                        fontWeight: FontWeight.bold,
-                      ),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer,
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     Text(
                       ' / ${dailyNutrition.calorieGoal.toInt()} kcal',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.7),
-                      ),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer
+                                .withOpacity(0.7),
+                          ),
                     ),
                   ],
                 ),
@@ -337,8 +359,13 @@ class CalorieProgressCard extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: LinearProgressIndicator(
-                value: dailyNutrition.calorieProgress > 1 ? 1 : dailyNutrition.calorieProgress,
-                backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.2),
+                value: dailyNutrition.calorieProgress > 1
+                    ? 1
+                    : dailyNutrition.calorieProgress,
+                backgroundColor: Theme.of(context)
+                    .colorScheme
+                    .onPrimaryContainer
+                    .withOpacity(0.2),
                 valueColor: AlwaysStoppedAnimation<Color>(
                   Theme.of(context).colorScheme.onPrimaryContainer,
                 ),
@@ -398,8 +425,8 @@ class _NutrientProgress extends StatelessWidget {
         Text(
           title,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onPrimaryContainer,
-          ),
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              ),
         ),
         const SizedBox(height: 8),
         SizedBox(
@@ -410,7 +437,10 @@ class _NutrientProgress extends StatelessWidget {
             children: [
               CircularProgressIndicator(
                 value: progress,
-                backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.2),
+                backgroundColor: Theme.of(context)
+                    .colorScheme
+                    .onPrimaryContainer
+                    .withOpacity(0.2),
                 valueColor: AlwaysStoppedAnimation<Color>(color),
                 strokeWidth: 8,
               ),
@@ -418,9 +448,9 @@ class _NutrientProgress extends StatelessWidget {
                 '${(progress * 100).toInt()}%',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ],
           ),
@@ -430,8 +460,8 @@ class _NutrientProgress extends StatelessWidget {
           '${current.toInt()}/${goal.toInt()}g',
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onPrimaryContainer,
-          ),
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              ),
         ),
       ],
     );
@@ -473,19 +503,20 @@ class MealCard extends StatelessWidget {
                         meal.type == MealType.breakfast
                             ? Icons.wb_sunny
                             : meal.type == MealType.lunch
-                            ? Icons.wb_twilight
-                            : meal.type == MealType.dinner
-                            ? Icons.nights_stay
-                            : Icons.fastfood,
+                                ? Icons.wb_twilight
+                                : meal.type == MealType.dinner
+                                    ? Icons.nights_stay
+                                    : Icons.fastfood,
                         color: Theme.of(context).colorScheme.primary,
                       ),
                       const SizedBox(width: 8),
                       Flexible(
                         child: Text(
                           meal.name,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -497,16 +528,17 @@ class MealCard extends StatelessWidget {
                     Text(
                       DateFormat('h:mm a').format(meal.dateTime),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       '${meal.totalCalories.toInt()} kcal',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                     ),
                   ],
                 ),
@@ -514,29 +546,31 @@ class MealCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             ...meal.items.map((item) => Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Icon(
-                        Icons.circle,
-                        size: 8,
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.circle,
+                            size: 8,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(item.foodItem.name),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      Text(item.foodItem.name),
+                      Text(
+                        '${(item.foodItem.calories * item.quantity).toInt()} kcal',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                      ),
                     ],
                   ),
-                  Text(
-                    '${(item.foodItem.calories * item.quantity).toInt()} kcal',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            )),
+                )),
             const SizedBox(height: 8),
             const Divider(),
             const SizedBox(height: 8),
@@ -548,14 +582,15 @@ class MealCard extends StatelessWidget {
                     Text(
                       '${meal.totalProtein.toInt()}g',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     Text(
                       'Protein',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                     ),
                   ],
                 ),
@@ -564,14 +599,15 @@ class MealCard extends StatelessWidget {
                     Text(
                       '${meal.totalCarbs.toInt()}g',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     Text(
                       'Carbs',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                     ),
                   ],
                 ),
@@ -580,14 +616,15 @@ class MealCard extends StatelessWidget {
                     Text(
                       '${meal.totalFat.toInt()}g',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     Text(
                       'Fat',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                     ),
                   ],
                 ),
@@ -729,8 +766,8 @@ class _AddMealScreenState extends State<AddMealScreen> {
                     Text(
                       'Food Items',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: 16),
 
@@ -753,7 +790,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
                             title: Text(item.foodItem.name),
                             subtitle: Text(
                               'Quantity: ${item.quantity.toStringAsFixed(1)} - '
-                                  '${(item.foodItem.calories * item.quantity).toInt()} kcal',
+                              '${(item.foodItem.calories * item.quantity).toInt()} kcal',
                             ),
                             trailing: IconButton(
                               icon: const Icon(Icons.remove_circle_outline),
@@ -842,7 +879,8 @@ class _AddMealScreenState extends State<AddMealScreen> {
       );
 
       // Save meal
-      final nutritionProvider = Provider.of<NutritionProvider>(context, listen: false);
+      final nutritionProvider =
+          Provider.of<NutritionProvider>(context, listen: false);
       await nutritionProvider.addMeal(
         _nameController.text,
         _selectedMealType,
@@ -992,8 +1030,8 @@ class _EditMealScreenState extends State<EditMealScreen> {
                     Text(
                       'Food Items',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: 16),
 
@@ -1016,7 +1054,7 @@ class _EditMealScreenState extends State<EditMealScreen> {
                             title: Text(item.foodItem.name),
                             subtitle: Text(
                               'Quantity: ${item.quantity.toStringAsFixed(1)} - '
-                                  '${(item.foodItem.calories * item.quantity).toInt()} kcal',
+                              '${(item.foodItem.calories * item.quantity).toInt()} kcal',
                             ),
                             trailing: IconButton(
                               icon: const Icon(Icons.remove_circle_outline),
@@ -1115,7 +1153,8 @@ class _EditMealScreenState extends State<EditMealScreen> {
         notes: _notesController.text.isEmpty ? null : _notesController.text,
       );
 
-      final nutritionProvider = Provider.of<NutritionProvider>(context, listen: false);
+      final nutritionProvider =
+          Provider.of<NutritionProvider>(context, listen: false);
       await nutritionProvider.updateMeal(updatedMeal);
 
       // Update daily nutrition after updating meal
@@ -1144,7 +1183,8 @@ class AddFoodItemScreen extends StatefulWidget {
 
 class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
   final TextEditingController _searchController = TextEditingController();
-  final TextEditingController _quantityController = TextEditingController(text: '1.0');
+  final TextEditingController _quantityController =
+      TextEditingController(text: '1.0');
   Timer? _debounce; // Timer for debouncing search
 
   FoodItem? _selectedFoodItem;
@@ -1170,7 +1210,8 @@ class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
       _isLoading = true;
     });
 
-    final nutritionProvider = Provider.of<NutritionProvider>(context, listen: false);
+    final nutritionProvider =
+        Provider.of<NutritionProvider>(context, listen: false);
     _searchResults = await nutritionProvider.searchFoodItems('');
 
     setState(() {
@@ -1208,9 +1249,7 @@ class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
           ),
         ],
       ),
-      body: _isCustomFood
-          ? _buildCustomFoodForm()
-          : _buildSearchFoodForm(),
+      body: _isCustomFood ? _buildCustomFoodForm() : _buildSearchFoodForm(),
     );
   }
 
@@ -1229,7 +1268,7 @@ class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
             onChanged: (query) {
               if (_debounce?.isActive ?? false) _debounce!.cancel();
               _debounce = Timer(const Duration(milliseconds: 500), () {
-                 _searchFood(query); // Pass the query to search function
+                _searchFood(query); // Pass the query to search function
               });
             },
             // Removed onSubmitted and IconButton onPressed
@@ -1241,28 +1280,28 @@ class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : _searchResults.isEmpty
-              ? const Center(child: Text('No food items found'))
-              : ListView.builder(
-            itemCount: _searchResults.length,
-            itemBuilder: (context, index) {
-              final foodItem = _searchResults[index];
-              return ListTile(
-                title: Text(foodItem.name),
-                subtitle: Text(
-                  '${foodItem.calories.toInt()} kcal | '
-                      'P: ${foodItem.protein.toInt()}g | '
-                      'C: ${foodItem.carbs.toInt()}g | '
-                      'F: ${foodItem.fat.toInt()}g',
-                ),
-                onTap: () {
-                  setState(() {
-                    _selectedFoodItem = foodItem;
-                  });
-                  _showQuantityDialog(context);
-                },
-              );
-            },
-          ),
+                  ? const Center(child: Text('No food items found'))
+                  : ListView.builder(
+                      itemCount: _searchResults.length,
+                      itemBuilder: (context, index) {
+                        final foodItem = _searchResults[index];
+                        return ListTile(
+                          title: Text(foodItem.name),
+                          subtitle: Text(
+                            '${foodItem.calories.toInt()} kcal | '
+                            'P: ${foodItem.protein.toInt()}g | '
+                            'C: ${foodItem.carbs.toInt()}g | '
+                            'F: ${foodItem.fat.toInt()}g',
+                          ),
+                          onTap: () {
+                            setState(() {
+                              _selectedFoodItem = foodItem;
+                            });
+                            _showQuantityDialog(context);
+                          },
+                        );
+                      },
+                    ),
         ),
       ],
     );
@@ -1277,8 +1316,8 @@ class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
           Text(
             'Add Custom Food',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
 
@@ -1353,20 +1392,21 @@ class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
   void _searchFood(String query) async {
     // Only search if query is not empty, otherwise maybe clear results or show initial list
     if (query.isEmpty) {
-       // Optionally clear results or load initial items again
-       // await _loadInitialFoodItems(); // Example: reload initial if query is empty
-       setState(() {
-         _searchResults = []; // Clear results for empty query
-         _isLoading = false;
-       });
-       return;
+      // Optionally clear results or load initial items again
+      // await _loadInitialFoodItems(); // Example: reload initial if query is empty
+      setState(() {
+        _searchResults = []; // Clear results for empty query
+        _isLoading = false;
+      });
+      return;
     }
 
     setState(() {
       _isLoading = true;
     });
 
-    final nutritionProvider = Provider.of<NutritionProvider>(context, listen: false);
+    final nutritionProvider =
+        Provider.of<NutritionProvider>(context, listen: false);
     // Use the passed query instead of controller text directly
     _searchResults = await nutritionProvider.searchFoodItems(query);
 
@@ -1438,7 +1478,7 @@ class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
     final fat = double.tryParse(_fatController.text) ?? 0;
 
     // Create custom food item
-    final uuid = const Uuid();
+    const uuid = Uuid();
     final customFoodItem = FoodItem(
       id: 'custom_${uuid.v4()}',
       name: name,
@@ -1450,7 +1490,8 @@ class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
     );
 
     // Save custom food item
-    final nutritionProvider = Provider.of<NutritionProvider>(context, listen: false);
+    final nutritionProvider =
+        Provider.of<NutritionProvider>(context, listen: false);
     await nutritionProvider.addFoodItem(customFoodItem);
 
     // Return meal item with custom food

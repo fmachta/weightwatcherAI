@@ -10,7 +10,7 @@ import '../providers/user_provider.dart';
 import 'login_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({Key? key}) : super(key: key);
+  const SignUpScreen({super.key});
 
   @override
   _SignUpScreenState createState() => _SignUpScreenState();
@@ -58,7 +58,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       });
 
       try {
-        UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+        UserCredential userCredential =
+            await _auth.createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
@@ -74,7 +75,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
             height: double.parse(_heightController.text.trim()),
             bodyFat: double.parse(_bodyFatController.text.trim()),
             muscleMass: double.parse(_muscleMassController.text.trim()),
-            activityLevel: _parseActivityLevel(_activityLevelController.text.trim()),
+            activityLevel:
+                _parseActivityLevel(_activityLevelController.text.trim()),
             fitnessGoal: _parseFitnessGoal(_fitnessGoalController.text.trim()),
           );
 
@@ -83,7 +85,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
               .doc(userCredential.user!.uid)
               .set(newUserProfile.toJson());
 
-          final userProvider = Provider.of<UserProvider>(context, listen: false);
+          final userProvider =
+              Provider.of<UserProvider>(context, listen: false);
           userProvider.userProfile = newUserProfile;
 
           Navigator.of(context).pushReplacement(
@@ -206,20 +209,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     color: colorScheme.primary,
                   ),
                   const SizedBox(height: 24),
-
                   Text(
                     'Create Your Account',
-                    style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+                    style: textTheme.headlineMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Join us to start your fitness journey!',
-                    style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
+                    style: textTheme.bodyLarge
+                        ?.copyWith(color: colorScheme.onSurfaceVariant),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
-
                   if (_errorMessage.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16.0),
@@ -229,7 +232,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         textAlign: TextAlign.center,
                       ),
                     ),
-
                   TextFormField(
                     controller: _nameController,
                     decoration: InputDecoration(
@@ -247,7 +249,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
-
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -269,7 +270,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
-
                   TextFormField(
                     controller: _passwordController,
                     obscureText: true,
@@ -279,7 +279,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      helperText: 'Min. 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 symbol.',
+                      helperText:
+                          'Min. 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 symbol.',
                       helperMaxLines: 2,
                     ),
                     validator: (value) {
@@ -305,7 +306,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
-
                   TextFormField(
                     controller: _ageController,
                     keyboardType: TextInputType.number,
@@ -321,23 +321,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your age';
                       }
-                      if (int.tryParse(value) == null || int.parse(value) <= 0) {
+                      if (int.tryParse(value) == null ||
+                          int.parse(value) <= 0) {
                         return 'Please enter a valid age';
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
-
                   DropdownButtonFormField<String>(
-                    value: _genderController.text.isEmpty ? null : _genderController.text,
+                    value: _genderController.text.isEmpty
+                        ? null
+                        : _genderController.text,
                     onChanged: (String? newValue) {
                       if (newValue != null) {
-                        setState(() { _genderController.text = newValue; });
+                        setState(() {
+                          _genderController.text = newValue;
+                        });
                       }
                     },
-                    items: _genderOptions.map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(value: value, child: Text(value));
+                    items: _genderOptions
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                          value: value, child: Text(value));
                     }).toList(),
                     decoration: InputDecoration(
                       labelText: 'Gender',
@@ -354,11 +360,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
-
                   TextFormField(
                     controller: _currentWeightController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,1}'))],
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d+\.?\d{0,1}'))
+                    ],
                     decoration: InputDecoration(
                       labelText: 'Current Weight (kg)',
                       prefixIcon: const Icon(Icons.monitor_weight_outlined),
@@ -370,18 +379,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your current weight';
                       }
-                      if (double.tryParse(value) == null || double.parse(value) <= 0) {
+                      if (double.tryParse(value) == null ||
+                          double.parse(value) <= 0) {
                         return 'Please enter a valid weight';
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
-
                   TextFormField(
                     controller: _targetWeightController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,1}'))],
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d+\.?\d{0,1}'))
+                    ],
                     decoration: InputDecoration(
                       labelText: 'Target Weight (kg)',
                       prefixIcon: const Icon(Icons.flag_outlined),
@@ -393,18 +406,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your target weight';
                       }
-                      if (double.tryParse(value) == null || double.parse(value) <= 0) {
+                      if (double.tryParse(value) == null ||
+                          double.parse(value) <= 0) {
                         return 'Please enter a valid weight';
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
-
                   TextFormField(
                     controller: _heightController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,1}'))],
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d+\.?\d{0,1}'))
+                    ],
                     decoration: InputDecoration(
                       labelText: 'Height (cm)',
                       prefixIcon: const Icon(Icons.height_outlined),
@@ -416,18 +433,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your height';
                       }
-                      if (double.tryParse(value) == null || double.parse(value) <= 0) {
+                      if (double.tryParse(value) == null ||
+                          double.parse(value) <= 0) {
                         return 'Please enter a valid height';
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
-
                   TextFormField(
                     controller: _bodyFatController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,1}'))],
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d+\.?\d{0,1}'))
+                    ],
                     decoration: InputDecoration(
                       labelText: 'Body Fat (%)',
                       prefixIcon: const Icon(Icons.water_drop_outlined),
@@ -439,18 +460,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your body fat percentage';
                       }
-                      if (double.tryParse(value) == null || double.parse(value) < 0) {
+                      if (double.tryParse(value) == null ||
+                          double.parse(value) < 0) {
                         return 'Please enter a valid percentage';
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
-
                   TextFormField(
                     controller: _muscleMassController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,1}'))],
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d+\.?\d{0,1}'))
+                    ],
                     decoration: InputDecoration(
                       labelText: 'Muscle Mass (kg)',
                       prefixIcon: const Icon(Icons.fitness_center_outlined),
@@ -462,23 +487,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your muscle mass';
                       }
-                      if (double.tryParse(value) == null || double.parse(value) < 0) {
+                      if (double.tryParse(value) == null ||
+                          double.parse(value) < 0) {
                         return 'Please enter a valid mass';
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
-
                   DropdownButtonFormField<String>(
-                    value: _activityLevelController.text.isEmpty ? null : _activityLevelController.text,
+                    value: _activityLevelController.text.isEmpty
+                        ? null
+                        : _activityLevelController.text,
                     onChanged: (String? newValue) {
                       if (newValue != null) {
-                        setState(() { _activityLevelController.text = newValue; });
+                        setState(() {
+                          _activityLevelController.text = newValue;
+                        });
                       }
                     },
-                    items: _activityLevelOptions.map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(value: value, child: Text(value));
+                    items: _activityLevelOptions
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                          value: value, child: Text(value));
                     }).toList(),
                     decoration: InputDecoration(
                       labelText: 'Activity Level',
@@ -495,16 +526,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
-
                   DropdownButtonFormField<String>(
-                    value: _fitnessGoalController.text.isEmpty ? null : _fitnessGoalController.text,
+                    value: _fitnessGoalController.text.isEmpty
+                        ? null
+                        : _fitnessGoalController.text,
                     onChanged: (String? newValue) {
                       if (newValue != null) {
-                        setState(() { _fitnessGoalController.text = newValue; });
+                        setState(() {
+                          _fitnessGoalController.text = newValue;
+                        });
                       }
                     },
-                    items: _fitnessGoalOptions.map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(value: value, child: Text(value));
+                    items: _fitnessGoalOptions
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                          value: value, child: Text(value));
                     }).toList(),
                     decoration: InputDecoration(
                       labelText: 'Fitness Goal',
@@ -521,7 +557,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     },
                   ),
                   const SizedBox(height: 24),
-
                   ElevatedButton(
                     onPressed: _isLoading ? null : _signUp,
                     style: ElevatedButton.styleFrom(
@@ -534,16 +569,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ? const SizedBox(
                             height: 24,
                             width: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.white),
                           )
                         : const Text('Sign Up'),
                   ),
                   const SizedBox(height: 24),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Flexible( // Wrap the Text widget with Flexible
+                      Flexible(
+                        // Wrap the Text widget with Flexible
                         child: Text(
                           "Already have an account?",
                           style: textTheme.bodyMedium,

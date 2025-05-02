@@ -1,7 +1,5 @@
 // services/gemini_service.dart
 import 'dart:convert';
-import 'dart:math';
-import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../models/user_profile.dart';
@@ -51,14 +49,18 @@ class GeminiService {
     _geminiModelName = dotenv.env['GEMINI_MODEL_NAME'] ?? 'gemini-1.5-flash';
 
     // Initialize Gemini Model - handle missing API key
-    if (_geminiApiKey == null || _geminiApiKey!.isEmpty || _geminiApiKey == 'google-api-key-here') {
-       print("Error: GEMINI_API_KEY not found or is placeholder in .env file. Gemini features will not work.");
-       // You might want to throw an exception or handle this state more gracefully
-       // For now, creating a dummy model to avoid late initialization error
-       // This dummy model will likely fail if used.
-        _model = GenerativeModel(model: _geminiModelName, apiKey: 'DUMMY_API_KEY');
+    if (_geminiApiKey == null ||
+        _geminiApiKey!.isEmpty ||
+        _geminiApiKey == 'google-api-key-here') {
+      print(
+          "Error: GEMINI_API_KEY not found or is placeholder in .env file. Gemini features will not work.");
+      // You might want to throw an exception or handle this state more gracefully
+      // For now, creating a dummy model to avoid late initialization error
+      // This dummy model will likely fail if used.
+      _model =
+          GenerativeModel(model: _geminiModelName, apiKey: 'DUMMY_API_KEY');
     } else {
-       _model = GenerativeModel(
+      _model = GenerativeModel(
         model: _geminiModelName,
         apiKey: _geminiApiKey!,
         // Optional: Add generationConfig, safetySettings if needed
@@ -66,18 +68,24 @@ class GeminiService {
       );
     }
   }
-  
+
   // Generate a workout plan based on user profile
-  Future<AIPlan> generateWorkoutPlan(UserProfile userProfile, [Map<String, dynamic>? preferenceData]) async {
+  Future<AIPlan> generateWorkoutPlan(UserProfile userProfile,
+      [Map<String, dynamic>? preferenceData]) async {
     // Check if API key is valid
-    if (_geminiApiKey == null || _geminiApiKey!.isEmpty || _geminiApiKey == 'google-api-key-here') {
-      print("Error: Cannot generate workout plan. GEMINI_API_KEY is missing or invalid.");
+    if (_geminiApiKey == null ||
+        _geminiApiKey!.isEmpty ||
+        _geminiApiKey == 'google-api-key-here') {
+      print(
+          "Error: Cannot generate workout plan. GEMINI_API_KEY is missing or invalid.");
       return _createDefaultWorkoutPlan(userProfile);
     }
-    
+
     // Parse the user's specific preferences
-    final primaryGoal = preferenceData?['primaryGoal'] ?? userProfile.fitnessGoal.name;
-    final fitnessLevel = preferenceData?['fitnessLevel'] ?? _determineFitnessLevel(userProfile);
+    final primaryGoal =
+        preferenceData?['primaryGoal'] ?? userProfile.fitnessGoal.name;
+    final fitnessLevel =
+        preferenceData?['fitnessLevel'] ?? _determineFitnessLevel(userProfile);
     final workoutDaysPerWeek = preferenceData?['daysPerWeek'] ?? 4;
     final workoutDuration = preferenceData?['workoutDuration'] ?? 45;
     final preferredExerciseTypes = preferenceData?['exerciseTypes'] ?? [];
@@ -117,43 +125,49 @@ Only return the JSON array.
       final content = [
         Content.text(prompt),
       ];
-      
+
       // Call Gemini API
       final response = await _model.generateContent(
         content,
         generationConfig: GenerationConfig(
           temperature: 0.7,
-          maxOutputTokens: 4000,
+          maxOutputTokens: 8192,
         ),
       );
-      
-      if (response.text == null) {
+
+      print("Raw Gemini workout response: \${response.text}");
+      if (response.text == null || response.text!.trim().isEmpty) {
         print("Error: Gemini response was null or blocked.");
         return _createDefaultWorkoutPlan(userProfile);
       }
-      
+
       final responseText = response.text!;
-      final jsonStart = responseText.indexOf('[');
-      final jsonEnd = responseText.lastIndexOf(']');
-      
+      final cleaned =
+          responseText.replaceAll(RegExp(r'```json|```'), '').trim();
+      final jsonStart = cleaned.indexOf('[');
+      final jsonEnd = cleaned.lastIndexOf(']');
+
       if (jsonStart == -1 || jsonEnd == -1) {
         print("Error: Could not find JSON array in Gemini response.");
         return _createDefaultWorkoutPlan(userProfile);
       }
-      
-      final jsonString = responseText.substring(jsonStart, jsonEnd + 1);
+
+      final jsonString = cleaned.substring(jsonStart, jsonEnd + 1);
       final parsed = jsonDecode(jsonString);
 
-      final days = (parsed as List).map<PlanDay>((e) => PlanDay(
-        dayNumber: e['day'],
-        notes: e['notes'] ?? 'No notes provided', // ✅ Required
-        summary: e['summary'] ?? '',
-      )).toList();
+      final days = (parsed as List)
+          .map<PlanDay>((e) => PlanDay(
+                dayNumber: e['day'],
+                notes: e['notes'] ?? 'No notes provided', // ✅ Required
+                summary: e['summary'] ?? '',
+              ))
+          .toList();
 
       return AIPlan(
         id: _uuid.v4(),
         title: "Custom Workout Plan",
-        description: "Personalized workout plan based on your profile and preferences",
+        description:
+            "Personalized workout plan based on your profile and preferences",
         type: PlanType.workout,
         startDate: DateTime.now(),
         endDate: DateTime.now().add(const Duration(days: 28)),
@@ -167,13 +181,17 @@ Only return the JSON array.
   }
 
   // Generate a meal plan based on user profile
-  Future<AIPlan> generateMealPlan(UserProfile userProfile, [Map<String, dynamic>? preferenceData]) async {
+  Future<AIPlan> generateMealPlan(UserProfile userProfile,
+      [Map<String, dynamic>? preferenceData]) async {
     // Check if API key is valid
-    if (_geminiApiKey == null || _geminiApiKey!.isEmpty || _geminiApiKey == 'google-api-key-here') {
-      print("Error: Cannot generate meal plan. GEMINI_API_KEY is missing or invalid.");
+    if (_geminiApiKey == null ||
+        _geminiApiKey!.isEmpty ||
+        _geminiApiKey == 'google-api-key-here') {
+      print(
+          "Error: Cannot generate meal plan. GEMINI_API_KEY is missing or invalid.");
       return _createDefaultMealPlan(userProfile);
     }
-    
+
     // Parse the user's specific preferences
     final dietaryRestrictions = preferenceData?['dietaryRestrictions'] ?? [];
     final mealsPerDay = preferenceData?['mealsPerDay'] ?? 3;
@@ -183,25 +201,34 @@ Only return the JSON array.
     final foodAllergies = preferenceData?['foodAllergies'] ?? '';
     final dislikedFoods = preferenceData?['dislikedFoods'] ?? '';
     final otherPreferences = preferenceData?['otherPreferences'] ?? '';
-    
+
     // Calculate calorie targets based on user profile and adjustments
-    final dailyCalories = userProfile.calculateDailyCalorieGoal() + calorieAdjustment;
-    final macrosDistribution = userProfile.macroDistribution ?? userProfile.defaultMacroDistribution;
-    final proteinGoal = dailyCalories * macrosDistribution['protein']! / 4; // 4 calories per gram of protein
-    final carbsGoal = dailyCalories * macrosDistribution['carbs']! / 4; // 4 calories per gram of carbs
-    final fatGoal = dailyCalories * macrosDistribution['fat']! / 9; // 9 calories per gram of fat
-    
+    final dailyCalories =
+        userProfile.calculateDailyCalorieGoal() + calorieAdjustment;
+    final macrosDistribution =
+        userProfile.macroDistribution ?? userProfile.defaultMacroDistribution;
+    final proteinGoal = dailyCalories *
+        macrosDistribution['protein']! /
+        4; // 4 calories per gram of protein
+    final carbsGoal = dailyCalories *
+        macrosDistribution['carbs']! /
+        4; // 4 calories per gram of carbs
+    final fatGoal = dailyCalories *
+        macrosDistribution['fat']! /
+        9; // 9 calories per gram of fat
+
     try {
       // Create the basic meal plan structure
       final id = _uuid.v4();
-      final title = "Custom Meal Plan";
-      final description = "AI-generated meal plan based on your profile and preferences";
+      const title = "Custom Meal Plan";
+      const description =
+          "AI-generated meal plan based on your profile and preferences";
       final planDays = <PlanDay>[];
-      
+
       // Generate each day sequentially
       for (int dayNumber = 1; dayNumber <= 7; dayNumber++) {
         print("Generating meal plan for Day $dayNumber...");
-        
+
         // Create a prompt specific to this day
         final singleDayPrompt = """
 You are a professional nutritionist creating a personalized meal plan. Format your response as JSON.
@@ -275,26 +302,30 @@ Format the response as a JSON object with the following structure:
         final content = [
           Content.text(singleDayPrompt),
         ];
-        
+
         // Call Gemini API for this day
         final response = await _model.generateContent(
           content,
           generationConfig: GenerationConfig(
             temperature: 0.7,
-            maxOutputTokens: 4000,
+            maxOutputTokens: 8192,
           ),
         );
-        
-        if (response.text == null) {
-          print("Error: Gemini response was null or blocked for Day $dayNumber.");
+
+        print("Raw Gemini response for Day $dayNumber:\n${response.text}");
+
+        if (response.text == null || response.text!.trim().isEmpty) {
+          print(
+              "Error: Gemini response was null or blocked for Day $dayNumber.");
           // Add default day
           planDays.add(_createDefaultMealPlanDay(userProfile, dayNumber));
           continue;
         }
-        
+
         // Parse the meal plan day from the response
         try {
-          final dayPlan = await _parseMealPlanDay(response.text!, userProfile, dayNumber);
+          final dayPlan =
+              await _parseMealPlanDay(response.text!, userProfile, dayNumber);
           planDays.add(dayPlan);
           print("Successfully generated meal plan for Day $dayNumber.");
         } catch (e) {
@@ -302,11 +333,11 @@ Format the response as a JSON object with the following structure:
           // Add default day on error
           planDays.add(_createDefaultMealPlanDay(userProfile, dayNumber));
         }
-        
+
         // Optional: add a small delay between API calls to avoid rate limits
-        await Future.delayed(Duration(milliseconds: 500));
+        await Future.delayed(const Duration(milliseconds: 500));
       }
-      
+
       return AIPlan(
         id: id,
         title: title,
@@ -323,55 +354,78 @@ Format the response as a JSON object with the following structure:
       return _createDefaultMealPlan(userProfile);
     }
   }
-  
-  // Parse a single day of meal plan
-  Future<PlanDay> _parseMealPlanDay(String jsonResponse, UserProfile userProfile, int dayNumber) async {
+
+  Future<PlanDay> _parseMealPlanDay(
+      String jsonResponse, UserProfile userProfile, int dayNumber) async {
     try {
-      // Extract JSON from the response (in case there's markdown or other text)
-      final jsonStart = jsonResponse.indexOf('{');
-      final jsonEnd = jsonResponse.lastIndexOf('}') + 1;
-      if (jsonStart == -1 || jsonEnd == 0) {
-        throw FormatException("Could not find JSON object in the response for Day $dayNumber.");
+      // Strip code fences
+      String cleaned =
+          jsonResponse.replaceAll(RegExp(r'```(json)?|```'), '').trim();
+
+      // Find the first opening brace
+      final jsonStart = cleaned.indexOf('{');
+      if (jsonStart == -1) {
+        throw const FormatException("No '{' found in Gemini response.");
       }
-      final jsonString = jsonResponse.substring(jsonStart, jsonEnd);
-      
-      print("Parsed JSON string: ${jsonString.substring(0, min(100, jsonString.length))}...");
-      
+
+      // Count braces to find the last matching closing brace
+      int braceCount = 0;
+      int jsonEnd = -1;
+      for (int i = jsonStart; i < cleaned.length; i++) {
+        if (cleaned[i] == '{') braceCount++;
+        if (cleaned[i] == '}') braceCount--;
+        if (braceCount == 0) {
+          jsonEnd = i;
+          break;
+        }
+      }
+
+      if (jsonEnd == -1) {
+        throw const FormatException("No matching closing '}' found in JSON.");
+      }
+
+      final safeEnd =
+          jsonEnd + 1 <= cleaned.length ? jsonEnd + 1 : cleaned.length;
+      final jsonString = cleaned.substring(jsonStart, safeEnd);
+
+      print(
+          "Parsed JSON string (truncated): ${jsonString.substring(0, jsonString.length > 300 ? 300 : jsonString.length)}");
+
       final data = jsonDecode(jsonString);
       final meals = <Meal>[];
-      
+
       if (data['meals'] is! List) {
-        throw FormatException("Expected 'meals' to be a list in the JSON response for Day $dayNumber.");
+        throw const FormatException(
+            "Expected 'meals' to be a list in the JSON.");
       }
-        
+
       for (var mealData in data['meals']) {
-        if (mealData is! Map) continue; // Skip invalid meal entries
-        
+        if (mealData is! Map) continue;
+
         final mealName = mealData['name']?.toString() ?? 'Unnamed Meal';
         final mealType = _getMealTypeFromName(mealName);
         final mealItems = <MealItem>[];
-        final mealNotes = mealData['notes']?.toString(); // Allow null notes
-        
-        // Parse ingredients
+        final mealNotes = mealData['notes']?.toString();
+
+        // Ingredients
         List<String>? ingredients;
         if (mealData['ingredients'] is List) {
           ingredients = List<String>.from(mealData['ingredients']);
         }
-        
-        // Parse cooking instructions
+
         final cookingInstructions = mealData['cookingInstructions']?.toString();
-        
+
+        // Foods
         if (mealData['foods'] is List) {
           for (var foodData in mealData['foods']) {
-            if (foodData is! Map) continue; // Skip invalid food entries
-            
-            // Helper function to safely parse numbers
+            if (foodData is! Map) continue;
+
             double? safeParseDouble(dynamic value) {
               if (value is num) return value.toDouble();
               if (value is String) return double.tryParse(value);
               return null;
             }
-            
+
             final foodItem = FoodItem(
               id: _uuid.v4(),
               name: foodData['name']?.toString() ?? 'Unnamed Food',
@@ -379,29 +433,29 @@ Format the response as a JSON object with the following structure:
               protein: safeParseDouble(foodData['protein']) ?? 0,
               carbs: safeParseDouble(foodData['carbs']) ?? 0,
               fat: safeParseDouble(foodData['fat']) ?? 0,
-              description: foodData['quantity']?.toString(), // Use quantity as description
+              description: foodData['quantity']?.toString(),
             );
-            
+
             mealItems.add(MealItem(
               foodItem: foodItem,
-              quantity: 1.0, // Assume quantity 1 unless specified otherwise
-              servingSize: foodData['quantity']?.toString() ?? '1 serving', // Use quantity as serving size
+              quantity: 1.0,
+              servingSize: foodData['quantity']?.toString() ?? '1 serving',
             ));
           }
         }
-        
+
         meals.add(Meal(
           id: _uuid.v4(),
           name: mealName,
           type: mealType,
-          dateTime: DateTime.now().add(Duration(days: dayNumber - 1)), // Approximate time
+          dateTime: DateTime.now().add(Duration(days: dayNumber - 1)),
           items: mealItems,
           notes: mealNotes,
           ingredients: ingredients,
           cookingInstructions: cookingInstructions,
         ));
       }
-      
+
       return PlanDay(
         dayNumber: dayNumber,
         notes: 'Day $dayNumber meal plan',
@@ -409,52 +463,66 @@ Format the response as a JSON object with the following structure:
       );
     } catch (e) {
       print('Error parsing meal plan day: $e');
-      // Re-throw to be handled by the calling method
-      throw e;
+      rethrow;
     }
   }
-  
+
   // Create a default meal plan day (for fallback)
   PlanDay _createDefaultMealPlanDay(UserProfile userProfile, int dayNumber) {
     final dayDate = DateTime.now().add(Duration(days: dayNumber - 1));
     final meals = <Meal>[];
-    
+
     // Base calorie estimate if AI fails - could use userProfile.calculateDailyCalorieGoal()
     // For simplicity, using fixed examples here. Actual implementation should be more dynamic.
-    final targetCalories = userProfile.fitnessGoal == FitnessGoal.weightLoss ? 1800 :
-                          userProfile.fitnessGoal == FitnessGoal.muscleGain ? 2500 : 2200;
-    
+    final targetCalories = userProfile.fitnessGoal == FitnessGoal.weightLoss
+        ? 1800
+        : userProfile.fitnessGoal == FitnessGoal.muscleGain
+            ? 2500
+            : 2200;
+
     // Add meals with sample data
-    meals.add(_createSampleMeal(MealType.breakfast, dayDate, targetCalories * 0.25)); // 25% calories
-    meals.add(_createSampleMeal(MealType.snack, dayDate, targetCalories * 0.10));      // 10% calories
-    meals.add(_createSampleMeal(MealType.lunch, dayDate, targetCalories * 0.30));      // 30% calories
-    meals.add(_createSampleMeal(MealType.snack, dayDate, targetCalories * 0.10));      // 10% calories
-    meals.add(_createSampleMeal(MealType.dinner, dayDate, targetCalories * 0.25));     // 25% calories
-    
+    meals.add(_createSampleMeal(
+        MealType.breakfast, dayDate, targetCalories * 0.25)); // 25% calories
+    meals.add(_createSampleMeal(
+        MealType.snack, dayDate, targetCalories * 0.10)); // 10% calories
+    meals.add(_createSampleMeal(
+        MealType.lunch, dayDate, targetCalories * 0.30)); // 30% calories
+    meals.add(_createSampleMeal(
+        MealType.snack, dayDate, targetCalories * 0.10)); // 10% calories
+    meals.add(_createSampleMeal(
+        MealType.dinner, dayDate, targetCalories * 0.25)); // 25% calories
+
     return PlanDay(
       dayNumber: dayNumber,
       meals: meals,
-      notes: 'Sample meal plan for Day $dayNumber aiming for approx ${targetCalories}kcal.',
+      notes:
+          'Sample meal plan for Day $dayNumber aiming for approx ${targetCalories}kcal.',
     );
   }
 
   // Get an AI insight for dashboard based on user data
-  Future<String> getAIInsight(UserProfile userProfile, List<dynamic> recentWorkouts, List<dynamic> recentMeals) async {
+  Future<String> getAIInsight(UserProfile userProfile,
+      List<dynamic> recentWorkouts, List<dynamic> recentMeals) async {
     // Check if API key is valid
-    if (_geminiApiKey == null || _geminiApiKey!.isEmpty || _geminiApiKey == 'google-api-key-here') {
-      print("Error: Cannot generate AI insight. GEMINI_API_KEY is missing or invalid.");
+    if (_geminiApiKey == null ||
+        _geminiApiKey!.isEmpty ||
+        _geminiApiKey == 'google-api-key-here') {
+      print(
+          "Error: Cannot generate AI insight. GEMINI_API_KEY is missing or invalid.");
       return 'Based on your recent activity, consider focusing on maintaining consistency in your workouts and ensuring adequate protein intake for muscle recovery.';
     }
-    
+
     // Create a prompt based on user's recent activities
-    final prompt = _createInsightPrompt(userProfile, recentWorkouts, recentMeals);
+    final prompt =
+        _createInsightPrompt(userProfile, recentWorkouts, recentMeals);
 
     try {
       // Prepare the content for Gemini
       final content = [
-        Content.text("You are a fitness and nutrition expert. Provide a short, personalized insight based on the user's recent activity and goals.\n\n" + prompt),
+        Content.text(
+            "You are a fitness and nutrition expert. Provide a short, personalized insight based on the user's recent activity and goals.\n\n$prompt"),
       ];
-      
+
       // Call Gemini API
       final response = await _model.generateContent(
         content,
@@ -463,11 +531,12 @@ Format the response as a JSON object with the following structure:
           maxOutputTokens: 250,
         ),
       );
-      
+
       if (response.text != null) {
         return response.text!;
       } else {
-        print('Error: Gemini response was null or blocked. Reason: ${response.promptFeedback?.blockReason?.name}');
+        print(
+            'Error: Gemini response was null or blocked. Reason: ${response.promptFeedback?.blockReason?.name}');
         return 'Stay consistent with your fitness routine and ensure you\'re getting enough hydration throughout the day.';
       }
     } catch (e) {
@@ -477,10 +546,14 @@ Format the response as a JSON object with the following structure:
   }
 
   // Answer a fitness question using AI
-  Future<String> answerQuestion(String question, UserProfile userProfile) async {
+  Future<String> answerQuestion(
+      String question, UserProfile userProfile) async {
     // Check if the API key is valid before proceeding
-    if (_geminiApiKey == null || _geminiApiKey!.isEmpty || _geminiApiKey == 'google-api-key-here') {
-      print("Error: Cannot answer question. GEMINI_API_KEY is missing or invalid.");
+    if (_geminiApiKey == null ||
+        _geminiApiKey!.isEmpty ||
+        _geminiApiKey == 'google-api-key-here') {
+      print(
+          "Error: Cannot answer question. GEMINI_API_KEY is missing or invalid.");
       return "I'm sorry, but my AI capabilities are not configured correctly. Please check the API key setup.";
     }
 
@@ -500,7 +573,7 @@ Use simple, easy-to-understand language.
 
     // Construct the user message including profile context
     final userMessage = """
-${systemPrompt}
+$systemPrompt
 
 User Profile:
 Age: ${userProfile.age}
@@ -529,20 +602,20 @@ Question: $question
         return response.text!;
       } else {
         // Handle cases where the response might be blocked or empty
-        print('Error: Gemini response was null or blocked. Reason: ${response.promptFeedback?.blockReason?.name}');
+        print(
+            'Error: Gemini response was null or blocked. Reason: ${response.promptFeedback?.blockReason?.name}');
         return "I couldn't generate a response. This might be due to safety settings or an issue with the request. Please try rephrasing your question.";
       }
-
     } catch (e) {
       print('Error answering question with Gemini: $e');
       // Handle potential SDK errors (e.g., InvalidApiKey, network issues)
-       if (e is GenerativeAIException) {
-         return "I encountered an issue communicating with the AI service (${e.message}). Please try again later.";
-       }
+      if (e is GenerativeAIException) {
+        return "I encountered an issue communicating with the AI service (${e.message}). Please try again later.";
+      }
       return 'I\'m experiencing technical difficulties processing your request. Please check your connection and try again later.';
     }
   }
-  
+
   // Create a prompt for workout plan generation
   String _createWorkoutPlanPrompt(UserProfile userProfile) {
     final fitnessLevel = _determineFitnessLevel(userProfile);
@@ -599,10 +672,17 @@ Question: $question
   String _createMealPlanPrompt(UserProfile userProfile) {
     // Calculate calorie targets based on user profile
     final dailyCalories = userProfile.calculateDailyCalorieGoal();
-    final macrosDistribution = userProfile.macroDistribution ?? userProfile.defaultMacroDistribution;
-    final proteinGoal = dailyCalories * macrosDistribution['protein']! / 4; // 4 calories per gram of protein
-    final carbsGoal = dailyCalories * macrosDistribution['carbs']! / 4; // 4 calories per gram of carbs
-    final fatGoal = dailyCalories * macrosDistribution['fat']! / 9; // 9 calories per gram of fat
+    final macrosDistribution =
+        userProfile.macroDistribution ?? userProfile.defaultMacroDistribution;
+    final proteinGoal = dailyCalories *
+        macrosDistribution['protein']! /
+        4; // 4 calories per gram of protein
+    final carbsGoal = dailyCalories *
+        macrosDistribution['carbs']! /
+        4; // 4 calories per gram of carbs
+    final fatGoal = dailyCalories *
+        macrosDistribution['fat']! /
+        9; // 9 calories per gram of fat
 
     return '''
     Create a detailed 1-week meal plan for a user with the following profile:
@@ -661,7 +741,8 @@ Question: $question
   }
 
   // Create a prompt for insight generation
-  String _createInsightPrompt(UserProfile userProfile, List<dynamic> recentWorkouts, List<dynamic> recentMeals) {
+  String _createInsightPrompt(UserProfile userProfile,
+      List<dynamic> recentWorkouts, List<dynamic> recentMeals) {
     // Create simple summaries of recent activity
     String formattedWorkouts;
     if (recentWorkouts.isEmpty) {
@@ -673,13 +754,13 @@ Question: $question
           totalMinutes += workout.duration.inMinutes;
         }
       }
-      formattedWorkouts = "${recentWorkouts.length} workouts in the past week, totaling approximately $totalMinutes minutes";
+      formattedWorkouts =
+          "${recentWorkouts.length} workouts in the past week, totaling approximately $totalMinutes minutes";
     }
 
     String mealSummary = recentMeals.isEmpty
         ? "No meal tracking data available"
         : "Recent meals show an average of ${recentMeals.fold(0.0, (sum, meal) => sum + (meal.totalCalories ?? 0.0)) / (recentMeals.isEmpty ? 1 : recentMeals.length)} calories per meal";
-
 
     return '''
     Generate a short, personalized fitness insight for a user with the following profile and recent activity:
@@ -711,27 +792,32 @@ Question: $question
     }
   }
 
-  AIPlan _parseWorkoutPlanResponse(String jsonResponse, UserProfile userProfile) {
+  AIPlan _parseWorkoutPlanResponse(
+      String jsonResponse, UserProfile userProfile) {
     try {
       // Extract JSON from the response (in case there's markdown or other text)
       final jsonStart = jsonResponse.indexOf('{');
       final jsonEnd = jsonResponse.lastIndexOf('}') + 1;
       if (jsonStart == -1 || jsonEnd == 0) {
-         throw FormatException("Could not find JSON object in the response.");
+        throw const FormatException(
+            "Could not find JSON object in the response.");
       }
-      final jsonString = jsonResponse.substring(jsonStart, jsonEnd);
-
+      final cleaned =
+          jsonResponse.replaceAll(RegExp(r'```json|```'), '').trim();
+      final jsonString = cleaned.substring(jsonStart, jsonEnd);
 
       final data = jsonDecode(jsonString);
 
       final id = _uuid.v4();
       final title = data['title'] ?? 'Custom Workout Plan';
-      final description = data['description'] ?? 'AI-generated workout plan based on your profile.';
+      final description = data['description'] ??
+          'AI-generated workout plan based on your profile.';
 
       // Create plan days
       final List<PlanDay> planDays = [];
       if (data['days'] is! List) {
-         throw FormatException("Expected 'days' to be a list in the JSON response.");
+        throw const FormatException(
+            "Expected 'days' to be a list in the JSON response.");
       }
 
       for (var dayData in data['days']) {
@@ -739,13 +825,15 @@ Question: $question
 
         final dayNumberDynamic = dayData['day'];
         if (dayNumberDynamic is! num) continue; // Skip invalid day numbers
-        final int dayNumber = (dayNumberDynamic as num).toInt();
+        final int dayNumber = (dayNumberDynamic).toInt();
 
         final notes = dayData['notes']?.toString() ?? 'No notes provided.';
         final summary = dayData['summary']?.toString() ?? '';
 
         // If it's a rest day
-         if (dayData['workout'] == null || (dayData['workout'] is Map && dayData['workout']['type'] == 'rest')) {
+        if (dayData['workout'] == null ||
+            (dayData['workout'] is Map &&
+                dayData['workout']['type'] == 'rest')) {
           planDays.add(PlanDay(
             dayNumber: dayNumber,
             notes: notes,
@@ -764,21 +852,20 @@ Question: $question
           continue;
         }
 
-
         // Create workout
         final workoutData = dayData['workout'];
         if (workoutData is! Map) continue; // Skip invalid workout data
 
         final exercises = <Exercise>[];
 
-         if (workoutData['exercises'] is List) {
-           for (var exerciseData in workoutData['exercises']) {
-             if (exerciseData is! Map) continue; // Skip invalid exercise entries
+        if (workoutData['exercises'] is List) {
+          for (var exerciseData in workoutData['exercises']) {
+            if (exerciseData is! Map) continue; // Skip invalid exercise entries
 
-             final exerciseSets = <ExerciseSet>[];
-             final setsCount = exerciseData['sets'];
-             final repsCount = exerciseData['reps'];
-             final weightValue = exerciseData['weight']; // Can be String or num
+            final exerciseSets = <ExerciseSet>[];
+            final setsCount = exerciseData['sets'];
+            final repsCount = exerciseData['reps'];
+            final weightValue = exerciseData['weight']; // Can be String or num
 
             // Fix 2: Helper function to safely parse weight to double?
             double? safeParseDouble(dynamic value) {
@@ -788,31 +875,36 @@ Question: $question
             }
 
             // Create sets if valid counts are provided
-             if (setsCount is int && setsCount > 0 && repsCount is int && repsCount > 0) {
-               for (int i = 0; i < setsCount; i++) {
-                 exerciseSets.add(ExerciseSet(
-                   reps: repsCount,
-                    // Use safe parse for weight
-                    weight: safeParseDouble(weightValue),
-                 ));
-               }
-             }
+            if (setsCount is int &&
+                setsCount > 0 &&
+                repsCount is int &&
+                repsCount > 0) {
+              for (int i = 0; i < setsCount; i++) {
+                exerciseSets.add(ExerciseSet(
+                  reps: repsCount,
+                  // Use safe parse for weight
+                  weight: safeParseDouble(weightValue),
+                ));
+              }
+            }
 
-
-             exercises.add(Exercise(
-               id: _uuid.v4(),
-               name: exerciseData['name']?.toString() ?? 'Unnamed Exercise',
-               description: exerciseData['notes']?.toString(), // Allow null description
-               sets: exerciseSets.isEmpty ? null : exerciseSets,
-                // Fix 3: Provide non-nullable String for targetMuscleGroup
-                targetMuscleGroup: exerciseData['muscleGroup']?.toString() ?? 'Unknown',
-             ));
-           }
-         }
+            exercises.add(Exercise(
+              id: _uuid.v4(),
+              name: exerciseData['name']?.toString() ?? 'Unnamed Exercise',
+              description:
+                  exerciseData['notes']?.toString(), // Allow null description
+              sets: exerciseSets.isEmpty ? null : exerciseSets,
+              // Fix 3: Provide non-nullable String for targetMuscleGroup
+              targetMuscleGroup:
+                  exerciseData['muscleGroup']?.toString() ?? 'Unknown',
+            ));
+          }
+        }
 
         final workoutDuration = workoutData['duration'];
-         final durationMinutes = workoutDuration is num ? workoutDuration.toInt() : 45; // Default duration
-
+        final durationMinutes = workoutDuration is num
+            ? workoutDuration.toInt()
+            : 45; // Default duration
 
         final workout = Workout(
           id: _uuid.v4(),
@@ -832,7 +924,7 @@ Question: $question
         planDays.add(PlanDay(
           dayNumber: dayNumber,
           notes: notes,
-           summary: summary.isNotEmpty ? summary : (workout.notes ?? ''),
+          summary: summary.isNotEmpty ? summary : (workout.notes ?? ''),
           workout: workout,
         ));
       }
@@ -849,103 +941,111 @@ Question: $question
       );
     } catch (e) {
       print('Error parsing workout plan: $e');
-       // Consider logging the jsonResponse that caused the error
+      // Consider logging the jsonResponse that caused the error
       return _createDefaultWorkoutPlan(userProfile); // Fallback to default
     }
   }
 
-
   AIPlan _parseMealPlanResponse(String jsonResponse, UserProfile userProfile) {
-     try {
+    try {
       // Extract JSON from the response (in case there's markdown or other text)
       final jsonStart = jsonResponse.indexOf('{');
       final jsonEnd = jsonResponse.lastIndexOf('}') + 1;
       if (jsonStart == -1 || jsonEnd == 0) {
-        throw FormatException("Could not find JSON object in the response.");
+        throw const FormatException(
+            "Could not find JSON object in the response.");
       }
-      final jsonString = jsonResponse.substring(jsonStart, jsonEnd);
+      final cleaned =
+          jsonResponse.replaceAll(RegExp(r'```json|```'), '').trim();
+      final jsonString = cleaned.substring(jsonStart, jsonEnd);
 
       final data = jsonDecode(jsonString);
 
       final id = _uuid.v4();
       final title = data['title']?.toString() ?? 'Custom Meal Plan';
-      final description = data['description']?.toString() ?? 'AI-generated meal plan based on your profile.';
+      final description = data['description']?.toString() ??
+          'AI-generated meal plan based on your profile.';
 
       // Create plan days
       final List<PlanDay> planDays = [];
-       if (data['days'] is! List) {
-         throw FormatException("Expected 'days' to be a list in the JSON response.");
-       }
+      if (data['days'] is! List) {
+        throw const FormatException(
+            "Expected 'days' to be a list in the JSON response.");
+      }
 
       for (var dayData in data['days']) {
-         if (dayData is! Map) continue; // Skip invalid day entries
+        if (dayData is! Map) continue; // Skip invalid day entries
 
         final dayNumberDynamic = dayData['day'];
-         if (dayNumberDynamic is! num) continue; // Skip invalid day number
+        if (dayNumberDynamic is! num) continue; // Skip invalid day number
 
-        final int dayNumber = (dayNumberDynamic as num).toInt();
+        final int dayNumber = (dayNumberDynamic).toInt();
         final notes = dayData['notes']?.toString() ?? 'Nutrition-focused day';
         final meals = <Meal>[];
 
-         if (dayData['meals'] is List) {
-           for (var mealData in dayData['meals']) {
-             if (mealData is! Map) continue; // Skip invalid meal entries
+        if (dayData['meals'] is List) {
+          for (var mealData in dayData['meals']) {
+            if (mealData is! Map) continue; // Skip invalid meal entries
 
-             final mealName = mealData['name']?.toString() ?? 'Unnamed Meal';
-             final mealType = _getMealTypeFromName(mealName);
-             final mealItems = <MealItem>[];
-             final mealNotes = mealData['notes']?.toString(); // Allow null notes
-             
-             // Parse ingredients (new)
-             List<String>? ingredients;
-             if (mealData['ingredients'] is List) {
-               ingredients = List<String>.from(mealData['ingredients']);
-             }
-             
-             // Parse cooking instructions (new)
-             final cookingInstructions = mealData['cookingInstructions']?.toString();
+            final mealName = mealData['name']?.toString() ?? 'Unnamed Meal';
+            final mealType = _getMealTypeFromName(mealName);
+            final mealItems = <MealItem>[];
+            final mealNotes = mealData['notes']?.toString(); // Allow null notes
 
-             if (mealData['foods'] is List) {
-               for (var foodData in mealData['foods']) {
-                 if (foodData is! Map) continue; // Skip invalid food entries
+            // Parse ingredients (new)
+            List<String>? ingredients;
+            if (mealData['ingredients'] is List) {
+              ingredients = List<String>.from(mealData['ingredients']);
+            }
+
+            // Parse cooking instructions (new)
+            final cookingInstructions =
+                mealData['cookingInstructions']?.toString();
+
+            if (mealData['foods'] is List) {
+              for (var foodData in mealData['foods']) {
+                if (foodData is! Map) continue; // Skip invalid food entries
 
                 // Helper function to safely parse numbers
-                 double? safeParseDouble(dynamic value) {
-                   if (value is num) return value.toDouble();
-                   if (value is String) return double.tryParse(value);
-                   return null;
-                 }
+                double? safeParseDouble(dynamic value) {
+                  if (value is num) return value.toDouble();
+                  if (value is String) return double.tryParse(value);
+                  return null;
+                }
 
-                 final foodItem = FoodItem(
-                   id: _uuid.v4(),
-                   name: foodData['name']?.toString() ?? 'Unnamed Food',
-                   calories: safeParseDouble(foodData['calories']) ?? 0,
-                   protein: safeParseDouble(foodData['protein']) ?? 0,
-                   carbs: safeParseDouble(foodData['carbs']) ?? 0,
-                   fat: safeParseDouble(foodData['fat']) ?? 0,
-                   description: foodData['quantity']?.toString(), // Use quantity as description
-                 );
+                final foodItem = FoodItem(
+                  id: _uuid.v4(),
+                  name: foodData['name']?.toString() ?? 'Unnamed Food',
+                  calories: safeParseDouble(foodData['calories']) ?? 0,
+                  protein: safeParseDouble(foodData['protein']) ?? 0,
+                  carbs: safeParseDouble(foodData['carbs']) ?? 0,
+                  fat: safeParseDouble(foodData['fat']) ?? 0,
+                  description: foodData['quantity']
+                      ?.toString(), // Use quantity as description
+                );
 
-                 mealItems.add(MealItem(
-                   foodItem: foodItem,
-                   quantity: 1.0, // Assume quantity 1 unless specified otherwise
-                   servingSize: foodData['quantity']?.toString() ?? '1 serving', // Use quantity as serving size
-                 ));
-               }
-             }
+                mealItems.add(MealItem(
+                  foodItem: foodItem,
+                  quantity: 1.0, // Assume quantity 1 unless specified otherwise
+                  servingSize: foodData['quantity']?.toString() ??
+                      '1 serving', // Use quantity as serving size
+                ));
+              }
+            }
 
-             meals.add(Meal(
-               id: _uuid.v4(),
-               name: mealName,
-               type: mealType,
-               dateTime: DateTime.now().add(Duration(days: dayNumber - 1)), // Approximate time
-               items: mealItems,
-               notes: mealNotes,
-               ingredients: ingredients,
-               cookingInstructions: cookingInstructions,
-             ));
-           }
-         }
+            meals.add(Meal(
+              id: _uuid.v4(),
+              name: mealName,
+              type: mealType,
+              dateTime: DateTime.now()
+                  .add(Duration(days: dayNumber - 1)), // Approximate time
+              items: mealItems,
+              notes: mealNotes,
+              ingredients: ingredients,
+              cookingInstructions: cookingInstructions,
+            ));
+          }
+        }
 
         planDays.add(PlanDay(
           dayNumber: dayNumber,
@@ -960,17 +1060,17 @@ Question: $question
         description: description,
         type: PlanType.nutrition,
         startDate: DateTime.now(),
-        endDate: DateTime.now().add(const Duration(days: 7)), // Assuming 7-day plan default
+        endDate: DateTime.now()
+            .add(const Duration(days: 7)), // Assuming 7-day plan default
         days: planDays,
         targetProfile: userProfile,
       );
-     } catch (e) {
-       print('Error parsing meal plan: $e');
-       // Consider logging the jsonResponse
-       return _createDefaultMealPlan(userProfile); // Fallback
-     }
+    } catch (e) {
+      print('Error parsing meal plan: $e');
+      // Consider logging the jsonResponse
+      return _createDefaultMealPlan(userProfile); // Fallback
+    }
   }
-
 
   // Get meal type from name
   MealType _getMealTypeFromName(String name) {
@@ -1005,22 +1105,25 @@ Question: $question
         return WorkoutType.sports;
       case 'rest':
         return WorkoutType.rest;
-       case 'hiit': // Added HIIT
-         return WorkoutType.hiit;
+      case 'hiit': // Added HIIT
+        return WorkoutType.hiit;
       default:
         return WorkoutType.other;
     }
   }
 
   // Estimate calories burned for a workout
-  double _estimateCaloriesBurned(List<Exercise> exercises, int durationMinutes, UserProfile userProfile) {
+  double _estimateCaloriesBurned(
+      List<Exercise> exercises, int durationMinutes, UserProfile userProfile) {
     // Ensure duration is positive
     if (durationMinutes <= 0) return 0;
 
     // MET values approximation per workout type
     // Source: Compendium of Physical Activities (Ainsworth et al.) - simplified
     double metValue;
-    switch (exercises.isEmpty ? WorkoutType.other : _determineWorkoutType(exercises)) {
+    switch (exercises.isEmpty
+        ? WorkoutType.other
+        : _determineWorkoutType(exercises)) {
       case WorkoutType.strength:
         metValue = 3.5; // General strength training
         break;
@@ -1047,12 +1150,11 @@ Question: $question
         break;
     }
 
-     // Formula: Calories Burned = MET * Body Weight (kg) * Duration (hours) * (3.5 / 200) -> simplified to MET * weight * duration_hr
-     // More standard formula: MET * 3.5 * bodyWeightKg / 200 * durationMinutes
-     final caloriesPerMinute = metValue * 3.5 * userProfile.currentWeight / 200;
-     return caloriesPerMinute * durationMinutes;
+    // Formula: Calories Burned = MET * Body Weight (kg) * Duration (hours) * (3.5 / 200) -> simplified to MET * weight * duration_hr
+    // More standard formula: MET * 3.5 * bodyWeightKg / 200 * durationMinutes
+    final caloriesPerMinute = metValue * 3.5 * userProfile.currentWeight / 200;
+    return caloriesPerMinute * durationMinutes;
   }
-
 
   // Determine workout type based on exercises
   WorkoutType _determineWorkoutType(List<Exercise> exercises) {
@@ -1062,35 +1164,58 @@ Question: $question
     int strengthCount = 0;
     int cardioCount = 0;
     int flexibilityCount = 0;
-     int hiitCount = 0; // Added HIIT counter
+    int hiitCount = 0; // Added HIIT counter
 
     for (var exercise in exercises) {
       final name = exercise.name.toLowerCase();
-       // Prioritize HIIT if keywords match
-       if (name.contains('burpee') || name.contains('interval') || name.contains('tabata') || name.contains('hiit')) {
-         hiitCount++;
-       } else if (name.contains('push') || name.contains('pull') || name.contains('press') ||
-          name.contains('curl') || name.contains('squat') || name.contains('deadlift') ||
-          name.contains('row') || name.contains('raise') || name.contains('extension')) {
+      // Prioritize HIIT if keywords match
+      if (name.contains('burpee') ||
+          name.contains('interval') ||
+          name.contains('tabata') ||
+          name.contains('hiit')) {
+        hiitCount++;
+      } else if (name.contains('push') ||
+          name.contains('pull') ||
+          name.contains('press') ||
+          name.contains('curl') ||
+          name.contains('squat') ||
+          name.contains('deadlift') ||
+          name.contains('row') ||
+          name.contains('raise') ||
+          name.contains('extension')) {
         strengthCount++;
-      } else if (name.contains('run') || name.contains('jog') || name.contains('sprint') ||
-          name.contains('cycle') || name.contains('elliptical') || name.contains('swim') ||
-          name.contains('jump') || name.contains('cardio')) {
+      } else if (name.contains('run') ||
+          name.contains('jog') ||
+          name.contains('sprint') ||
+          name.contains('cycle') ||
+          name.contains('elliptical') ||
+          name.contains('swim') ||
+          name.contains('jump') ||
+          name.contains('cardio')) {
         cardioCount++;
-      } else if (name.contains('stretch') || name.contains('yoga') || name.contains('flex') ||
-                 name.contains('mobility') || name.contains('foam roll')) {
+      } else if (name.contains('stretch') ||
+          name.contains('yoga') ||
+          name.contains('flex') ||
+          name.contains('mobility') ||
+          name.contains('foam roll')) {
         flexibilityCount++;
       }
     }
 
-     // Determine primary type based on counts (prioritize HIIT)
-     if (hiitCount > 0 && hiitCount >= strengthCount && hiitCount >= cardioCount && hiitCount >= flexibilityCount) {
-       return WorkoutType.hiit;
-     } else if (strengthCount >= cardioCount && strengthCount >= flexibilityCount) {
+    // Determine primary type based on counts (prioritize HIIT)
+    if (hiitCount > 0 &&
+        hiitCount >= strengthCount &&
+        hiitCount >= cardioCount &&
+        hiitCount >= flexibilityCount) {
+      return WorkoutType.hiit;
+    } else if (strengthCount >= cardioCount &&
+        strengthCount >= flexibilityCount) {
       return WorkoutType.strength;
-    } else if (cardioCount >= strengthCount && cardioCount >= flexibilityCount) {
+    } else if (cardioCount >= strengthCount &&
+        cardioCount >= flexibilityCount) {
       return WorkoutType.cardio;
-    } else if (flexibilityCount > 0) { // Flexibility only if explicitly present
+    } else if (flexibilityCount > 0) {
+      // Flexibility only if explicitly present
       return WorkoutType.flexibility;
     } else {
       return WorkoutType.other; // Default if no clear type
@@ -1112,7 +1237,8 @@ Question: $question
 
       // Rest days on Sundays (dayOfWeek == 0)
       if (dayOfWeek == 0) {
-        notes = 'Rest day - focus on recovery and active rest like light walking or stretching.';
+        notes =
+            'Rest day - focus on recovery and active rest like light walking or stretching.';
         workout = Workout(
           id: _uuid.v4(),
           name: 'Rest Day',
@@ -1127,37 +1253,38 @@ Question: $question
         // Assign workouts based on goal and day
         if (userProfile.fitnessGoal == FitnessGoal.weightLoss) {
           workout = _createDefaultWeightLossWorkout(dayOfWeek, workoutDate);
-          notes = workout?.notes ?? 'Weight Loss Focus Workout';
+          notes = workout.notes ?? 'Weight Loss Focus Workout';
         } else if (userProfile.fitnessGoal == FitnessGoal.muscleGain) {
           workout = _createDefaultMuscleGainWorkout(dayOfWeek, workoutDate);
-           notes = workout?.notes ?? 'Muscle Gain Focus Workout';
-        } else { // Maintenance
+          notes = workout.notes ?? 'Muscle Gain Focus Workout';
+        } else {
+          // Maintenance
           workout = _createDefaultMaintenanceWorkout(dayOfWeek, workoutDate);
-           notes = workout?.notes ?? 'Balanced Fitness Workout';
+          notes = workout.notes ?? 'Balanced Fitness Workout';
         }
 
-         // Estimate calories for non-rest days if workout exists
-         if (workout != null) {
-           workout = Workout(
-             id: workout.id,
-             name: workout.name,
-             dateTime: workout.dateTime,
-             duration: workout.duration,
-             type: workout.type,
-             exercises: workout.exercises,
-             caloriesBurned: _estimateCaloriesBurned(workout.exercises, workout.duration.inMinutes, userProfile).toInt(),
-             notes: workout.notes,
-           );
-           notes = workout.notes ?? ''; // Update notes from workout if available
-         }
+        // Estimate calories for non-rest days if workout exists
+        workout = Workout(
+          id: workout.id,
+          name: workout.name,
+          dateTime: workout.dateTime,
+          duration: workout.duration,
+          type: workout.type,
+          exercises: workout.exercises,
+          caloriesBurned: _estimateCaloriesBurned(
+                  workout.exercises, workout.duration.inMinutes, userProfile)
+              .toInt(),
+          notes: workout.notes,
+        );
+        notes = workout.notes ?? ''; // Update notes from workout if available
       }
-
 
       planDays.add(PlanDay(
         dayNumber: day,
-        workout: workout, // Can be null if no specific workout assigned (though unlikely with current logic)
+        workout:
+            workout, // Can be null if no specific workout assigned (though unlikely with current logic)
         notes: notes,
-        summary: workout?.name ?? 'Rest or Light Activity', // Provide a summary
+        summary: workout.name ?? 'Rest or Light Activity', // Provide a summary
       ));
     }
 
@@ -1167,19 +1294,21 @@ Question: $question
     switch (userProfile.fitnessGoal) {
       case FitnessGoal.weightLoss:
         planTitle = 'Default Fat Loss Workout Plan';
-        planDescription = 'A basic 4-week plan combining cardio and strength to support weight loss when AI generation fails.';
+        planDescription =
+            'A basic 4-week plan combining cardio and strength to support weight loss when AI generation fails.';
         break;
       case FitnessGoal.muscleGain:
         planTitle = 'Default Muscle Building Program';
-        planDescription = 'A basic 4-week strength-focused plan for muscle gain when AI generation fails.';
+        planDescription =
+            'A basic 4-week strength-focused plan for muscle gain when AI generation fails.';
         break;
       case FitnessGoal.maintenance:
       default:
         planTitle = 'Default Balanced Fitness Plan';
-        planDescription = 'A basic 4-week plan with mixed activities for general fitness when AI generation fails.';
+        planDescription =
+            'A basic 4-week plan with mixed activities for general fitness when AI generation fails.';
         break;
     }
-
 
     return AIPlan(
       id: id,
@@ -1193,7 +1322,6 @@ Question: $question
     );
   }
 
-
   // Helper to create weight loss workout for a specific day
   Workout _createDefaultWeightLossWorkout(int dayOfWeek, DateTime date) {
     List<Exercise> exercises = [];
@@ -1206,10 +1334,43 @@ Question: $question
         name = 'Full Body Strength';
         type = WorkoutType.strength;
         exercises = [
-          Exercise(id: _uuid.v4(), name: 'Goblet Squats', sets: [ExerciseSet(reps: 12), ExerciseSet(reps: 12), ExerciseSet(reps: 12)], targetMuscleGroup: 'Legs'),
-          Exercise(id: _uuid.v4(), name: 'Push-ups (on knees if needed)', sets: [ExerciseSet(reps: 10), ExerciseSet(reps: 10), ExerciseSet(reps: 10)], targetMuscleGroup: 'Chest/Triceps'),
-          Exercise(id: _uuid.v4(), name: 'Dumbbell Rows', sets: [ExerciseSet(reps: 12), ExerciseSet(reps: 12), ExerciseSet(reps: 12)], targetMuscleGroup: 'Back/Biceps'),
-          Exercise(id: _uuid.v4(), name: 'Plank', duration: const Duration(seconds: 30), sets: [ExerciseSet(reps: 1), ExerciseSet(reps: 1), ExerciseSet(reps: 1)], targetMuscleGroup: 'Core'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Goblet Squats',
+              sets: [
+                ExerciseSet(reps: 12),
+                ExerciseSet(reps: 12),
+                ExerciseSet(reps: 12)
+              ],
+              targetMuscleGroup: 'Legs'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Push-ups (on knees if needed)',
+              sets: [
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10)
+              ],
+              targetMuscleGroup: 'Chest/Triceps'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Dumbbell Rows',
+              sets: [
+                ExerciseSet(reps: 12),
+                ExerciseSet(reps: 12),
+                ExerciseSet(reps: 12)
+              ],
+              targetMuscleGroup: 'Back/Biceps'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Plank',
+              duration: const Duration(seconds: 30),
+              sets: [
+                ExerciseSet(reps: 1),
+                ExerciseSet(reps: 1),
+                ExerciseSet(reps: 1)
+              ],
+              targetMuscleGroup: 'Core'),
         ];
         break;
       case 2: // Tue: Cardio HIIT
@@ -1217,11 +1378,46 @@ Question: $question
         name = 'Cardio HIIT';
         type = WorkoutType.hiit;
         exercises = [
-          Exercise(id: _uuid.v4(), name: 'Jumping Jacks (Warm-up)', duration: const Duration(minutes: 2), targetMuscleGroup: 'Full Body'),
-          Exercise(id: _uuid.v4(), name: 'High Knees (30s work, 30s rest)', sets: [ExerciseSet(reps: 1), ExerciseSet(reps: 1), ExerciseSet(reps: 1), ExerciseSet(reps: 1)], targetMuscleGroup: 'Full Body'),
-          Exercise(id: _uuid.v4(), name: 'Burpees (30s work, 30s rest)', sets: [ExerciseSet(reps: 1), ExerciseSet(reps: 1), ExerciseSet(reps: 1), ExerciseSet(reps: 1)], targetMuscleGroup: 'Full Body'),
-          Exercise(id: _uuid.v4(), name: 'Mountain Climbers (30s work, 30s rest)', sets: [ExerciseSet(reps: 1), ExerciseSet(reps: 1), ExerciseSet(reps: 1), ExerciseSet(reps: 1)], targetMuscleGroup: 'Core/Full Body'),
-          Exercise(id: _uuid.v4(), name: 'Cool-down walk', duration: const Duration(minutes: 5), targetMuscleGroup: 'Full Body'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Jumping Jacks (Warm-up)',
+              duration: const Duration(minutes: 2),
+              targetMuscleGroup: 'Full Body'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'High Knees (30s work, 30s rest)',
+              sets: [
+                ExerciseSet(reps: 1),
+                ExerciseSet(reps: 1),
+                ExerciseSet(reps: 1),
+                ExerciseSet(reps: 1)
+              ],
+              targetMuscleGroup: 'Full Body'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Burpees (30s work, 30s rest)',
+              sets: [
+                ExerciseSet(reps: 1),
+                ExerciseSet(reps: 1),
+                ExerciseSet(reps: 1),
+                ExerciseSet(reps: 1)
+              ],
+              targetMuscleGroup: 'Full Body'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Mountain Climbers (30s work, 30s rest)',
+              sets: [
+                ExerciseSet(reps: 1),
+                ExerciseSet(reps: 1),
+                ExerciseSet(reps: 1),
+                ExerciseSet(reps: 1)
+              ],
+              targetMuscleGroup: 'Core/Full Body'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Cool-down walk',
+              duration: const Duration(minutes: 5),
+              targetMuscleGroup: 'Full Body'),
         ];
         break;
       case 3: // Wed: Active Recovery / Light Cardio
@@ -1229,8 +1425,16 @@ Question: $question
         name = 'Active Recovery / Light Cardio';
         type = WorkoutType.cardio; // Or flexibility
         exercises = [
-          Exercise(id: _uuid.v4(), name: 'Brisk Walking or Light Jogging', duration: const Duration(minutes: 30), targetMuscleGroup: 'Cardiovascular'),
-          Exercise(id: _uuid.v4(), name: 'Light Stretching', duration: const Duration(minutes: 10), targetMuscleGroup: 'Full Body'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Brisk Walking or Light Jogging',
+              duration: const Duration(minutes: 30),
+              targetMuscleGroup: 'Cardiovascular'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Light Stretching',
+              duration: const Duration(minutes: 10),
+              targetMuscleGroup: 'Full Body'),
         ];
         break;
     }
@@ -1243,12 +1447,13 @@ Question: $question
       type: type,
       exercises: exercises,
       caloriesBurned: 200, // Default calories burned value
-      notes: '$name focusing on calorie expenditure and improving cardiovascular health.',
+      notes:
+          '$name focusing on calorie expenditure and improving cardiovascular health.',
     );
   }
 
- // Helper to create muscle gain workout for a specific day
- Workout _createDefaultMuscleGainWorkout(int dayOfWeek, DateTime date) {
+  // Helper to create muscle gain workout for a specific day
+  Workout _createDefaultMuscleGainWorkout(int dayOfWeek, DateTime date) {
     List<Exercise> exercises = [];
     String name = '';
     WorkoutType type = WorkoutType.strength;
@@ -1257,49 +1462,189 @@ Question: $question
       case 1: // Mon: Upper Body Push (Chest, Shoulders, Triceps)
         name = 'Upper Body Push';
         exercises = [
-          Exercise(id: _uuid.v4(), name: 'Bench Press (or Dumbbell Press)', sets: [ExerciseSet(reps: 8), ExerciseSet(reps: 8), ExerciseSet(reps: 8)], targetMuscleGroup: 'Chest'),
-          Exercise(id: _uuid.v4(), name: 'Overhead Press', sets: [ExerciseSet(reps: 10), ExerciseSet(reps: 10), ExerciseSet(reps: 10)], targetMuscleGroup: 'Shoulders'),
-          Exercise(id: _uuid.v4(), name: 'Tricep Dips (or Extensions)', sets: [ExerciseSet(reps: 12), ExerciseSet(reps: 12), ExerciseSet(reps: 12)], targetMuscleGroup: 'Triceps'),
-          Exercise(id: _uuid.v4(), name: 'Lateral Raises', sets: [ExerciseSet(reps: 15), ExerciseSet(reps: 15), ExerciseSet(reps: 15)], targetMuscleGroup: 'Shoulders'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Bench Press (or Dumbbell Press)',
+              sets: [
+                ExerciseSet(reps: 8),
+                ExerciseSet(reps: 8),
+                ExerciseSet(reps: 8)
+              ],
+              targetMuscleGroup: 'Chest'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Overhead Press',
+              sets: [
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10)
+              ],
+              targetMuscleGroup: 'Shoulders'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Tricep Dips (or Extensions)',
+              sets: [
+                ExerciseSet(reps: 12),
+                ExerciseSet(reps: 12),
+                ExerciseSet(reps: 12)
+              ],
+              targetMuscleGroup: 'Triceps'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Lateral Raises',
+              sets: [
+                ExerciseSet(reps: 15),
+                ExerciseSet(reps: 15),
+                ExerciseSet(reps: 15)
+              ],
+              targetMuscleGroup: 'Shoulders'),
         ];
         break;
       case 2: // Tue: Lower Body (Quads, Hamstrings, Glutes, Calves)
         name = 'Lower Body';
         exercises = [
-          Exercise(id: _uuid.v4(), name: 'Barbell Squats', sets: [ExerciseSet(reps: 8), ExerciseSet(reps: 8), ExerciseSet(reps: 8)], targetMuscleGroup: 'Legs/Glutes'),
-          Exercise(id: _uuid.v4(), name: 'Romanian Deadlifts', sets: [ExerciseSet(reps: 10), ExerciseSet(reps: 10), ExerciseSet(reps: 10)], targetMuscleGroup: 'Hamstrings/Glutes'),
-          Exercise(id: _uuid.v4(), name: 'Leg Press', sets: [ExerciseSet(reps: 12), ExerciseSet(reps: 12), ExerciseSet(reps: 12)], targetMuscleGroup: 'Legs'),
-          Exercise(id: _uuid.v4(), name: 'Calf Raises', sets: [ExerciseSet(reps: 15), ExerciseSet(reps: 15), ExerciseSet(reps: 15)], targetMuscleGroup: 'Calves'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Barbell Squats',
+              sets: [
+                ExerciseSet(reps: 8),
+                ExerciseSet(reps: 8),
+                ExerciseSet(reps: 8)
+              ],
+              targetMuscleGroup: 'Legs/Glutes'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Romanian Deadlifts',
+              sets: [
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10)
+              ],
+              targetMuscleGroup: 'Hamstrings/Glutes'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Leg Press',
+              sets: [
+                ExerciseSet(reps: 12),
+                ExerciseSet(reps: 12),
+                ExerciseSet(reps: 12)
+              ],
+              targetMuscleGroup: 'Legs'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Calf Raises',
+              sets: [
+                ExerciseSet(reps: 15),
+                ExerciseSet(reps: 15),
+                ExerciseSet(reps: 15)
+              ],
+              targetMuscleGroup: 'Calves'),
         ];
         break;
-       case 3: // Wed: Rest or Active Recovery
-         name = 'Active Recovery / Light Activity';
-         type = WorkoutType.other; // Or flexibility
-         exercises = [Exercise(id: _uuid.v4(), name: 'Light walk or stretching', duration: const Duration(minutes: 30), targetMuscleGroup: 'Full Body')];
-         break;
+      case 3: // Wed: Rest or Active Recovery
+        name = 'Active Recovery / Light Activity';
+        type = WorkoutType.other; // Or flexibility
+        exercises = [
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Light walk or stretching',
+              duration: const Duration(minutes: 30),
+              targetMuscleGroup: 'Full Body')
+        ];
+        break;
       case 4: // Thu: Upper Body Pull (Back, Biceps)
         name = 'Upper Body Pull';
         exercises = [
-          Exercise(id: _uuid.v4(), name: 'Pull-ups (or Lat Pulldowns)', sets: [ExerciseSet(reps: 8), ExerciseSet(reps: 8), ExerciseSet(reps: 8)], targetMuscleGroup: 'Back/Biceps'),
-          Exercise(id: _uuid.v4(), name: 'Barbell Rows', sets: [ExerciseSet(reps: 10), ExerciseSet(reps: 10), ExerciseSet(reps: 10)], targetMuscleGroup: 'Back'),
-          Exercise(id: _uuid.v4(), name: 'Face Pulls', sets: [ExerciseSet(reps: 15), ExerciseSet(reps: 15), ExerciseSet(reps: 15)], targetMuscleGroup: 'Shoulders/Back'),
-          Exercise(id: _uuid.v4(), name: 'Bicep Curls', sets: [ExerciseSet(reps: 12), ExerciseSet(reps: 12), ExerciseSet(reps: 12)], targetMuscleGroup: 'Biceps'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Pull-ups (or Lat Pulldowns)',
+              sets: [
+                ExerciseSet(reps: 8),
+                ExerciseSet(reps: 8),
+                ExerciseSet(reps: 8)
+              ],
+              targetMuscleGroup: 'Back/Biceps'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Barbell Rows',
+              sets: [
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10)
+              ],
+              targetMuscleGroup: 'Back'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Face Pulls',
+              sets: [
+                ExerciseSet(reps: 15),
+                ExerciseSet(reps: 15),
+                ExerciseSet(reps: 15)
+              ],
+              targetMuscleGroup: 'Shoulders/Back'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Bicep Curls',
+              sets: [
+                ExerciseSet(reps: 12),
+                ExerciseSet(reps: 12),
+                ExerciseSet(reps: 12)
+              ],
+              targetMuscleGroup: 'Biceps'),
         ];
         break;
       case 5: // Fri: Lower Body / Core
-         name = 'Lower Body & Core';
-         exercises = [
-           Exercise(id: _uuid.v4(), name: 'Front Squats', sets: [ExerciseSet(reps: 10), ExerciseSet(reps: 10), ExerciseSet(reps: 10)], targetMuscleGroup: 'Quads/Glutes'),
-           Exercise(id: _uuid.v4(), name: 'Hamstring Curls', sets: [ExerciseSet(reps: 12), ExerciseSet(reps: 12), ExerciseSet(reps: 12)], targetMuscleGroup: 'Hamstrings'),
-           Exercise(id: _uuid.v4(), name: 'Leg Extensions', sets: [ExerciseSet(reps: 15), ExerciseSet(reps: 15), ExerciseSet(reps: 15)], targetMuscleGroup: 'Quads'),
-           Exercise(id: _uuid.v4(), name: 'Hanging Leg Raises', sets: [ExerciseSet(reps: 15), ExerciseSet(reps: 15), ExerciseSet(reps: 15)], targetMuscleGroup: 'Core'),
-         ];
-         break;
-       case 6: // Sat: Rest or Optional Light Cardio/Mobility
-         name = 'Optional Light Activity';
-         type = WorkoutType.other;
-         exercises = [Exercise(id: _uuid.v4(), name: 'Optional light cardio or mobility work', duration: const Duration(minutes: 30), targetMuscleGroup: 'Full Body')];
-         break;
+        name = 'Lower Body & Core';
+        exercises = [
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Front Squats',
+              sets: [
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10)
+              ],
+              targetMuscleGroup: 'Quads/Glutes'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Hamstring Curls',
+              sets: [
+                ExerciseSet(reps: 12),
+                ExerciseSet(reps: 12),
+                ExerciseSet(reps: 12)
+              ],
+              targetMuscleGroup: 'Hamstrings'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Leg Extensions',
+              sets: [
+                ExerciseSet(reps: 15),
+                ExerciseSet(reps: 15),
+                ExerciseSet(reps: 15)
+              ],
+              targetMuscleGroup: 'Quads'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Hanging Leg Raises',
+              sets: [
+                ExerciseSet(reps: 15),
+                ExerciseSet(reps: 15),
+                ExerciseSet(reps: 15)
+              ],
+              targetMuscleGroup: 'Core'),
+        ];
+        break;
+      case 6: // Sat: Rest or Optional Light Cardio/Mobility
+        name = 'Optional Light Activity';
+        type = WorkoutType.other;
+        exercises = [
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Optional light cardio or mobility work',
+              duration: const Duration(minutes: 30),
+              targetMuscleGroup: 'Full Body')
+        ];
+        break;
     }
 
     return Workout(
@@ -1314,8 +1659,8 @@ Question: $question
     );
   }
 
- // Helper to create maintenance workout for a specific day
- Workout _createDefaultMaintenanceWorkout(int dayOfWeek, DateTime date) {
+  // Helper to create maintenance workout for a specific day
+  Workout _createDefaultMaintenanceWorkout(int dayOfWeek, DateTime date) {
     List<Exercise> exercises = [];
     String name = '';
     WorkoutType type = WorkoutType.other;
@@ -1325,44 +1670,129 @@ Question: $question
         name = 'Full Body Strength A';
         type = WorkoutType.strength;
         exercises = [
-          Exercise(id: _uuid.v4(), name: 'Squats', sets: [ExerciseSet(reps: 10), ExerciseSet(reps: 10), ExerciseSet(reps: 10)], targetMuscleGroup: 'Legs/Glutes'),
-          Exercise(id: _uuid.v4(), name: 'Bench Press', sets: [ExerciseSet(reps: 10), ExerciseSet(reps: 10), ExerciseSet(reps: 10)], targetMuscleGroup: 'Chest'),
-          Exercise(id: _uuid.v4(), name: 'Barbell Rows', sets: [ExerciseSet(reps: 10), ExerciseSet(reps: 10), ExerciseSet(reps: 10)], targetMuscleGroup: 'Back'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Squats',
+              sets: [
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10)
+              ],
+              targetMuscleGroup: 'Legs/Glutes'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Bench Press',
+              sets: [
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10)
+              ],
+              targetMuscleGroup: 'Chest'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Barbell Rows',
+              sets: [
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10)
+              ],
+              targetMuscleGroup: 'Back'),
         ];
         break;
-       case 2: // Tue: Light Cardio / Active Recovery
-         name = 'Light Cardio / Active Recovery';
-         type = WorkoutType.cardio;
-         exercises = [Exercise(id: _uuid.v4(), name: 'Brisk walking or cycling', duration: const Duration(minutes: 30), targetMuscleGroup: 'Cardiovascular')];
-         break;
+      case 2: // Tue: Light Cardio / Active Recovery
+        name = 'Light Cardio / Active Recovery';
+        type = WorkoutType.cardio;
+        exercises = [
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Brisk walking or cycling',
+              duration: const Duration(minutes: 30),
+              targetMuscleGroup: 'Cardiovascular')
+        ];
+        break;
       case 3: // Wed: Full Body Strength B
         name = 'Full Body Strength B';
         type = WorkoutType.strength;
         exercises = [
-          Exercise(id: _uuid.v4(), name: 'Deadlifts (conventional or Romanian)', sets: [ExerciseSet(reps: 8), ExerciseSet(reps: 8)], targetMuscleGroup: 'Back/Legs/Glutes'),
-          Exercise(id: _uuid.v4(), name: 'Overhead Press', sets: [ExerciseSet(reps: 10), ExerciseSet(reps: 10), ExerciseSet(reps: 10)], targetMuscleGroup: 'Shoulders'),
-          Exercise(id: _uuid.v4(), name: 'Pull-ups (or Lat Pulldowns)', sets: [ExerciseSet(reps: 10), ExerciseSet(reps: 10), ExerciseSet(reps: 10)], targetMuscleGroup: 'Back/Biceps'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Deadlifts (conventional or Romanian)',
+              sets: [ExerciseSet(reps: 8), ExerciseSet(reps: 8)],
+              targetMuscleGroup: 'Back/Legs/Glutes'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Overhead Press',
+              sets: [
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10)
+              ],
+              targetMuscleGroup: 'Shoulders'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Pull-ups (or Lat Pulldowns)',
+              sets: [
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10)
+              ],
+              targetMuscleGroup: 'Back/Biceps'),
         ];
         break;
-       case 4: // Thu: Rest or Mobility/Flexibility
-         name = 'Mobility & Flexibility';
-         type = WorkoutType.flexibility;
-         exercises = [Exercise(id: _uuid.v4(), name: 'Yoga or Dynamic Stretching', duration: const Duration(minutes: 30), targetMuscleGroup: 'Full Body')];
-         break;
+      case 4: // Thu: Rest or Mobility/Flexibility
+        name = 'Mobility & Flexibility';
+        type = WorkoutType.flexibility;
+        exercises = [
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Yoga or Dynamic Stretching',
+              duration: const Duration(minutes: 30),
+              targetMuscleGroup: 'Full Body')
+        ];
+        break;
       case 5: // Fri: Full Body Strength A (Repeat) or Optional activity
-         name = 'Full Body Strength A (Repeat)';
-         type = WorkoutType.strength;
-         exercises = [ // Same as Monday
-           Exercise(id: _uuid.v4(), name: 'Squats', sets: [ExerciseSet(reps: 10), ExerciseSet(reps: 10), ExerciseSet(reps: 10)], targetMuscleGroup: 'Legs/Glutes'),
-           Exercise(id: _uuid.v4(), name: 'Bench Press', sets: [ExerciseSet(reps: 10), ExerciseSet(reps: 10), ExerciseSet(reps: 10)], targetMuscleGroup: 'Chest'),
-           Exercise(id: _uuid.v4(), name: 'Barbell Rows', sets: [ExerciseSet(reps: 10), ExerciseSet(reps: 10), ExerciseSet(reps: 10)], targetMuscleGroup: 'Back'),
-         ];
+        name = 'Full Body Strength A (Repeat)';
+        type = WorkoutType.strength;
+        exercises = [
+          // Same as Monday
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Squats',
+              sets: [
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10)
+              ],
+              targetMuscleGroup: 'Legs/Glutes'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Bench Press',
+              sets: [
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10)
+              ],
+              targetMuscleGroup: 'Chest'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Barbell Rows',
+              sets: [
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10),
+                ExerciseSet(reps: 10)
+              ],
+              targetMuscleGroup: 'Back'),
+        ];
         break;
       case 6: // Sat: Longer Cardio or Recreational Activity
         name = 'Longer Cardio / Activity';
         type = WorkoutType.cardio; // Or Sports
         exercises = [
-          Exercise(id: _uuid.v4(), name: 'Jogging, Hiking, Cycling, or Sport', duration: const Duration(minutes: 45), targetMuscleGroup: 'Cardiovascular'),
+          Exercise(
+              id: _uuid.v4(),
+              name: 'Jogging, Hiking, Cycling, or Sport',
+              duration: const Duration(minutes: 45),
+              targetMuscleGroup: 'Cardiovascular'),
         ];
         break;
     }
@@ -1379,7 +1809,6 @@ Question: $question
     );
   }
 
-
   // Create a default meal plan if API generation fails
   AIPlan _createDefaultMealPlan(UserProfile userProfile) {
     final id = _uuid.v4();
@@ -1388,8 +1817,11 @@ Question: $question
 
     // Base calorie estimate if AI fails - could use userProfile.calculateDailyCalorieGoal()
     // For simplicity, using fixed examples here. Actual implementation should be more dynamic.
-    final targetCalories = userProfile.fitnessGoal == FitnessGoal.weightLoss ? 1800 :
-                          userProfile.fitnessGoal == FitnessGoal.muscleGain ? 2500 : 2200;
+    final targetCalories = userProfile.fitnessGoal == FitnessGoal.weightLoss
+        ? 1800
+        : userProfile.fitnessGoal == FitnessGoal.muscleGain
+            ? 2500
+            : 2200;
 
     // Create a simple 7-day meal plan structure
     for (int day = 1; day <= 7; day++) {
@@ -1397,18 +1829,23 @@ Question: $question
       final meals = <Meal>[];
 
       // Add meals with sample data (adjust based on targetCalories if desired)
-      meals.add(_createSampleMeal(MealType.breakfast, dayDate, targetCalories * 0.25)); // 25% calories
-      meals.add(_createSampleMeal(MealType.snack, dayDate, targetCalories * 0.10));      // 10% calories
-      meals.add(_createSampleMeal(MealType.lunch, dayDate, targetCalories * 0.30));      // 30% calories
-      meals.add(_createSampleMeal(MealType.snack, dayDate, targetCalories * 0.10));      // 10% calories
-      meals.add(_createSampleMeal(MealType.dinner, dayDate, targetCalories * 0.25));     // 25% calories
-
+      meals.add(_createSampleMeal(
+          MealType.breakfast, dayDate, targetCalories * 0.25)); // 25% calories
+      meals.add(_createSampleMeal(
+          MealType.snack, dayDate, targetCalories * 0.10)); // 10% calories
+      meals.add(_createSampleMeal(
+          MealType.lunch, dayDate, targetCalories * 0.30)); // 30% calories
+      meals.add(_createSampleMeal(
+          MealType.snack, dayDate, targetCalories * 0.10)); // 10% calories
+      meals.add(_createSampleMeal(
+          MealType.dinner, dayDate, targetCalories * 0.25)); // 25% calories
 
       planDays.add(PlanDay(
         dayNumber: day,
         meals: meals,
-        notes: 'Sample meal plan for Day $day aiming for approx ${targetCalories}kcal.',
-         summary: 'Breakfast, Lunch, Dinner, 2 Snacks (~${targetCalories} kcal)',
+        notes:
+            'Sample meal plan for Day $day aiming for approx ${targetCalories}kcal.',
+        summary: 'Breakfast, Lunch, Dinner, 2 Snacks (~$targetCalories kcal)',
       ));
     }
 
@@ -1418,19 +1855,21 @@ Question: $question
     switch (userProfile.fitnessGoal) {
       case FitnessGoal.weightLoss:
         planTitle = 'Default Weight Loss Meal Plan';
-        planDescription = 'A basic 7-day sample meal plan (~${targetCalories} kcal/day) when AI generation fails.';
+        planDescription =
+            'A basic 7-day sample meal plan (~$targetCalories kcal/day) when AI generation fails.';
         break;
       case FitnessGoal.muscleGain:
         planTitle = 'Default Muscle Building Meal Plan';
-        planDescription = 'A basic 7-day sample meal plan (~${targetCalories} kcal/day) when AI generation fails.';
+        planDescription =
+            'A basic 7-day sample meal plan (~$targetCalories kcal/day) when AI generation fails.';
         break;
       case FitnessGoal.maintenance:
       default:
         planTitle = 'Default Balanced Nutrition Plan';
-        planDescription = 'A basic 7-day sample meal plan (~${targetCalories} kcal/day) when AI generation fails.';
+        planDescription =
+            'A basic 7-day sample meal plan (~$targetCalories kcal/day) when AI generation fails.';
         break;
     }
-
 
     return AIPlan(
       id: id,
@@ -1444,8 +1883,8 @@ Question: $question
     );
   }
 
- // Helper to create a sample meal with approximate nutritional info
- Meal _createSampleMeal(MealType type, DateTime date, double targetCalories) {
+  // Helper to create a sample meal with approximate nutritional info
+  Meal _createSampleMeal(MealType type, DateTime date, double targetCalories) {
     String name = '';
     List<MealItem> items = [];
     DateTime mealTime;
@@ -1461,7 +1900,7 @@ Question: $question
       case MealType.breakfast:
         name = 'Breakfast';
         mealTime = DateTime(date.year, date.month, date.day, 8); // 8 AM
-        
+
         ingredients = [
           "2/3 cup rolled oats",
           "1 cup unsweetened almond milk",
@@ -1472,25 +1911,34 @@ Question: $question
           "2 tablespoons chopped walnuts",
           "1/4 cup fresh berries (blueberries, strawberries, etc.)"
         ];
-        
-        cookingInstructions = "1. Combine oats and almond milk in a small pot.\n"
+
+        cookingInstructions =
+            "1. Combine oats and almond milk in a small pot.\n"
             "2. Bring to a simmer over medium heat and cook for 5-7 minutes, stirring occasionally, until oats are soft and creamy.\n"
             "3. Remove from heat and stir in honey and cinnamon.\n"
             "4. Transfer to a bowl and top with sliced banana, chia seeds, walnuts, and berries.\n"
             "5. Allow to cool slightly before serving.";
-            
+
         items = [
           MealItem(
-            foodItem: FoodItem(id: _uuid.v4(), name: 'Oatmeal with Fruit and Nuts', calories: targetCalories, protein: proteinGrams, carbs: carbsGrams, fat: fatGrams, description: '~${targetCalories.toInt()} kcal'),
-            quantity: 1.0, servingSize: '1 bowl',
+            foodItem: FoodItem(
+                id: _uuid.v4(),
+                name: 'Oatmeal with Fruit and Nuts',
+                calories: targetCalories,
+                protein: proteinGrams,
+                carbs: carbsGrams,
+                fat: fatGrams,
+                description: '~${targetCalories.toInt()} kcal'),
+            quantity: 1.0,
+            servingSize: '1 bowl',
           ),
         ];
         break;
-        
+
       case MealType.lunch:
         name = 'Lunch';
         mealTime = DateTime(date.year, date.month, date.day, 13); // 1 PM
-        
+
         ingredients = [
           "4 oz (120g) boneless, skinless chicken breast",
           "1/2 cup cooked brown rice",
@@ -1504,8 +1952,9 @@ Question: $question
           "1 teaspoon honey",
           "1/2 tablespoon sesame seeds"
         ];
-        
-        cookingInstructions = "1. Cook brown rice according to package instructions and set aside.\n"
+
+        cookingInstructions =
+            "1. Cook brown rice according to package instructions and set aside.\n"
             "2. Cut chicken into 1-inch cubes and season with salt, pepper, and oregano.\n"
             "3. Heat olive oil in a non-stick pan over medium-high heat.\n"
             "4. Add minced garlic and sauté for 30 seconds until fragrant.\n"
@@ -1514,19 +1963,27 @@ Question: $question
             "7. In a small bowl, mix soy sauce and honey, then pour over the chicken and vegetables.\n"
             "8. Cook for another minute, stirring to coat everything in the sauce.\n"
             "9. Serve over brown rice and sprinkle with sesame seeds.";
-            
+
         items = [
           MealItem(
-            foodItem: FoodItem(id: _uuid.v4(), name: 'Chicken Stir-Fry with Brown Rice', calories: targetCalories, protein: proteinGrams, carbs: carbsGrams, fat: fatGrams, description: '~${targetCalories.toInt()} kcal'),
-            quantity: 1.0, servingSize: '1 plate',
+            foodItem: FoodItem(
+                id: _uuid.v4(),
+                name: 'Chicken Stir-Fry with Brown Rice',
+                calories: targetCalories,
+                protein: proteinGrams,
+                carbs: carbsGrams,
+                fat: fatGrams,
+                description: '~${targetCalories.toInt()} kcal'),
+            quantity: 1.0,
+            servingSize: '1 plate',
           ),
         ];
         break;
-        
+
       case MealType.dinner:
         name = 'Dinner';
         mealTime = DateTime(date.year, date.month, date.day, 19); // 7 PM
-        
+
         ingredients = [
           "4 oz (120g) salmon fillet",
           "1 tablespoon olive oil",
@@ -1542,7 +1999,7 @@ Question: $question
           "1/2 tablespoon olive oil for roasting vegetables",
           "1 small sweet potato, cubed (about 3/4 cup)"
         ];
-        
+
         cookingInstructions = "1. Preheat oven to 400°F (200°C).\n"
             "2. Toss broccoli, cauliflower, carrots, and sweet potato with 1/2 tablespoon olive oil, salt, and pepper. Spread on a baking sheet.\n"
             "3. Roast vegetables for 20-25 minutes, tossing halfway through, until tender and caramelized.\n"
@@ -1551,21 +2008,29 @@ Question: $question
             "6. During the last 12-15 minutes of vegetable roasting time, add the salmon to the oven.\n"
             "7. Cook until salmon is opaque and flakes easily with a fork.\n"
             "8. Serve salmon with roasted vegetables.";
-            
+
         items = [
           MealItem(
-            foodItem: FoodItem(id: _uuid.v4(), name: 'Baked Salmon with Roasted Vegetables', calories: targetCalories, protein: proteinGrams, carbs: carbsGrams, fat: fatGrams, description: '~${targetCalories.toInt()} kcal'),
-            quantity: 1.0, servingSize: '1 portion',
+            foodItem: FoodItem(
+                id: _uuid.v4(),
+                name: 'Baked Salmon with Roasted Vegetables',
+                calories: targetCalories,
+                protein: proteinGrams,
+                carbs: carbsGrams,
+                fat: fatGrams,
+                description: '~${targetCalories.toInt()} kcal'),
+            quantity: 1.0,
+            servingSize: '1 portion',
           ),
         ];
         break;
-        
+
       case MealType.snack:
         name = 'Snack';
         mealTime = date.hour < 12
-          ? DateTime(date.year, date.month, date.day, 11) // 11 AM
-          : DateTime(date.year, date.month, date.day, 16); // 4 PM
-          
+            ? DateTime(date.year, date.month, date.day, 11) // 11 AM
+            : DateTime(date.year, date.month, date.day, 16); // 4 PM
+
         ingredients = [
           "1/2 cup plain Greek yogurt",
           "1 tablespoon honey or maple syrup",
@@ -1575,24 +2040,34 @@ Question: $question
           "1/4 cup fresh berries",
           "1 teaspoon chia seeds"
         ];
-        
-        cookingInstructions = "1. In a small bowl, mix Greek yogurt with honey and vanilla extract.\n"
+
+        cookingInstructions =
+            "1. In a small bowl, mix Greek yogurt with honey and vanilla extract.\n"
             "2. Top with mixed nuts, pumpkin seeds, berries, and chia seeds.\n"
             "3. Enjoy immediately or refrigerate for up to 24 hours (add nuts just before eating to maintain crunch).";
-            
+
         items = [
           MealItem(
-            foodItem: FoodItem(id: _uuid.v4(), name: 'Greek Yogurt Parfait with Nuts and Berries', calories: targetCalories, protein: proteinGrams, carbs: carbsGrams, fat: fatGrams, description: '~${targetCalories.toInt()} kcal'),
-            quantity: 1.0, servingSize: '1 serving',
+            foodItem: FoodItem(
+                id: _uuid.v4(),
+                name: 'Greek Yogurt Parfait with Nuts and Berries',
+                calories: targetCalories,
+                protein: proteinGrams,
+                carbs: carbsGrams,
+                fat: fatGrams,
+                description: '~${targetCalories.toInt()} kcal'),
+            quantity: 1.0,
+            servingSize: '1 serving',
           ),
         ];
         break;
-        
+
       case MealType.other:
       default:
         name = 'Other Meal';
-        mealTime = DateTime(date.year, date.month, date.day, 12); // Default noon
-        
+        mealTime =
+            DateTime(date.year, date.month, date.day, 12); // Default noon
+
         ingredients = [
           "1 whole grain wrap",
           "3 oz (90g) lean turkey breast, sliced",
@@ -1603,19 +2078,28 @@ Question: $question
           "1 teaspoon Dijon mustard",
           "1 small apple"
         ];
-        
-        cookingInstructions = "1. Spread hummus evenly over the whole grain wrap.\n"
+
+        cookingInstructions =
+            "1. Spread hummus evenly over the whole grain wrap.\n"
             "2. Layer turkey slices, avocado, mixed greens, and tomato on top.\n"
             "3. Drizzle with Dijon mustard.\n"
             "4. Roll up tightly, tucking in the sides as you go.\n"
             "5. Cut in half diagonally and serve with apple on the side.";
-            
+
         items = [
-           MealItem(
-             foodItem: FoodItem(id: _uuid.v4(), name: 'Turkey Avocado Wrap with Apple', calories: targetCalories, protein: proteinGrams, carbs: carbsGrams, fat: fatGrams, description: '~${targetCalories.toInt()} kcal'),
-             quantity: 1.0, servingSize: '1 serving',
-           ),
-         ];
+          MealItem(
+            foodItem: FoodItem(
+                id: _uuid.v4(),
+                name: 'Turkey Avocado Wrap with Apple',
+                calories: targetCalories,
+                protein: proteinGrams,
+                carbs: carbsGrams,
+                fat: fatGrams,
+                description: '~${targetCalories.toInt()} kcal'),
+            quantity: 1.0,
+            servingSize: '1 serving',
+          ),
+        ];
         break;
     }
 
@@ -1635,16 +2119,17 @@ Question: $question
   List<String> getRandomSuggestedQuestions({int count = 3}) {
     // Create a copy of the list to avoid modifying the original
     final questions = List<String>.from(_suggestedQuestions);
-    
+
     // Shuffle the questions
     questions.shuffle();
-    
+
     // Return the specified number of questions (or all if less available)
     return questions.take(count).toList();
   }
-  
+
   // Generate question suggestions based on user profile
-  List<String> getSuggestedQuestionsForUser(UserProfile userProfile, {int count = 3}) {
+  List<String> getSuggestedQuestionsForUser(UserProfile userProfile,
+      {int count = 3}) {
     // Create lists of targeted questions based on fitness goals
     final List<String> weightLossQuestions = [
       "How can I burn more calories during my workouts?",
@@ -1653,7 +2138,7 @@ Question: $question
       "How often should I weigh myself?",
       "What foods should I avoid to lose weight?",
     ];
-    
+
     final List<String> muscleGainQuestions = [
       "How much protein should I eat to build muscle?",
       "What's the best split for muscle growth?",
@@ -1661,7 +2146,7 @@ Question: $question
       "How do I know if I'm making muscle gains?",
       "Should I take creatine for muscle building?",
     ];
-    
+
     final List<String> maintenanceQuestions = [
       "How do I maintain my current fitness level?",
       "What's a good balanced workout routine?",
@@ -1669,10 +2154,10 @@ Question: $question
       "What's the best way to stay motivated?",
       "How often should I change my workout routine?",
     ];
-    
+
     // Combine general questions with goal-specific questions
     List<String> combinedQuestions = List<String>.from(_suggestedQuestions);
-    
+
     // Add goal-specific questions based on user profile
     if (userProfile.fitnessGoal == FitnessGoal.weightLoss) {
       combinedQuestions.addAll(weightLossQuestions);
@@ -1681,11 +2166,11 @@ Question: $question
     } else if (userProfile.fitnessGoal == FitnessGoal.maintenance) {
       combinedQuestions.addAll(maintenanceQuestions);
     }
-    
+
     // Shuffle the combined list
     combinedQuestions.shuffle();
-    
+
     // Return the specified number of questions
     return combinedQuestions.take(count).toList();
   }
-} 
+}

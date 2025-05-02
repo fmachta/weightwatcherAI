@@ -109,9 +109,12 @@ class _SplashScreenState extends State<SplashScreen> {
     try {
       // Initialize all providers
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final nutritionProvider = Provider.of<NutritionProvider>(context, listen: false);
-      final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
-      final aiTrainerProvider = Provider.of<AITrainerProvider>(context, listen: false);
+      final nutritionProvider =
+          Provider.of<NutritionProvider>(context, listen: false);
+      final workoutProvider =
+          Provider.of<WorkoutProvider>(context, listen: false);
+      final aiTrainerProvider =
+          Provider.of<AITrainerProvider>(context, listen: false);
 
       await userProvider.initialize();
       await nutritionProvider.initialize();
@@ -195,9 +198,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
   // Add some sample data for demo purposes
   Future<void> _addSampleDataIfNeeded(
-      NutritionProvider nutritionProvider,
-      WorkoutProvider workoutProvider,
-      ) async {
+    NutritionProvider nutritionProvider,
+    WorkoutProvider workoutProvider,
+  ) async {
     final now = DateTime.now();
 
     // Add a sample meal if no meals exist
@@ -334,15 +337,15 @@ class _SplashScreenState extends State<SplashScreen> {
             Text(
               'Weight Watcher AI',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Your personal fitness assistant',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
             const SizedBox(height: 32),
             const CircularProgressIndicator(),
@@ -464,11 +467,10 @@ class AuthGate extends StatelessWidget {
                     body: Center(child: CircularProgressIndicator()));
               }
 
-              if (firestoreSnapshot.hasData &&
-                  firestoreSnapshot.data!.exists) {
+              if (firestoreSnapshot.hasData && firestoreSnapshot.data!.exists) {
                 // Document exists, create UserProfile and set it in UserProvider
                 final userData =
-                firestoreSnapshot.data!.data() as Map<String, dynamic>;
+                    firestoreSnapshot.data!.data() as Map<String, dynamic>;
                 final userProfile = UserProfile.fromJson(userData);
                 // Update the provider state *after* the build phase
                 WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -493,7 +495,8 @@ class AuthGate extends StatelessWidget {
           // User is not logged in, show the MainScreen for guest browsing
           // Clear any existing user profile in the provider for the guest session
           WidgetsBinding.instance.addPostFrameCallback((_) {
-             Provider.of<UserProvider>(context, listen: false).clearUserProfile();
+            Provider.of<UserProvider>(context, listen: false)
+                .clearUserProfile();
           });
           return const MainScreen();
         }
@@ -518,7 +521,7 @@ class HomeScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
                 );
               },
               child: const Text('Go to Login'),
@@ -528,7 +531,7 @@ class HomeScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => SignUpScreen()),
+                  MaterialPageRoute(builder: (context) => const SignUpScreen()),
                 );
               },
               child: const Text('Go to Sign Up'),

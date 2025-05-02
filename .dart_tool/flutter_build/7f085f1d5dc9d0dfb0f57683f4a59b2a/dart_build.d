@@ -1,0 +1,1 @@
+ C:\\Users\\erick\\AndroidStudioProjects\\weightwatcherAI\\.dart_tool\\flutter_build\\7f085f1d5dc9d0dfb0f57683f4a59b2a\\dart_build_result.json: 

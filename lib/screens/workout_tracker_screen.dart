@@ -9,7 +9,6 @@ import '../providers/workout_provider.dart';
 import '../providers/user_provider.dart'; // Import UserProvider
 import 'login_screen.dart'; // Import LoginScreen
 
-
 class WorkoutTrackerScreen extends StatefulWidget {
   const WorkoutTrackerScreen({super.key});
 
@@ -32,7 +31,8 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
   }
 
   Future<void> _loadWorkouts() async {
-    final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+    final workoutProvider =
+        Provider.of<WorkoutProvider>(context, listen: false);
     await workoutProvider.changeSelectedDate(_selectedDate);
   }
 
@@ -48,7 +48,8 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
         _selectedDate = picked;
       });
 
-      final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+      final workoutProvider =
+          Provider.of<WorkoutProvider>(context, listen: false);
       await workoutProvider.changeSelectedDate(_selectedDate);
     }
   }
@@ -56,7 +57,7 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
   // Helper function to prompt login
   void _promptLogin(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => LoginScreen()),
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
     // Optionally show a message
     ScaffoldMessenger.of(context).showSnackBar(
@@ -85,18 +86,24 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
                       children: [
                         Text(
                           'Workout Tracker',
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                         TextButton.icon(
                           onPressed: () => _selectDate(context),
                           icon: const Icon(Icons.calendar_today, size: 16),
                           label: Text(
                             DateFormat('MMMM d, yyyy').format(_selectedDate),
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyLarge
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
                           ),
                           style: TextButton.styleFrom(
                             padding: EdgeInsets.zero,
@@ -123,8 +130,8 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
                       child: Text(
                         'Your Workouts',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                              fontWeight: FontWeight.bold,
+                            ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -142,40 +149,50 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
                   child: isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : workouts.isEmpty
-                      ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.fitness_center_outlined,
-                          size: 64,
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No workouts recorded yet',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.outline,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        ElevatedButton(
-                          onPressed: () => _navigateToAddWorkout(context),
-                          child: const Text('Record Your First Workout'),
-                        ),
-                      ],
-                    ),
-                  )
-                      : ListView.builder(
-                    itemCount: workouts.length,
-                    itemBuilder: (context, index) {
-                      return WorkoutCard(
-                        workout: workouts[index],
-                        onEdit: () => _navigateToEditWorkout(context, workouts[index]),
-                        onDelete: () => _deleteWorkout(context, workouts[index].id),
-                      );
-                    },
-                  ),
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.fitness_center_outlined,
+                                    size: 64,
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'No workouts recorded yet',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .outline,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  ElevatedButton(
+                                    onPressed: () =>
+                                        _navigateToAddWorkout(context),
+                                    child:
+                                        const Text('Record Your First Workout'),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : ListView.builder(
+                              itemCount: workouts.length,
+                              itemBuilder: (context, index) {
+                                return WorkoutCard(
+                                  workout: workouts[index],
+                                  onEdit: () => _navigateToEditWorkout(
+                                      context, workouts[index]),
+                                  onDelete: () => _deleteWorkout(
+                                      context, workouts[index].id),
+                                );
+                              },
+                            ),
                 ),
               ],
             ),
@@ -220,25 +237,28 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
 
     // Show confirmation dialog
     final shouldDelete = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Workout'),
-        content: const Text('Are you sure you want to delete this workout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Delete Workout'),
+            content:
+                const Text('Are you sure you want to delete this workout?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Delete'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
 
     if (shouldDelete) {
-      final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+      final workoutProvider =
+          Provider.of<WorkoutProvider>(context, listen: false);
       await workoutProvider.deleteWorkout(workoutId);
     }
   }
@@ -280,9 +300,11 @@ class WorkoutSummaryCard extends StatelessWidget {
                     Text(
                       'Today\'s Summary',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSecondaryContainer,
-                        fontWeight: FontWeight.bold,
-                      ),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSecondaryContainer,
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ],
                 ),
@@ -299,14 +321,17 @@ class WorkoutSummaryCard extends StatelessWidget {
                     Container(
                       height: 50,
                       width: 1,
-                      color: Theme.of(context).colorScheme.onSecondaryContainer.withOpacity(0.2),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSecondaryContainer
+                          .withOpacity(0.2),
                     ),
                     _WorkoutStat(
                       icon: Icons.timer,
                       value: totalMinutes > 0
                           ? totalMinutes >= 60
-                          ? '${totalMinutes ~/ 60}h ${totalMinutes % 60}m'
-                          : '${totalMinutes}m'
+                              ? '${totalMinutes ~/ 60}h ${totalMinutes % 60}m'
+                              : '${totalMinutes}m'
                           : '0m',
                       label: 'Total Time',
                       color: Theme.of(context).colorScheme.onSecondaryContainer,
@@ -314,7 +339,10 @@ class WorkoutSummaryCard extends StatelessWidget {
                     Container(
                       height: 50,
                       width: 1,
-                      color: Theme.of(context).colorScheme.onSecondaryContainer.withOpacity(0.2),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSecondaryContainer
+                          .withOpacity(0.2),
                     ),
                     _WorkoutStat(
                       icon: Icons.local_fire_department,
@@ -359,15 +387,15 @@ class _WorkoutStat extends StatelessWidget {
         Text(
           value,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
         ),
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: color.withOpacity(0.8),
-          ),
+                color: color.withOpacity(0.8),
+              ),
         ),
       ],
     );
@@ -404,7 +432,6 @@ class WorkoutCard extends StatelessWidget {
         return 'Rest';
       case WorkoutType.other:
         return 'Other';
-
     }
   }
 
@@ -434,11 +461,12 @@ class WorkoutCard extends StatelessWidget {
                 Text(
                   workout.name,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.secondaryContainer,
                     borderRadius: BorderRadius.circular(16),
@@ -446,8 +474,10 @@ class WorkoutCard extends StatelessWidget {
                   child: Text(
                     _getWorkoutTypeLabel(workout.type),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSecondaryContainer,
-                    ),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSecondaryContainer,
+                        ),
                   ),
                 ),
               ],
@@ -474,31 +504,31 @@ class WorkoutCard extends StatelessWidget {
             Text(
               'Exercises',
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 8),
             ...workout.exercises.map((exercise) => Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.circle,
-                    size: 8,
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.circle,
+                        size: 8,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          exercise.sets != null && exercise.sets!.isNotEmpty
+                              ? '${exercise.name}: ${exercise.sets!.length} × ${exercise.sets!.first.reps}'
+                              : exercise.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      exercise.sets != null && exercise.sets!.isNotEmpty
-                          ? '${exercise.name}: ${exercise.sets!.length} × ${exercise.sets!.first.reps}'
-                          : exercise.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            )),
+                )),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -556,14 +586,14 @@ class _WorkoutDetail extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
             Text(
               value,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ],
         ),
@@ -589,7 +619,8 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
-  final TextEditingController _durationController = TextEditingController(text: '30');
+  final TextEditingController _durationController =
+      TextEditingController(text: '30');
   final TextEditingController _caloriesController = TextEditingController();
 
   WorkoutType _selectedWorkoutType = WorkoutType.strength;
@@ -720,8 +751,8 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
                     Text(
                       'Exercises',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: 16),
 
@@ -742,9 +773,12 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
                           final exercise = _selectedExercises[index];
                           return ListTile(
                             title: Text(exercise.name),
-                            subtitle: exercise.sets != null && exercise.sets!.isNotEmpty
-                                ? Text('${exercise.sets!.length} sets × ${exercise.sets!.first.reps} reps')
-                                : Text(exercise.targetMuscleGroup ?? 'No target specified'),
+                            subtitle: exercise.sets != null &&
+                                    exercise.sets!.isNotEmpty
+                                ? Text(
+                                    '${exercise.sets!.length} sets × ${exercise.sets!.first.reps} reps')
+                                : Text(exercise.targetMuscleGroup ??
+                                    'No target specified'),
                             trailing: IconButton(
                               icon: const Icon(Icons.remove_circle_outline),
                               color: Colors.red,
@@ -819,13 +853,15 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
       return;
     }
 
-    final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+    final workoutProvider =
+        Provider.of<WorkoutProvider>(context, listen: false);
     final exercise = Exercise(
       id: const Uuid().v4(),
       name: _nameController.text,
       targetMuscleGroup: 'Full Body',
       description: _getWorkoutTypeDescription(_selectedWorkoutType),
-      sets: _selectedExercises.isNotEmpty ? List.from(_selectedExercises) : null,
+      sets:
+          _selectedExercises.isNotEmpty ? List.from(_selectedExercises) : null,
       duration: Duration(minutes: int.tryParse(_durationController.text) ?? 0),
       caloriesBurnedPerMinute: _getCaloriesPerMinute(_selectedWorkoutType),
     );
@@ -938,8 +974,10 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
     super.initState();
     _nameController = TextEditingController(text: widget.workout.name);
     _notesController = TextEditingController(text: widget.workout.notes);
-    _durationController = TextEditingController(text: widget.workout.duration.inMinutes.toString());
-    _caloriesController = TextEditingController(text: widget.workout.caloriesBurned.toString());
+    _durationController = TextEditingController(
+        text: widget.workout.duration.inMinutes.toString());
+    _caloriesController =
+        TextEditingController(text: widget.workout.caloriesBurned.toString());
     _selectedWorkoutType = widget.workout.type;
     _selectedExercises = List.from(widget.workout.exercises);
     _selectedTime = TimeOfDay(
@@ -1080,8 +1118,8 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
                     Text(
                       'Exercises',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: 16),
 
@@ -1102,9 +1140,12 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
                           final exercise = _selectedExercises[index];
                           return ListTile(
                             title: Text(exercise.name),
-                            subtitle: exercise.sets != null && exercise.sets!.isNotEmpty
-                                ? Text('${exercise.sets!.length} sets × ${exercise.sets!.first.reps} reps')
-                                : Text(exercise.targetMuscleGroup ?? 'No target specified'),
+                            subtitle: exercise.sets != null &&
+                                    exercise.sets!.isNotEmpty
+                                ? Text(
+                                    '${exercise.sets!.length} sets × ${exercise.sets!.first.reps} reps')
+                                : Text(exercise.targetMuscleGroup ??
+                                    'No target specified'),
                             trailing: IconButton(
                               icon: const Icon(Icons.remove_circle_outline),
                               color: Colors.red,
@@ -1204,7 +1245,8 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
         notes: _notesController.text.isEmpty ? null : _notesController.text,
       );
 
-      final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+      final workoutProvider =
+          Provider.of<WorkoutProvider>(context, listen: false);
       await workoutProvider.updateWorkout(updatedWorkout);
 
       Navigator.of(context).pop();
@@ -1258,12 +1300,16 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
 
   // Strength training set fields
   bool _hasStrengthSets = false;
-  final TextEditingController _setsController = TextEditingController(text: '3');
-  final TextEditingController _repsController = TextEditingController(text: '12');
-  final TextEditingController _weightController = TextEditingController(text: '0');
-  final TextEditingController _durationController = TextEditingController(text: '0');
+  final TextEditingController _setsController =
+      TextEditingController(text: '3');
+  final TextEditingController _repsController =
+      TextEditingController(text: '12');
+  final TextEditingController _weightController =
+      TextEditingController(text: '0');
+  final TextEditingController _durationController =
+      TextEditingController(text: '0');
 
-  WorkoutType _selectedType = WorkoutType.strength;
+  final WorkoutType _selectedType = WorkoutType.strength;
 
   @override
   void initState() {
@@ -1276,7 +1322,8 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
       _isLoading = true;
     });
 
-    final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+    final workoutProvider =
+        Provider.of<WorkoutProvider>(context, listen: false);
     _searchResults = workoutProvider.searchExercises('');
 
     setState(() {
@@ -1311,7 +1358,8 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
                 _isCustomExercise = !_isCustomExercise;
               });
             },
-            tooltip: _isCustomExercise ? 'Search Exercise' : 'Add Custom Exercise',
+            tooltip:
+                _isCustomExercise ? 'Search Exercise' : 'Add Custom Exercise',
           ),
         ],
       ),
@@ -1345,23 +1393,24 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : _searchResults.isEmpty
-              ? const Center(child: Text('No exercises found'))
-              : ListView.builder(
-            itemCount: _searchResults.length,
-            itemBuilder: (context, index) {
-              final exercise = _searchResults[index];
-              return ListTile(
-                title: Text(exercise.name),
-                subtitle: Text(exercise.targetMuscleGroup ?? 'No target specified'),
-                onTap: () {
-                  setState(() {
-                    _selectedExercise = exercise;
-                  });
-                  _showExerciseDetailsDialog(context, exercise);
-                },
-              );
-            },
-          ),
+                  ? const Center(child: Text('No exercises found'))
+                  : ListView.builder(
+                      itemCount: _searchResults.length,
+                      itemBuilder: (context, index) {
+                        final exercise = _searchResults[index];
+                        return ListTile(
+                          title: Text(exercise.name),
+                          subtitle: Text(exercise.targetMuscleGroup ??
+                              'No target specified'),
+                          onTap: () {
+                            setState(() {
+                              _selectedExercise = exercise;
+                            });
+                            _showExerciseDetailsDialog(context, exercise);
+                          },
+                        );
+                      },
+                    ),
         ),
       ],
     );
@@ -1376,8 +1425,8 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
           Text(
             'Add Custom Exercise',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
 
@@ -1474,7 +1523,8 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
                 labelText: 'Weight (kg, optional)',
                 border: OutlineInputBorder(),
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
             ),
           ],
 
@@ -1494,7 +1544,8 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
   }
 
   void _searchExercises() {
-    final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+    final workoutProvider =
+        Provider.of<WorkoutProvider>(context, listen: false);
     setState(() {
       _searchResults = workoutProvider.searchExercises(_searchController.text);
     });
@@ -1514,8 +1565,8 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
                 Text(
                   'Description:',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 Text(exercise.description!),
                 const SizedBox(height: 16),
@@ -1523,8 +1574,8 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
               Text(
                 'Target Muscle Group:',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               Text(exercise.targetMuscleGroup ?? 'Not specified'),
 
@@ -1582,7 +1633,8 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
                     labelText: 'Weight (kg, optional)',
                     border: OutlineInputBorder(),
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                 ),
               ],
             ],
@@ -1604,11 +1656,12 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
                 final weight = double.tryParse(_weightController.text);
 
                 // Create exercise sets
-                final exerciseSets = List.generate(sets, (_) =>
-                    ExerciseSet(
-                      reps: reps,
-                      weight: weight,
-                    ),
+                final exerciseSets = List.generate(
+                  sets,
+                  (_) => ExerciseSet(
+                    reps: reps,
+                    weight: weight,
+                  ),
                 );
 
                 selectedExercise = Exercise(
@@ -1647,8 +1700,12 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
     // Create custom exercise
     final id = 'custom_${_uuid.v4()}';
     final name = _nameController.text;
-    final description = _descriptionController.text.isEmpty ? null : _descriptionController.text;
-    final targetMuscleGroup = _muscleGroupController.text.isEmpty ? null : _muscleGroupController.text;
+    final description = _descriptionController.text.isEmpty
+        ? null
+        : _descriptionController.text;
+    final targetMuscleGroup = _muscleGroupController.text.isEmpty
+        ? null
+        : _muscleGroupController.text;
     final caloriesBurnedPerMinute = double.tryParse(_caloriesController.text);
 
     // Create exercise sets if needed
@@ -1658,11 +1715,12 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
       final reps = int.tryParse(_repsController.text) ?? 12;
       final weight = double.tryParse(_weightController.text);
 
-      exerciseSets = List.generate(sets, (_) =>
-          ExerciseSet(
-            reps: reps,
-            weight: weight,
-          ),
+      exerciseSets = List.generate(
+        sets,
+        (_) => ExerciseSet(
+          reps: reps,
+          weight: weight,
+        ),
       );
     }
 
@@ -1676,7 +1734,8 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
     );
 
     // Save custom exercise
-    final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+    final workoutProvider =
+        Provider.of<WorkoutProvider>(context, listen: false);
     await workoutProvider.addCustomExercise(customExercise);
 
     // Navigate back with the new exercise

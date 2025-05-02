@@ -52,16 +52,26 @@ class MealDetailScreen extends StatelessWidget {
                             children: [
                               Text(
                                 meal.name,
-                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer,
+                                    ),
                               ),
                               Text(
                                 _getMealTypeString(meal.type),
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer,
+                                    ),
                               ),
                             ],
                           ),
@@ -73,35 +83,41 @@ class MealDetailScreen extends StatelessWidget {
                       Text(
                         meal.notes!,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
-                        ),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                            ),
                       ),
-                      
+
                     // Nutrition information
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _buildNutritionInfo(context, '${meal.totalCalories.toInt()}', 'kcal'),
-                        _buildNutritionInfo(context, '${meal.totalProtein.toInt()}g', 'Protein'),
-                        _buildNutritionInfo(context, '${meal.totalCarbs.toInt()}g', 'Carbs'),
-                        _buildNutritionInfo(context, '${meal.totalFat.toInt()}g', 'Fat'),
+                        _buildNutritionInfo(
+                            context, '${meal.totalCalories.toInt()}', 'kcal'),
+                        _buildNutritionInfo(context,
+                            '${meal.totalProtein.toInt()}g', 'Protein'),
+                        _buildNutritionInfo(
+                            context, '${meal.totalCarbs.toInt()}g', 'Carbs'),
+                        _buildNutritionInfo(
+                            context, '${meal.totalFat.toInt()}g', 'Fat'),
                       ],
                     ),
                   ],
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Ingredients section
             if (meal.ingredients != null && meal.ingredients!.isNotEmpty) ...[
               Text(
                 'Ingredients',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 12),
               ListView.builder(
@@ -132,20 +148,21 @@ class MealDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
             ],
-            
+
             // Cooking Instructions
-            if (meal.cookingInstructions != null && meal.cookingInstructions!.isNotEmpty) ...[
+            if (meal.cookingInstructions != null &&
+                meal.cookingInstructions!.isNotEmpty) ...[
               Text(
                 'Cooking Instructions',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -155,13 +172,13 @@ class MealDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
             ],
-            
+
             // Food Items
             Text(
               'Food Items',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 12),
             ListView.builder(
@@ -189,27 +206,27 @@ class MealDetailScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildNutritionInfo(BuildContext context, String value, String label) {
     return Column(
       children: [
         Text(
           value,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onPrimaryContainer,
-          ),
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              ),
         ),
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onPrimaryContainer,
-          ),
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              ),
         ),
       ],
     );
   }
-  
+
   IconData _getMealIcon(MealType type) {
     switch (type) {
       case MealType.breakfast:
@@ -224,7 +241,7 @@ class MealDetailScreen extends StatelessWidget {
         return Icons.fastfood;
     }
   }
-  
+
   String _getMealTypeString(MealType type) {
     switch (type) {
       case MealType.breakfast:
@@ -239,4 +256,4 @@ class MealDetailScreen extends StatelessWidget {
         return 'Meal';
     }
   }
-} 
+}

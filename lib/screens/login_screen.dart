@@ -44,7 +44,8 @@ class _LoginScreenState extends State<LoginScreen> {
           _isLoading = false;
           _errorMessage = _handleFirebaseAuthError(e.code);
         });
-        print("FirebaseAuthException: ${e.code} - ${e.message}"); // Log the error
+        print(
+            "FirebaseAuthException: ${e.code} - ${e.message}"); // Log the error
       } catch (e) {
         setState(() {
           _isLoading = false;
@@ -82,7 +83,8 @@ class _LoginScreenState extends State<LoginScreen> {
   // Helper to navigate to SignUpScreen
   void _navigateToSignUp() {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => SignUpScreen()), // Removed const
+      MaterialPageRoute(
+          builder: (context) => const SignUpScreen()), // Removed const
     );
   }
 
@@ -93,9 +95,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       // Removed AppBar for a cleaner look, back button is usually handled by Navigator
-      body: SafeArea( // Ensure content is within safe area
-        child: Center( // Center the content vertically
-          child: SingleChildScrollView( // Prevent overflow
+      body: SafeArea(
+        // Ensure content is within safe area
+        child: Center(
+          // Center the content vertically
+          child: SingleChildScrollView(
+            // Prevent overflow
             padding: const EdgeInsets.all(32.0), // Increased padding
             child: Form(
               key: _formKey,
@@ -114,13 +119,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   // Welcome Text
                   Text(
                     'Welcome Back!',
-                    style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+                    style: textTheme.headlineMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Log in to continue your fitness journey',
-                    style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
+                    style: textTheme.bodyLarge
+                        ?.copyWith(color: colorScheme.onSurfaceVariant),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
@@ -144,14 +151,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       labelText: 'Email',
                       prefixIcon: const Icon(Icons.email_outlined), // Add icon
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12), // Rounded corners
+                        borderRadius:
+                            BorderRadius.circular(12), // Rounded corners
                       ),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your email';
                       }
-                      if (!value.contains('@')) { // Basic email validation
+                      if (!value.contains('@')) {
+                        // Basic email validation
                         return 'Please enter a valid email address';
                       }
                       return null;
@@ -167,7 +176,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       labelText: 'Password',
                       prefixIcon: const Icon(Icons.lock_outline), // Add icon
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12), // Rounded corners
+                        borderRadius:
+                            BorderRadius.circular(12), // Rounded corners
                       ),
                     ),
                     validator: (value) {
@@ -183,16 +193,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   ElevatedButton(
                     onPressed: _isLoading ? null : _login,
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16), // Taller button
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16), // Taller button
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12), // Rounded corners
+                        borderRadius:
+                            BorderRadius.circular(12), // Rounded corners
                       ),
                     ),
                     child: _isLoading
-                        ? const SizedBox( // Constrained progress indicator
+                        ? const SizedBox(
+                            // Constrained progress indicator
                             height: 24,
                             width: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.white),
                           )
                         : const Text('Login'),
                   ),
