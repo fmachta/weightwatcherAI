@@ -33,9 +33,7 @@ class AIPlanRepository {
     final prefs = await SharedPreferences.getInstance();
     final plansJson = prefs.getStringList(_plansKey) ?? [];
 
-    return plansJson
-        .map((json) => AIPlan.fromJson(jsonDecode(json)))
-        .toList();
+    return plansJson.map((json) => AIPlan.fromJson(jsonDecode(json))).toList();
   }
 
   // Get plan by id
@@ -54,9 +52,8 @@ class AIPlanRepository {
     final prefs = await SharedPreferences.getInstance();
     final plansJson = prefs.getStringList(_plansKey) ?? [];
 
-    final plans = plansJson
-        .map((json) => AIPlan.fromJson(jsonDecode(json)))
-        .toList();
+    final plans =
+        plansJson.map((json) => AIPlan.fromJson(jsonDecode(json))).toList();
 
     // Remove the plan with the given id
     plans.removeWhere((plan) => plan.id == id);

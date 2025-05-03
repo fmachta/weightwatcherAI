@@ -42,6 +42,9 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
       if (!mounted) return;
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       if (userProvider.isLoggedIn) {
+        final aiTrainerProvider =
+            Provider.of<AITrainerProvider>(context, listen: false);
+        aiTrainerProvider.initialize(); // <-- 🔥 This is the key addition
         _getInitialInsight();
         _loadSuggestedQuestions();
       } else {
@@ -407,10 +410,8 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
         final bool isLoggedIn = userProvider.isLoggedIn;
         final UserProfile? userProfile = userProvider.userProfile;
         final plans = aiTrainerProvider.plans;
-        final currentPlan = aiTrainerProvider.currentPlan;
         final isLoading = aiTrainerProvider.isLoading;
 
-        // --- Guest View ---
         if (!isLoggedIn) {
           return Center(
             child: Padding(
@@ -454,17 +455,12 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
           );
         }
 
-        // --- Logged-in View ---
-        assert(userProfile != null,
-            'UserProfile is null despite being logged in.');
         if (userProfile == null) {
-          // Fallback in case assertion fails in production or data loading issue
           return const Center(
               child: Text(
                   'Error: User profile not loaded. Please restart the app.'));
         }
 
-        // Main content for logged-in users
         return RefreshIndicator(
           onRefresh: () async {
             await aiTrainerProvider.initialize();
@@ -504,9 +500,8 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   padding: const EdgeInsets.all(16),
-                  child: ListView(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -516,9 +511,7 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
                             style: Theme.of(context)
                                 .textTheme
                                 .titleLarge
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           if (plans.isNotEmpty)
                             TextButton.icon(
@@ -531,16 +524,24 @@ class _AITrainerScreenState extends State<AITrainerScreen> {
                       const SizedBox(height: 16),
                       if (isLoading)
                         const Center(child: CircularProgressIndicator())
-                      else if (currentPlan != null)
-                        PlanCard(
-                          plan: currentPlan,
-                          onView: () =>
-                              _navigateToPlanDetails(context, currentPlan),
-                          onDelete: () =>
-                              _showDeleteConfirmation(context, currentPlan),
-                        )
-                      else
-                        _buildGeneratePlanButtons(context, userProfile),
+                      else if (plans.isNotEmpty)
+                        Column(
+                          children: plans
+                              .map((plan) => Padding(
+                                    padding:
+                                        const EdgeInsets.only(bottom: 12.0),
+                                    child: PlanCard(
+                                      plan: plan,
+                                      onView: () =>
+                                          _navigateToPlanDetails(context, plan),
+                                      onDelete: () => _showDeleteConfirmation(
+                                          context, plan),
+                                    ),
+                                  ))
+                              .toList(),
+                        ),
+                      const SizedBox(height: 16),
+                      _buildGeneratePlanButtons(context, userProfile),
                       const SizedBox(height: 24),
                       AskAICard(
                         controller: _questionController,
@@ -1082,6 +1083,11 @@ class AllPlansScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Your Plans'),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showAddPlanOptions(context),
+        icon: const Icon(Icons.add),
+        label: const Text('Add Plan'),
+      ),
       body: Consumer<AITrainerProvider>(
         builder: (context, aiTrainerProvider, child) {
           final plans = aiTrainerProvider.plans;
@@ -1111,6 +1117,80 @@ class AllPlansScreen extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+
+  void _showAddPlanOptions(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userProfile = userProvider.userProfile;
+
+    if (userProfile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please complete your profile first.')),
+      );
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) {
+        return Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton.icon(
+                icon: const Icon(Icons.fitness_center),
+                label: const Text('Generate Workout Plan'),
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => WorkoutPlanPreferencesScreen(
+                        userProfile: userProfile,
+                        onComplete: (data) async {
+                          Navigator.pop(context);
+                          await Provider.of<AITrainerProvider>(
+                            context,
+                            listen: false,
+                          ).generateWorkoutPlan(userProfile, data);
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.restaurant_menu),
+                label: const Text('Generate Meal Plan'),
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MealPlanPreferencesScreen(
+                        userProfile: userProfile,
+                        onComplete: (data) async {
+                          Navigator.pop(context);
+                          await Provider.of<AITrainerProvider>(
+                            context,
+                            listen: false,
+                          ).generateMealPlan(userProfile, data);
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

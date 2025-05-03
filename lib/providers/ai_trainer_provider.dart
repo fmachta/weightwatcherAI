@@ -4,6 +4,8 @@ import '../models/ai_plan.dart';
 import '../models/user_profile.dart';
 import '../services/gemini_service.dart';
 import '../repositories/ai_plan_repository.dart';
+//import '../models/workout.dart';
+//import '../models/meal.dart';
 
 class AITrainerProvider with ChangeNotifier {
   final AIPlanRepository _repository = AIPlanRepository();

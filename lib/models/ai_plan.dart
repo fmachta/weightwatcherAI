@@ -24,8 +24,7 @@ class AIPlan {
   });
 
   // Calculate duration in weeks
-  int get durationInWeeks =>
-      endDate.difference(startDate).inDays ~/ 7;
+  int get durationInWeeks => endDate.difference(startDate).inDays ~/ 7;
 
   // Convert to and from JSON for persistence
   Map<String, dynamic> toJson() {
@@ -47,7 +46,7 @@ class AIPlan {
       title: json['title'],
       description: json['description'],
       type: PlanType.values.firstWhere(
-            (e) => e.toString() == json['type'],
+        (e) => e.toString() == json['type'],
         orElse: () => PlanType.other,
       ),
       startDate: DateTime.parse(json['startDate']),
@@ -61,13 +60,7 @@ class AIPlan {
 }
 
 // Plan types
-enum PlanType {
-  workout,
-  nutrition,
-  combined,
-  other
-}
-
+enum PlanType { workout, nutrition, combined, other }
 
 class PlanDay {
   final int dayNumber;
@@ -101,12 +94,11 @@ class PlanDay {
       summary: json['summary'] ?? '',
       meals: json['meals'] != null
           ? (json['meals'] as List)
-          .map((mealJson) => Meal.fromJson(mealJson))
-          .toList()
+              .map((mealJson) => Meal.fromJson(mealJson))
+              .toList()
           : null,
-      workout: json['workout'] != null
-          ? Workout.fromJson(json['workout'])
-          : null,
+      workout:
+          json['workout'] != null ? Workout.fromJson(json['workout']) : null,
     );
   }
 }
