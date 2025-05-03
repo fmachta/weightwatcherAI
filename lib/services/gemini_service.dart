@@ -69,10 +69,9 @@ class GeminiService {
     }
   }
 
-  // Generate a workout plan based on user profile
+// Generate a workout plan based on user profile
   Future<AIPlan> generateWorkoutPlan(UserProfile userProfile,
       [Map<String, dynamic>? preferenceData]) async {
-    // Check if API key is valid
     if (_geminiApiKey == null ||
         _geminiApiKey!.isEmpty ||
         _geminiApiKey == 'google-api-key-here') {
@@ -81,7 +80,6 @@ class GeminiService {
       return _createDefaultWorkoutPlan(userProfile);
     }
 
-    // Parse the user's specific preferences
     final primaryGoal =
         preferenceData?['primaryGoal'] ?? userProfile.fitnessGoal.name;
     final fitnessLevel =
@@ -90,13 +88,15 @@ class GeminiService {
     final workoutDuration = preferenceData?['workoutDuration'] ?? 45;
     final preferredExerciseTypes = preferenceData?['exerciseTypes'] ?? [];
     final equipmentAvailable = preferenceData?['equipment'] ?? [];
-    final specificFocus = preferenceData?['specificFocus'] ?? '';
-    final otherPreferences = preferenceData?['otherPreferences'] ?? '';
+    final specificFocus =
+        _sanitizeUserInput(preferenceData?['specificFocus'] ?? '');
+    final otherPreferences =
+        _sanitizeUserInput(preferenceData?['otherPreferences'] ?? '');
 
     final prompt = """
 You are a fitness coach AI that generates structured, safe workout plans.
 
-Create a detailed 4-week workout plan for the following user:
+Create a detailed 4-week workout plan (28 days) for the following user:
 
 Age: ${userProfile.age}
 Gender: ${userProfile.gender}
@@ -106,31 +106,59 @@ Height: ${userProfile.height} cm
 Body Fat: ${userProfile.bodyFat}%
 Fitness Goal: $primaryGoal
 Fitness Level: $fitnessLevel
-Days per week available: $workoutDaysPerWeek
-Preferred workout duration: $workoutDuration minutes
+Workout days per week: $workoutDaysPerWeek
+Workout duration per day: $workoutDuration minutes
 ${preferredExerciseTypes.isNotEmpty ? 'Preferred exercise types: ${preferredExerciseTypes.join(', ')}' : ''}
 ${equipmentAvailable.isNotEmpty ? 'Available equipment: ${equipmentAvailable.join(', ')}' : ''}
-${specificFocus.isNotEmpty ? 'Specific focus areas: $specificFocus' : ''}
+${specificFocus.isNotEmpty ? 'Specific focus: $specificFocus' : ''}
 ${otherPreferences.isNotEmpty ? 'Other preferences: $otherPreferences' : ''}
 
-Return the plan as a JSON array of 28 days. Each item should look like:
-{ "day": 1, "notes": "Upper body push workout", "summary": "Bench press, shoulder press, triceps dips" }
+IMPORTANT STRICT RULES:
+- ❗ DO NOT use any ranges like 8-12. Only provide exact numbers like 10.
+- ❗ DO NOT use vague values like "as many as possible", "TBD", "choose a weight", or "adjust as needed". Always give a numeric value.
+- ❗ Each exercise MUST include a numeric "duration" value in seconds.
+- ❗ If a user has a limitation (like a knee injury), substitute exercises with safe alternatives. DO NOT explain or add conditional logic.
+- ❗ Return a single valid JSON object with a "days" array of 28 entries. Do not return markdown or explanation.
+- ❗ All numbers like sets, reps, weight, and duration must be returned as plain numbers (not strings).
 
-Make sure there is rest at least once per week.
-Only return the JSON array.
+Duration is in seconds.
+
+Format:
+{
+  "title": "Custom Workout Plan",
+  "description": "Generated plan",
+  "days": [
+    {
+      "day": 1,
+      "notes": "Upper Body Strength",
+      "summary": "Chest, shoulders, triceps",
+      "workout": {
+        "name": "Upper Body Push",
+        "type": "strength",
+        "duration": 45,
+        "notes": "Controlled reps",
+        "exercises": [
+          {
+            "name": "Bench Press",
+            "muscleGroup": "Chest",
+            "sets": 4,
+            "reps": 10,
+            "weight": 50,
+            "duration": 60
+          }
+        ]
+      }
+    }
+  ]
+}
 """;
 
     try {
-      // Prepare the content for Gemini
-      final content = [
-        Content.text(prompt),
-      ];
-
-      // Call Gemini API
+      final content = [Content.text(prompt)];
       final response = await _model.generateContent(
         content,
         generationConfig: GenerationConfig(
-          temperature: 0.7,
+          temperature: 0.6,
           maxOutputTokens: 8192,
         ),
       );
@@ -141,43 +169,176 @@ Only return the JSON array.
         return _createDefaultWorkoutPlan(userProfile);
       }
 
-      final responseText = response.text!;
-      final cleaned =
-          responseText.replaceAll(RegExp(r'```json|```'), '').trim();
-      final jsonStart = cleaned.indexOf('[');
-      final jsonEnd = cleaned.lastIndexOf(']');
+      return _parseWorkoutPlanResponse(response.text!, userProfile);
+    } catch (e) {
+      print("Error generating workout plan with Gemini: \$e");
+      return _createDefaultWorkoutPlan(userProfile);
+    }
+  }
 
-      if (jsonStart == -1 || jsonEnd == -1) {
-        print("Error: Could not find JSON array in Gemini response.");
-        return _createDefaultWorkoutPlan(userProfile);
+  AIPlan _parseWorkoutPlanResponse(
+      String jsonResponse, UserProfile userProfile) {
+    try {
+      // Step 1: Remove markdown wrappers
+      final raw = jsonResponse.replaceAll(RegExp(r'```json|```'), '').trim();
+
+      final sanitized = _sanitizeGeminiWorkoutResponse(raw);
+      print("Sanitized Gemini workout response:\n$sanitized");
+
+      final decoded = jsonDecode(sanitized) as Map<String, dynamic>;
+      final data = decoded['days'] as List<dynamic>;
+
+      final List<PlanDay> planDays = [];
+
+      for (final dayEntry in data) {
+        if (dayEntry is! Map) continue;
+
+        final int dayNumber = (dayEntry['day'] as num?)?.toInt() ?? 0;
+        final String notes = dayEntry['notes']?.toString() ?? '';
+        final String summary = dayEntry['summary']?.toString() ?? '';
+
+        final workoutData = dayEntry['workout'];
+        final isRestDay = workoutData == null ||
+            (workoutData['type']?.toString().toLowerCase() == 'rest');
+
+        final exercises = <Exercise>[];
+
+        if (!isRestDay && workoutData['exercises'] is List) {
+          for (var ex in workoutData['exercises']) {
+            if (ex is! Map) continue;
+
+            final reps = _safeParseInt(ex['reps']);
+            final sets = _safeParseInt(ex['sets']);
+            final weight = _safeParseDouble(ex['weight']);
+
+            // Handle duration safely (in seconds)
+            final durationRaw = ex['duration'];
+            final durationSeconds = _safeParseInt(durationRaw) ??
+                _safeParseDouble(durationRaw)?.toInt();
+            final exDuration = durationSeconds != null
+                ? Duration(seconds: durationSeconds)
+                : null;
+
+            if (reps == null || sets == null) continue;
+
+            final exSets = List.generate(
+              sets!,
+              (_) => ExerciseSet(
+                reps: reps,
+                weight: weight,
+                duration: exDuration,
+              ),
+            );
+
+            exercises.add(Exercise(
+              id: _uuid.v4(),
+              name: ex['name']?.toString() ?? 'Unnamed',
+              targetMuscleGroup: ex['muscleGroup']?.toString() ?? 'Unknown',
+              sets: exSets,
+              duration: exDuration,
+              description: ex['notes']?.toString(),
+            ));
+          }
+        }
+
+        final duration = isRestDay
+            ? Duration.zero
+            : Duration(minutes: _safeParseInt(workoutData['duration']) ?? 45);
+
+        final workout = Workout(
+          id: _uuid.v4(),
+          name: isRestDay
+              ? 'Rest Day'
+              : (workoutData['name']?.toString() ?? 'Workout Day $dayNumber'),
+          dateTime: DateTime.now().add(Duration(days: dayNumber - 1)),
+          duration: duration,
+          type: isRestDay
+              ? WorkoutType.rest
+              : _parseWorkoutType(workoutData['type']?.toString()),
+          exercises: exercises,
+          caloriesBurned: isRestDay
+              ? 0
+              : _estimateCaloriesBurned(
+                      exercises, duration.inMinutes, userProfile)
+                  .toInt(),
+          notes: workoutData['notes']?.toString() ?? notes,
+        );
+
+        planDays.add(PlanDay(
+          dayNumber: dayNumber,
+          notes: notes,
+          summary: summary,
+          workout: workout,
+        ));
       }
-
-      final jsonString = cleaned.substring(jsonStart, jsonEnd + 1);
-      final parsed = jsonDecode(jsonString);
-
-      final days = (parsed as List)
-          .map<PlanDay>((e) => PlanDay(
-                dayNumber: e['day'],
-                notes: e['notes'] ?? 'No notes provided', // ✅ Required
-                summary: e['summary'] ?? '',
-              ))
-          .toList();
 
       return AIPlan(
         id: _uuid.v4(),
-        title: "Custom Workout Plan",
-        description:
-            "Personalized workout plan based on your profile and preferences",
+        title: 'Custom Workout Plan',
+        description: 'AI-generated workout plan based on your profile.',
         type: PlanType.workout,
         startDate: DateTime.now(),
         endDate: DateTime.now().add(const Duration(days: 28)),
-        days: days,
+        days: planDays,
         targetProfile: userProfile,
       );
     } catch (e) {
-      print("Error generating workout plan with Gemini: $e");
+      print('Error parsing workout plan: $e');
       return _createDefaultWorkoutPlan(userProfile);
     }
+  }
+
+  String _sanitizeGeminiWorkoutResponse(String raw) {
+    return raw
+        .replaceAllMapped(RegExp(r'(\d+)\s*[-–]\s*(\d+)'), (match) {
+          final start = int.parse(match.group(1)!);
+          final end = int.parse(match.group(2)!);
+          return ((start + end) / 2).round().toString();
+        })
+        .replaceAll(
+            RegExp(
+                r'(?<!\")\b(AsManyAsPossible|ChooseModerateWeight|ChooseHeavyWeight|TBD|Any)\b(?!\")',
+                caseSensitive: false),
+            '10')
+        .replaceAll(
+            RegExp(r'"[^"]*(as many as possible|choose a weight|tbd|any)[^"]*"',
+                caseSensitive: false),
+            '10')
+        .replaceAll(RegExp(r'```json|```'), '')
+        .replaceAllMapped(RegExp(r'"(\d+(\.\d+)?)"'),
+            (m) => m.group(1)!) // ← converts "60" to 60
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .replaceAllMapped(RegExp(r'"(\d+(\.\d+)?)(\s*(reps|seconds|min|kg))?"'),
+            (m) => m.group(1)!)
+        .trim();
+  }
+
+  String _sanitizeUserInput(String input) {
+    return input
+        .replaceAll(RegExp(r'[^ -~]'), '')
+        .replaceAll(RegExp(r'["\\]'), '')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+  }
+
+  int? _safeParseInt(dynamic value) {
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String && RegExp(r'^\d+$').hasMatch(value.trim())) {
+      return int.tryParse(value);
+    }
+    return null;
+  }
+
+  double? _safeParseDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) {
+      final cleaned = value.replaceAll(RegExp(r'[^\d.]'), '');
+      return double.tryParse(cleaned);
+    }
+    return null;
   }
 
   // Generate a meal plan based on user profile
@@ -789,160 +950,6 @@ Question: $question
       return 'Intermediate';
     } else {
       return 'Advanced';
-    }
-  }
-
-  AIPlan _parseWorkoutPlanResponse(
-      String jsonResponse, UserProfile userProfile) {
-    try {
-      // Extract JSON from the response (in case there's markdown or other text)
-      final jsonStart = jsonResponse.indexOf('{');
-      final jsonEnd = jsonResponse.lastIndexOf('}') + 1;
-      if (jsonStart == -1 || jsonEnd == 0) {
-        throw const FormatException(
-            "Could not find JSON object in the response.");
-      }
-      final cleaned =
-          jsonResponse.replaceAll(RegExp(r'```json|```'), '').trim();
-      final jsonString = cleaned.substring(jsonStart, jsonEnd);
-
-      final data = jsonDecode(jsonString);
-
-      final id = _uuid.v4();
-      final title = data['title'] ?? 'Custom Workout Plan';
-      final description = data['description'] ??
-          'AI-generated workout plan based on your profile.';
-
-      // Create plan days
-      final List<PlanDay> planDays = [];
-      if (data['days'] is! List) {
-        throw const FormatException(
-            "Expected 'days' to be a list in the JSON response.");
-      }
-
-      for (var dayData in data['days']) {
-        if (dayData is! Map) continue; // Skip invalid day entries
-
-        final dayNumberDynamic = dayData['day'];
-        if (dayNumberDynamic is! num) continue; // Skip invalid day numbers
-        final int dayNumber = (dayNumberDynamic).toInt();
-
-        final notes = dayData['notes']?.toString() ?? 'No notes provided.';
-        final summary = dayData['summary']?.toString() ?? '';
-
-        // If it's a rest day
-        if (dayData['workout'] == null ||
-            (dayData['workout'] is Map &&
-                dayData['workout']['type'] == 'rest')) {
-          planDays.add(PlanDay(
-            dayNumber: dayNumber,
-            notes: notes,
-            summary: summary,
-            workout: Workout(
-              id: _uuid.v4(),
-              name: 'Rest Day',
-              dateTime: DateTime.now().add(Duration(days: dayNumber - 1)),
-              duration: Duration.zero,
-              type: WorkoutType.rest,
-              exercises: [],
-              caloriesBurned: 0,
-              notes: notes,
-            ),
-          ));
-          continue;
-        }
-
-        // Create workout
-        final workoutData = dayData['workout'];
-        if (workoutData is! Map) continue; // Skip invalid workout data
-
-        final exercises = <Exercise>[];
-
-        if (workoutData['exercises'] is List) {
-          for (var exerciseData in workoutData['exercises']) {
-            if (exerciseData is! Map) continue; // Skip invalid exercise entries
-
-            final exerciseSets = <ExerciseSet>[];
-            final setsCount = exerciseData['sets'];
-            final repsCount = exerciseData['reps'];
-            final weightValue = exerciseData['weight']; // Can be String or num
-
-            // Fix 2: Helper function to safely parse weight to double?
-            double? safeParseDouble(dynamic value) {
-              if (value is num) return value.toDouble();
-              if (value is String) return double.tryParse(value);
-              return null;
-            }
-
-            // Create sets if valid counts are provided
-            if (setsCount is int &&
-                setsCount > 0 &&
-                repsCount is int &&
-                repsCount > 0) {
-              for (int i = 0; i < setsCount; i++) {
-                exerciseSets.add(ExerciseSet(
-                  reps: repsCount,
-                  // Use safe parse for weight
-                  weight: safeParseDouble(weightValue),
-                ));
-              }
-            }
-
-            exercises.add(Exercise(
-              id: _uuid.v4(),
-              name: exerciseData['name']?.toString() ?? 'Unnamed Exercise',
-              description:
-                  exerciseData['notes']?.toString(), // Allow null description
-              sets: exerciseSets.isEmpty ? null : exerciseSets,
-              // Fix 3: Provide non-nullable String for targetMuscleGroup
-              targetMuscleGroup:
-                  exerciseData['muscleGroup']?.toString() ?? 'Unknown',
-            ));
-          }
-        }
-
-        final workoutDuration = workoutData['duration'];
-        final durationMinutes = workoutDuration is num
-            ? workoutDuration.toInt()
-            : 45; // Default duration
-
-        final workout = Workout(
-          id: _uuid.v4(),
-          name: workoutData['name']?.toString() ?? 'Day $dayNumber Workout',
-          dateTime: DateTime.now().add(Duration(days: dayNumber - 1)),
-          duration: Duration(minutes: durationMinutes),
-          type: _parseWorkoutType(workoutData['type']?.toString()),
-          exercises: exercises,
-          caloriesBurned: _estimateCaloriesBurned(
-            exercises,
-            durationMinutes,
-            userProfile,
-          ).toInt(),
-          notes: workoutData['notes']?.toString() ?? '',
-        );
-
-        planDays.add(PlanDay(
-          dayNumber: dayNumber,
-          notes: notes,
-          summary: summary.isNotEmpty ? summary : (workout.notes ?? ''),
-          workout: workout,
-        ));
-      }
-
-      return AIPlan(
-        id: id,
-        title: title,
-        description: description,
-        type: PlanType.workout,
-        startDate: DateTime.now(),
-        endDate: DateTime.now().add(const Duration(days: 28)),
-        days: planDays,
-        targetProfile: userProfile,
-      );
-    } catch (e) {
-      print('Error parsing workout plan: $e');
-      // Consider logging the jsonResponse that caused the error
-      return _createDefaultWorkoutPlan(userProfile); // Fallback to default
     }
   }
 

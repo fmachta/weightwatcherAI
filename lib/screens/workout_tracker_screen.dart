@@ -508,27 +508,47 @@ class WorkoutCard extends StatelessWidget {
                   ),
             ),
             const SizedBox(height: 8),
-            ...workout.exercises.map((exercise) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.circle,
-                        size: 8,
+            ...workout.exercises.map((exercise) {
+              final firstSet = exercise.sets?.isNotEmpty == true
+                  ? exercise.sets!.first
+                  : null;
+              final reps = firstSet?.reps ?? 0;
+              final weight = firstSet?.weight ?? 0.0;
+
+              // Use exercise.duration only — not from set
+              final duration = exercise.duration;
+
+              // Improved regex – more inclusive
+              final isNonWeighted = RegExp(
+                r'\b(yoga|hiit|plank|crunch|pull.?ups?|push.?ups?|run|walk|burpee|climber|jumping jack|bodyweight|stretch|mobility|recovery|cardio|sit.?ups?|mountain climbers?)\b',
+                caseSensitive: false,
+              ).hasMatch(exercise.name);
+
+              final showWeight = !isNonWeighted && weight > 0;
+              final weightDisplay =
+                  showWeight ? ' (${weight.toStringAsFixed(1)}kg)' : '';
+
+              final durationDisplay = duration != null && duration.inSeconds > 0
+                  ? ' – ${duration.inMinutes} min'
+                  : '';
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  children: [
+                    const Icon(Icons.circle, size: 8),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '${exercise.name}: ${exercise.sets?.length ?? 1} × $reps$weightDisplay$durationDisplay',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          exercise.sets != null && exercise.sets!.isNotEmpty
-                              ? '${exercise.name}: ${exercise.sets!.length} × ${exercise.sets!.first.reps}'
-                              : exercise.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                )),
+                    ),
+                  ],
+                ),
+              );
+            }),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
