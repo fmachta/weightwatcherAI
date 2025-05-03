@@ -182,10 +182,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                 Consumer<AITrainerProvider>(
                   builder: (context, provider, _) {
+                    final insight = provider.aiInsight;
+
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (provider.aiInsight != null)
+                        ElevatedButton(
+                          onPressed: () async {
+                            await Provider.of<AITrainerProvider>(context,
+                                    listen: false)
+                                .fetchAIInsight(
+                              userProfile,
+                              recentWorkouts,
+                              [if (dailyNutrition != null) dailyNutrition],
+                            );
+                          },
+                          child: const Text("Get Fitness Tips"),
+                        ),
+                        const SizedBox(height: 16),
+                        if (insight != null && insight.isNotEmpty)
                           Container(
                             decoration: BoxDecoration(
                               color: Colors.pink.shade200.withOpacity(0.3),
@@ -206,20 +221,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   ],
                                 ),
                                 const SizedBox(height: 12),
-                                Text(provider.aiInsight!,
+                                Text(insight,
                                     style: const TextStyle(fontSize: 14)),
                               ],
                             ),
-                          )
-                        else
-                          ElevatedButton(
-                            onPressed: () async {
-                              await Provider.of<AITrainerProvider>(context,
-                                      listen: false)
-                                  .fetchAIInsight(userProfile, recentWorkouts,
-                                      [dailyNutrition]);
-                            },
-                            child: const Text("Get Fitness Tips"),
                           ),
                         const SizedBox(height: 24),
                       ],

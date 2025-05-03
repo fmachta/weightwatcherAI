@@ -414,6 +414,16 @@ class WorkoutCard extends StatelessWidget {
     required this.onDelete,
   });
 
+  String _formatDurationSmart(Duration duration, {bool isExercise = false}) {
+    if (duration.inMinutes >= 60) {
+      return '${duration.inHours}h ${duration.inMinutes % 60}m';
+    } else if (duration.inMinutes >= 1) {
+      return '${duration.inMinutes}m';
+    } else {
+      return isExercise ? '${duration.inSeconds}s' : '0m';
+    }
+  }
+
   String _getWorkoutTypeLabel(WorkoutType type) {
     switch (type) {
       case WorkoutType.strength:
@@ -435,15 +445,17 @@ class WorkoutCard extends StatelessWidget {
     }
   }
 
-  String _formatDuration(Duration duration) {
-    if (duration.inHours > 0) {
-      return '${duration.inHours}h ${duration.inMinutes % 60}m';
-    }
-    return '${duration.inMinutes}m';
-  }
-
   @override
   Widget build(BuildContext context) {
+    final totalExerciseDuration = workout.exercises.fold<Duration>(
+      Duration.zero,
+      (sum, ex) => sum + (ex.duration ?? Duration.zero),
+    );
+    final totalDurationDisplay = _formatDurationSmart(totalExerciseDuration);
+
+    print(
+        'Rendering WorkoutCard for: ${workout.name} with duration ${workout.duration}'); //debug log
+
     return Card(
       elevation: 0,
       margin: const EdgeInsets.only(bottom: 16),
@@ -455,11 +467,12 @@ class WorkoutCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Title and type with total actual duration
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  workout.name,
+                  '${workout.name} ($totalDurationDisplay)',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -483,12 +496,14 @@ class WorkoutCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
+
+            // Stats row
             Row(
               children: [
                 _WorkoutDetail(
                   icon: Icons.timer,
                   label: 'Duration',
-                  value: _formatDuration(workout.duration),
+                  value: totalDurationDisplay,
                 ),
                 const SizedBox(width: 24),
                 _WorkoutDetail(
@@ -501,6 +516,8 @@ class WorkoutCard extends StatelessWidget {
             const SizedBox(height: 16),
             const Divider(),
             const SizedBox(height: 8),
+
+            // Exercises title
             Text(
               'Exercises',
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -508,29 +525,52 @@ class WorkoutCard extends StatelessWidget {
                   ),
             ),
             const SizedBox(height: 8),
+
+            // Exercises list
+
             ...workout.exercises.map((exercise) {
+              print(
+                  'WorkoutCard rendering: ${workout.name}, exercises: ${workout.exercises.length}'); //debug log
+
+              print(
+                  'UI duration display for ${exercise.name}: ${exercise.duration}'); //debug log
+
               final firstSet = exercise.sets?.isNotEmpty == true
                   ? exercise.sets!.first
                   : null;
-              final reps = firstSet?.reps ?? 0;
-              final weight = firstSet?.weight ?? 0.0;
 
-              // Use exercise.duration only — not from set
+              final reps = firstSet?.reps;
+              final sets = exercise.sets?.length ?? 1;
+              final weight = firstSet?.weight ?? 0.0;
               final duration = exercise.duration;
 
-              // Improved regex – more inclusive
               final isNonWeighted = RegExp(
                 r'\b(yoga|hiit|plank|crunch|pull.?ups?|push.?ups?|run|walk|burpee|climber|jumping jack|bodyweight|stretch|mobility|recovery|cardio|sit.?ups?|mountain climbers?)\b',
                 caseSensitive: false,
               ).hasMatch(exercise.name);
 
-              final showWeight = !isNonWeighted && weight > 0;
-              final weightDisplay =
-                  showWeight ? ' (${weight.toStringAsFixed(1)}kg)' : '';
+              final hasValidWeight = weight > 0;
+              final showWeight = hasValidWeight && !isNonWeighted;
 
-              final durationDisplay = duration != null && duration.inSeconds > 0
-                  ? ' – ${duration.inMinutes} min'
-                  : '';
+              String line = exercise.name;
+
+              if (reps != null && reps > 0) {
+                line += ': $sets × $reps';
+                if (showWeight) {
+                  line += ' (${weight.toStringAsFixed(1)}kg)';
+                }
+              }
+
+              if (duration != null && duration.inSeconds > 0) {
+                final formattedDuration =
+                    _formatDurationSmart(duration, isExercise: true);
+
+                if (reps == null || reps <= 0) {
+                  line += ': $formattedDuration';
+                } else {
+                  line += ' – $formattedDuration';
+                }
+              }
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
@@ -540,7 +580,7 @@ class WorkoutCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '${exercise.name}: ${exercise.sets?.length ?? 1} × $reps$weightDisplay$durationDisplay',
+                        line,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -549,6 +589,7 @@ class WorkoutCard extends StatelessWidget {
                 ),
               );
             }),
+
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,

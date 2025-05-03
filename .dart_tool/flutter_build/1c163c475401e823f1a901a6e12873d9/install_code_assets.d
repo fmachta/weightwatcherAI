@@ -1,0 +1,1 @@
+ C:\\Users\\erick\\AndroidStudioProjects\\weightwatcherAI\\.dart_tool\\flutter_build\\1c163c475401e823f1a901a6e12873d9\\native_assets.json: 

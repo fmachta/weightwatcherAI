@@ -37,11 +37,12 @@ class Exercise {
       name: json['name'],
       targetMuscleGroup: json['targetMuscleGroup'],
       sets: json['sets'] != null
-          ? (json['sets'] as List).map((setJson) => ExerciseSet.fromJson(setJson)).toList()
+          ? (json['sets'] as List)
+              .map((setJson) => ExerciseSet.fromJson(setJson))
+              .toList()
           : null,
-      duration: json['duration'] != null
-          ? Duration(seconds: json['duration'])
-          : null,
+      duration:
+          json['duration'] != null ? Duration(seconds: json['duration']) : null,
       description: json['description'],
       caloriesBurnedPerMinute: json['caloriesBurnedPerMinute']?.toDouble(),
     );
@@ -69,12 +70,21 @@ class ExerciseSet {
   }
 
   factory ExerciseSet.fromJson(Map<String, dynamic> json) {
+    final rawDuration = json['duration'];
+    final durationSeconds = rawDuration is int
+        ? rawDuration
+        : rawDuration is String
+            ? int.tryParse(rawDuration)
+            : rawDuration is double
+                ? rawDuration.toInt()
+                : null;
+
     return ExerciseSet(
       reps: json['reps'],
-      weight: json['weight']?.toDouble(),
-      duration: json['duration'] != null
-          ? Duration(seconds: json['duration'])
-          : null,
+      weight:
+          json['weight'] != null ? (json['weight'] as num).toDouble() : null,
+      duration:
+          durationSeconds != null ? Duration(seconds: durationSeconds) : null,
     );
   }
 }

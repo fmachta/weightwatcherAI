@@ -114,16 +114,18 @@ ${specificFocus.isNotEmpty ? 'Specific focus: $specificFocus' : ''}
 ${otherPreferences.isNotEmpty ? 'Other preferences: $otherPreferences' : ''}
 
 IMPORTANT STRICT RULES:
+- ❗ Return a single valid JSON object with a "days" array of 28 entries (4 full weeks). Each week must include both workout and rest/recovery days. Distribute workoutDaysPerWeek accordingly.
+- ❗ If workoutDaysPerWeek < 7, assign the remaining days as rest or active recovery.
 - ❗ DO NOT use any ranges like 8-12. Only provide exact numbers like 10.
-- ❗ DO NOT use vague values like "as many as possible", "TBD", "choose a weight", or "adjust as needed". Always give a numeric value.
-- ❗ Each exercise MUST include a numeric "duration" value in seconds.
-- ❗ If a user has a limitation (like a knee injury), substitute exercises with safe alternatives. DO NOT explain or add conditional logic.
-- ❗ Return a single valid JSON object with a "days" array of 28 entries. Do not return markdown or explanation.
-- ❗ All numbers like sets, reps, weight, and duration must be returned as plain numbers (not strings).
+- ❗ DO NOT use vague values like "as many as possible", "TBD", "choose a weight", or "adjust as needed". Always use a numeric value.
+- ❗ Every exercise MUST include a numeric top-level "duration" field in seconds. This represents the **total time spent on the exercise**, not per rep or set. Do NOT omit it.
+- ❗ DO NOT return null, 0, empty, or missing durations — use realistic values (e.g., 120 for 2 minutes, 600 for 10 minutes).
+- ❗ For bodyweight, yoga, or cardio-style exercises, OMIT the "weight" field entirely. Do not include weight: 0.
+- ❗ Only include "weight" if it is actually used (e.g., barbell, dumbbell, machine).
+- ❗ Return only a valid single JSON object. No markdown, no explanations, no comments.
+- ❗ All numbers (sets, reps, weight, duration) must be raw numbers (not strings).
 
-Duration is in seconds.
-
-Format:
+Output Format:
 {
   "title": "Custom Workout Plan",
   "description": "Generated plan",
@@ -135,7 +137,7 @@ Format:
       "workout": {
         "name": "Upper Body Push",
         "type": "strength",
-        "duration": 45,
+        "duration": 2700,
         "notes": "Controlled reps",
         "exercises": [
           {
@@ -145,6 +147,13 @@ Format:
             "reps": 10,
             "weight": 50,
             "duration": 60
+          },
+          {
+            "name": "Push-ups",
+            "muscleGroup": "Chest",
+            "sets": 3,
+            "reps": 15,
+            "duration": 45
           }
         ]
       }
@@ -219,13 +228,16 @@ Format:
                 ? Duration(seconds: durationSeconds)
                 : null;
 
-            if (reps == null || sets == null) continue;
+            // Use fallback if reps/sets missing
+            final validSets = sets ?? 1;
+            final validReps = reps ?? 0;
 
+            // Generate sets anyway so duration displays
             final exSets = List.generate(
-              sets!,
+              validSets,
               (_) => ExerciseSet(
-                reps: reps,
-                weight: weight,
+                reps: validReps,
+                weight: (weight != null && weight > 0) ? weight : null,
                 duration: exDuration,
               ),
             );
@@ -238,6 +250,9 @@ Format:
               duration: exDuration,
               description: ex['notes']?.toString(),
             ));
+
+            print(
+                'Parsed exercise: ${ex['name']} → duration: ${exDuration?.inSeconds ?? 'null'} sec'); //debug log
           }
         }
 
@@ -271,6 +286,7 @@ Format:
           workout: workout,
         ));
       }
+      print('Returning parsed AIPlan with ${planDays.length} days'); //debug log
 
       return AIPlan(
         id: _uuid.v4(),
