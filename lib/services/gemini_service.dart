@@ -9,12 +9,14 @@ import '../models/meal.dart';
 import '../models/food_item.dart';
 import '../models/ai_plan.dart';
 import 'package:uuid/uuid.dart';
+import 'dart:math';
 
 class GeminiService {
   // Gemini specific variables
   late final String? _geminiApiKey;
   late final String _geminiModelName;
   late final GenerativeModel _model;
+  late final GenerationConfig _defaultConfig;
 
   final Uuid _uuid = const Uuid();
 
@@ -43,28 +45,28 @@ class GeminiService {
   ];
 
   GeminiService() {
-    // Load Gemini API key and model name from .env
     _geminiApiKey = dotenv.env['GEMINI_API_KEY'];
-    // Provide a default model name if not found in .env
     _geminiModelName = dotenv.env['GEMINI_MODEL_NAME'] ?? 'gemini-1.5-flash';
 
-    // Initialize Gemini Model - handle missing API key
+    _defaultConfig = GenerationConfig(
+      temperature: 0.8,
+      topP: 1.0,
+      topK: 40,
+      maxOutputTokens: 8192,
+    );
+
     if (_geminiApiKey == null ||
         _geminiApiKey!.isEmpty ||
         _geminiApiKey == 'google-api-key-here') {
       print(
           "Error: GEMINI_API_KEY not found or is placeholder in .env file. Gemini features will not work.");
-      // You might want to throw an exception or handle this state more gracefully
-      // For now, creating a dummy model to avoid late initialization error
-      // This dummy model will likely fail if used.
       _model =
           GenerativeModel(model: _geminiModelName, apiKey: 'DUMMY_API_KEY');
     } else {
       _model = GenerativeModel(
         model: _geminiModelName,
         apiKey: _geminiApiKey!,
-        // Optional: Add generationConfig, safetySettings if needed
-        // generationConfig: GenerationConfig(temperature: 0.7),
+        generationConfig: _defaultConfig, // use shared config here
       );
     }
   }
@@ -677,55 +679,57 @@ Format the response as a JSON object with the following structure:
     );
   }
 
-  // Get an AI insight for dashboard based on user data
   Future<String> getAIInsight(UserProfile userProfile,
       List<dynamic> recentWorkouts, List<dynamic> recentMeals) async {
-    // Check if API key is valid
-    if (_geminiApiKey == null ||
-        _geminiApiKey!.isEmpty ||
-        _geminiApiKey == 'google-api-key-here') {
-      print(
-          "Error: Cannot generate AI insight. GEMINI_API_KEY is missing or invalid.");
-      return 'Based on your recent activity, consider focusing on maintaining consistency in your workouts and ensuring adequate protein intake for muscle recovery.';
+    if (_geminiApiKey == null || _geminiApiKey!.isEmpty) {
+      print("Error: GEMINI_API_KEY is missing.");
+      return 'Stay consistent with your fitness routine and ensure you\'re getting enough hydration throughout the day.';
     }
 
-    // Create a prompt based on user's recent activities
     final prompt =
         _createInsightPrompt(userProfile, recentWorkouts, recentMeals);
 
-    try {
-      // Prepare the content for Gemini
-      final content = [
-        Content.text(
-            "You are a fitness and nutrition expert. Provide a short, personalized insight based on the user's recent activity and goals.\n\n$prompt"),
-      ];
+    final List<String> styleVariants = [
+      "Give a fresh, motivating tip:",
+      "Offer a brief and inspiring fitness insight:",
+      "Share a quick and energetic reminder to help the user stay on track:"
+    ];
+    final stylePrompt =
+        styleVariants[_uuid.v4().hashCode % styleVariants.length];
 
-      // Call Gemini API
+    final content = [
+      Content.text(
+          "You are a highly motivating and practical AI fitness coach."),
+      Content.text("$stylePrompt\n\n$prompt")
+    ];
+
+    try {
       final response = await _model.generateContent(
         content,
         generationConfig: GenerationConfig(
-          temperature: 0.7,
+          temperature: 0.9, // Higher variety
           maxOutputTokens: 250,
+          topP: 1.0,
+          topK: 40,
         ),
       );
 
-      if (response.text != null) {
+      if (response.text != null && response.text!.isNotEmpty) {
         return response.text!;
       } else {
         print(
-            'Error: Gemini response was null or blocked. Reason: ${response.promptFeedback?.blockReason?.name}');
-        return 'Stay consistent with your fitness routine and ensure you\'re getting enough hydration throughout the day.';
+            'Error: Gemini returned no text. Reason: ${response.promptFeedback?.blockReason?.name}');
+        return 'Keep up the effort and remember — every step forward counts!';
       }
     } catch (e) {
-      print('Error generating AI insight with Gemini: $e');
-      return 'Stay consistent with your fitness routine and ensure you\'re getting enough hydration throughout the day.';
+      print('Gemini Insight Error: $e');
+      return 'Stay consistent with your workouts and mindful of your nutrition.';
     }
   }
 
-  // Answer a fitness question using AI
   Future<String> answerQuestion(
       String question, UserProfile userProfile) async {
-    // Check if the API key is valid before proceeding
+    // Check API key
     if (_geminiApiKey == null ||
         _geminiApiKey!.isEmpty ||
         _geminiApiKey == 'google-api-key-here') {
@@ -734,58 +738,55 @@ Format the response as a JSON object with the following structure:
       return "I'm sorry, but my AI capabilities are not configured correctly. Please check the API key setup.";
     }
 
-    // Define the system prompt for the AI persona
+    // System prompt defines the AI's behavior
     const systemPrompt = """
-You are an expert fitness coach and nutritionist AI. Your name is 'Weight Watcher AI Trainer'.
-Act as a professional personal trainer and nutrition expert helping the user achieve their fitness goals.
-Be motivational and supportive while providing evidence-based advice.
-Your responses MUST be extremely concise - 2-3 short sentences maximum.
-Do NOT use asterisks (*) or any markdown formatting for emphasis.
-Avoid unnecessary details, introductions, or explanations.
-Provide only the most essential, practical information directly related to the question.
-Avoid phrases like "based on your profile" or "as your AI trainer".
-Do not give medical advice - refer users to doctors for health concerns.
-Use simple, easy-to-understand language.
-""";
+         You are 'Weight Watcher AI Trainer', an expert fitness coach and nutritionist AI.
+         Your job is to motivate and guide users to achieve their health goals with high-impact, concise advice.
+         Each response must be extremely concise — no more than 2–3 sentences.
+         Use simple, encouraging language. Vary your tone slightly to keep responses fresh. You may include motivational phrases (e.g., "Keep pushing!" or "You're doing great!") occasionally.
+         Be direct and practical — offer actionable tips or quick insights that change each time.
+         It is okay to provide healthy advice on fat loss, weight management, and body composition when asked — focus on fitness, nutrition, and positive lifestyle changes.
+         Do NOT provide any medical advice or diagnose conditions. If a question relates to medical concerns, direct the user to a healthcare provider.
+         Avoid introductions or repeating the user's question.
+         Do NOT use markdown formatting or asterisks.
+          """;
 
-    // Construct the user message including profile context
-    final userMessage = """
-$systemPrompt
+    // User profile context
+    final profileContext = '''
+      Age: ${userProfile.age}
+      Gender: ${userProfile.gender}
+      Current Weight: ${userProfile.currentWeight} kg
+      Goal Weight: ${userProfile.targetWeight} kg
+      Height: ${userProfile.height} cm
+      Body Fat: ${userProfile.bodyFat}%
+      Fitness Goal: ${userProfile.fitnessGoal.name}
+      Activity Level: ${userProfile.activityLevel.toString().split('.').last}
+      ''';
 
-User Profile:
-Age: ${userProfile.age}
-Gender: ${userProfile.gender}
-Current Weight: ${userProfile.currentWeight} kg
-Goal Weight: ${userProfile.targetWeight} kg
-Height: ${userProfile.height} cm
-Body Fat: ${userProfile.bodyFat}%
-Fitness Goal: ${userProfile.fitnessGoal.name}
-Activity Level: ${userProfile.activityLevel.toString().split('.').last}
-
-Question: $question
-""";
-
-    // Prepare content for Gemini
     final content = [
-      Content.text(userMessage),
+      Content.text(systemPrompt), // System prompt
+      Content.text(
+          'Here is my profile:\n$profileContext\n\nMy question is: $question'),
     ];
 
     try {
-      // Call Gemini API
       final response = await _model.generateContent(content);
 
-      // Parse and return the response text
-      if (response.text != null) {
+      /*final response = await _model.generateContent(
+        content,
+        generationConfig:
+            _defaultConfig, // reuse the one defined in constructor
+      );*/
+
+      if (response.text != null && response.text!.isNotEmpty) {
         return response.text!;
       } else {
-        // Handle cases where the response might be blocked or empty
         print(
             'Error: Gemini response was null or blocked. Reason: ${response.promptFeedback?.blockReason?.name}');
-        return "I couldn't generate a response. This might be due to safety settings or an issue with the request. Please try rephrasing your question.";
+        return "I couldn't generate a response. This might be due to safety settings or a technical issue. Try rephrasing your question.";
       }
     } catch (e) {
       print('Error answering question with Gemini: $e');
-      // Handle potential SDK errors (e.g., InvalidApiKey, network issues)
       if (e is GenerativeAIException) {
         return "I encountered an issue communicating with the AI service (${e.message}). Please try again later.";
       }
@@ -920,10 +921,9 @@ Question: $question
   // Create a prompt for insight generation
   String _createInsightPrompt(UserProfile userProfile,
       List<dynamic> recentWorkouts, List<dynamic> recentMeals) {
-    // Create simple summaries of recent activity
     String formattedWorkouts;
     if (recentWorkouts.isEmpty) {
-      formattedWorkouts = "No workouts in the past week";
+      formattedWorkouts = "The user has not logged any workouts this week.";
     } else {
       num totalMinutes = 0;
       for (var workout in recentWorkouts) {
@@ -932,33 +932,50 @@ Question: $question
         }
       }
       formattedWorkouts =
-          "${recentWorkouts.length} workouts in the past week, totaling approximately $totalMinutes minutes";
+          "${recentWorkouts.length} workouts logged this week, totaling about $totalMinutes minutes.";
     }
 
     String mealSummary = recentMeals.isEmpty
-        ? "No meal tracking data available"
-        : "Recent meals show an average of ${recentMeals.fold(0.0, (sum, meal) => sum + (meal.totalCalories ?? 0.0)) / (recentMeals.isEmpty ? 1 : recentMeals.length)} calories per meal";
+        ? "No recent meals logged."
+        : "Recent meals average ${(recentMeals.fold(0.0, (sum, meal) => sum + (meal.totalCalories ?? 0.0)) / (recentMeals.length)).round()} calories per meal.";
+
+    final fitnessLevel = _determineFitnessLevel(userProfile);
 
     return '''
-    Generate a short, personalized fitness insight for a user with the following profile and recent activity:
-    
-    Profile:
-    - Age: ${userProfile.age}
-    - Current Weight: ${userProfile.currentWeight}kg
-    - Goal Weight: ${userProfile.targetWeight}kg
-    - Fitness Goal: ${userProfile.fitnessGoal.name}
-    
-    Recent Activity:
-    - $formattedWorkouts
-    - $mealSummary
-    
-    Provide a specific, actionable insight (1-2 sentences) based on their profile and activity that can help them make progress toward their fitness goal.
-    ''';
+You are a fitness and nutrition AI providing personalized, positive insights.
+
+User Profile:
+- Age: ${userProfile.age}
+- Weight: ${userProfile.currentWeight}kg (Goal: ${userProfile.targetWeight}kg)
+- Body Fat: ${userProfile.bodyFat.toStringAsFixed(1)}%
+- Muscle Mass: ${userProfile.muscleMass.toStringAsFixed(1)}%
+- Height: ${userProfile.height} cm
+- Fitness Goal: ${userProfile.fitnessGoal.name}
+- Activity Level: ${userProfile.activityLevel.toString().split('.').last}
+- Estimated Fitness Level: $fitnessLevel
+
+Activity Summary:
+- $formattedWorkouts
+- $mealSummary
+
+When writing the insight:
+- Use 1–2 clear sentences
+- Use a varied tone: friendly, calm, confident, motivating
+- Start with a greeting **only 30–50% of the time**
+  - Examples: "Hey champ", "You've got this", "Quick reminder", "Heads up", or no greeting at all
+- End with a **unique motivational nudge**
+  - Examples: "Small wins lead to big changes.", "You're stronger than you think.", "Keep showing up.", "Fuel your progress.", "Consistency creates confidence."
+- Tailor the advice to the user's stats and habits
+- Do not repeat greetings, tips, or advice often
+- Do not include any medical disclaimers
+- Do not use formatting, asterisks, or bullet points
+
+Respond with the insight **text only**.
+''';
   }
 
-  // Determine fitness level based on profile and activity
+// Determine fitness level based on profile and activity
   String _determineFitnessLevel(UserProfile userProfile) {
-    // This is a simple approximation - a real app would use more data points
     if (userProfile.activityLevel == ActivityLevel.sedentary ||
         userProfile.activityLevel == ActivityLevel.lightlyActive) {
       return 'Beginner';

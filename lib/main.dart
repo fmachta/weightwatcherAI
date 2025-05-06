@@ -49,10 +49,13 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => UserProvider()),
-        ChangeNotifierProvider(create: (_) => NutritionProvider()),
-        ChangeNotifierProvider(create: (_) => WorkoutProvider()),
-        ChangeNotifierProvider(create: (_) => AITrainerProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()..initialize()),
+        ChangeNotifierProvider(
+            create: (_) => NutritionProvider()..initialize()),
+        ChangeNotifierProvider(
+            create: (_) => WorkoutProvider()..initialize()), // <-- KEY LINE
+        ChangeNotifierProvider(
+            create: (_) => AITrainerProvider()..initialize()),
       ],
       child: const WeightWatcherAI(),
     ),

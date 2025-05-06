@@ -396,6 +396,9 @@ class _MeasurementCard extends StatelessWidget {
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
+              textAlign: TextAlign.center,
+              maxLines: 2, // allow wrapping to two lines
+              overflow: TextOverflow.visible,
             ),
             const SizedBox(height: 4),
             Text(
@@ -588,6 +591,13 @@ class _AddMeasurementSheetState extends State<AddMeasurementSheet> {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your weight';
                 }
+                final parsed = double.tryParse(value);
+                if (parsed == null) {
+                  return 'Please enter a valid number';
+                }
+                if (parsed <= 0) {
+                  return 'Weight must be greater than 0';
+                }
                 return null;
               },
             ),
@@ -602,7 +612,17 @@ class _AddMeasurementSheetState extends State<AddMeasurementSheet> {
               ),
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
+              validator: (value) {
+                if (value != null && value.isNotEmpty) {
+                  final parsed = double.tryParse(value);
+                  if (parsed == null) return 'Enter a valid number';
+                  if (parsed < 0 || parsed > 60)
+                    return 'Enter a value between 0 and 100%';
+                }
+                return null; // Accept empty values
+              },
             ),
+
             const SizedBox(height: 16),
 
             // Muscle mass field
@@ -614,7 +634,17 @@ class _AddMeasurementSheetState extends State<AddMeasurementSheet> {
               ),
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
+              validator: (value) {
+                if (value != null && value.isNotEmpty) {
+                  final parsed = double.tryParse(value);
+                  if (parsed == null) return 'Enter a valid number';
+                  if (parsed < 0 || parsed > 100)
+                    return 'Enter a value between 0 and 100%';
+                }
+                return null; // Accept empty values
+              },
             ),
+
             const SizedBox(height: 24),
 
             // Save button
@@ -633,7 +663,9 @@ class _AddMeasurementSheetState extends State<AddMeasurementSheet> {
 
   void _saveMeasurement() async {
     if (_formKey.currentState!.validate()) {
-      final weight = double.parse(_weightController.text);
+      final weight = double.tryParse(_weightController.text) ?? 0.0;
+      if (weight <= 0) return; // or show error
+
       final bodyFat = _bodyFatController.text.isNotEmpty
           ? double.parse(_bodyFatController.text)
           : null;
