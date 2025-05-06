@@ -1576,29 +1576,39 @@ class PlanDetailsScreen extends StatelessWidget {
 
             if (day.workout != null) ...[
               const SizedBox(height: 16),
-              Text(
-                'Workout: ${day.workout!.name}',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 8),
-              ...day.workout!.exercises.map((exercise) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.circle, size: 8),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            _formatExerciseDetails(exercise),
-                            maxLines: 2, // Allow wrapping
-                            overflow: TextOverflow.ellipsis,
+              if (day.workout!.type == WorkoutType.rest)
+                Text(
+                  'Rest Day',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        fontStyle: FontStyle.italic,
+                      ),
+                )
+              else ...[
+                Text(
+                  'Workout: ${day.workout!.name}',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                ...day.workout!.exercises.map((exercise) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.circle, size: 8),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _formatExerciseDetails(exercise),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  )),
+                        ],
+                      ),
+                    )),
+              ]
             ],
 
             // Spread the pre-built meal widgets here

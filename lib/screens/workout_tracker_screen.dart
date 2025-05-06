@@ -24,6 +24,7 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
     super.initState();
     _selectedDate = DateTime.now();
 
+    // Load data for today
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadWorkouts();
     });
@@ -53,10 +54,12 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
     }
   }
 
+  // Helper function to prompt login
   void _promptLogin(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
+    // Optionally show a message
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Please log in to perform this action.')),
     );
@@ -115,7 +118,10 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
                   ],
                 ),
                 const SizedBox(height: 24),
+
+                // Workout summary card
                 const WorkoutSummaryCard(),
+
                 const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -137,6 +143,8 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
+
+                // Display the list of workouts
                 Expanded(
                   child: isLoading
                       ? const Center(child: CircularProgressIndicator())
@@ -176,25 +184,12 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
                           : ListView.builder(
                               itemCount: workouts.length,
                               itemBuilder: (context, index) {
-                                final workout = workouts[index];
-                                return CheckboxListTile(
-                                  title: WorkoutCard(
-                                    workout: workout,
-                                    onEdit: () => _navigateToEditWorkout(
-                                        context, workout),
-                                    onDelete: () =>
-                                        _deleteWorkout(context, workout.id),
-                                  ),
-                                  value: workout.isCompleted,
-                                  onChanged: (bool? value) async {
-                                    final updated = workout.copyWith(
-                                        isCompleted: value ?? false);
-                                    await Provider.of<WorkoutProvider>(context,
-                                            listen: false)
-                                        .updateWorkout(updated);
-                                  },
-                                  controlAffinity:
-                                      ListTileControlAffinity.leading,
+                                return WorkoutCard(
+                                  workout: workouts[index],
+                                  onEdit: () => _navigateToEditWorkout(
+                                      context, workouts[index]),
+                                  onDelete: () => _deleteWorkout(
+                                      context, workouts[index].id),
                                 );
                               },
                             ),
@@ -240,6 +235,7 @@ class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> {
       return;
     }
 
+    // Show confirmation dialog
     final shouldDelete = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
@@ -277,6 +273,7 @@ class WorkoutSummaryCard extends StatelessWidget {
       builder: (context, workoutProvider, child) {
         final workouts = workoutProvider.workouts;
 
+        // Calculate total workout time, calories, and exercises
         int totalMinutes = 0;
         int totalCalories = 0;
         int totalExercises = 0;
@@ -287,10 +284,6 @@ class WorkoutSummaryCard extends StatelessWidget {
           totalExercises += workout.exercises.length;
         }
 
-        final completed = workouts.where((w) => w.isCompleted).length;
-        final progress =
-            workouts.isNotEmpty ? completed / workouts.length : 0.0;
-
         return Card(
           elevation: 0,
           shape: RoundedRectangleBorder(
@@ -300,29 +293,63 @@ class WorkoutSummaryCard extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Today\'s Summary',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color:
-                            Theme.of(context).colorScheme.onSecondaryContainer,
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 16),
-                LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: Colors.grey.shade300,
-                  color: progress == 1.0 ? Colors.green : Colors.blue,
-                ),
-                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('${(progress * 100).toStringAsFixed(0)}% complete'),
-                    if (progress == 1.0)
-                      const Icon(Icons.check_circle, color: Colors.green),
+                    Text(
+                      'Today\'s Summary',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSecondaryContainer,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _WorkoutStat(
+                      icon: Icons.fitness_center,
+                      value: workouts.length.toString(),
+                      label: 'Workouts',
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    ),
+                    Container(
+                      height: 50,
+                      width: 1,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSecondaryContainer
+                          .withOpacity(0.2),
+                    ),
+                    _WorkoutStat(
+                      icon: Icons.timer,
+                      value: totalMinutes > 0
+                          ? totalMinutes >= 60
+                              ? '${totalMinutes ~/ 60}h ${totalMinutes % 60}m'
+                              : '${totalMinutes}m'
+                          : '0m',
+                      label: 'Total Time',
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    ),
+                    Container(
+                      height: 50,
+                      width: 1,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSecondaryContainer
+                          .withOpacity(0.2),
+                    ),
+                    _WorkoutStat(
+                      icon: Icons.local_fire_department,
+                      value: totalCalories.toString(),
+                      label: 'Calories',
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    ),
                   ],
                 ),
               ],
@@ -769,19 +796,8 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
                 border: OutlineInputBorder(),
                 hintText: 'Leave empty for automatic calculation',
               ),
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: false),
-              validator: (value) {
-                if (value == null || value.isEmpty)
-                  return null; // allow empty for auto-calc
-                final parsed = int.tryParse(value);
-                if (parsed == null || parsed < 0) {
-                  return 'Enter a valid number';
-                }
-                return null;
-              },
+              keyboardType: TextInputType.number,
             ),
-
             const SizedBox(height: 16),
 
             // Exercises section
@@ -893,32 +909,28 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
   }
 
   Future<void> _saveWorkout() async {
-    if (!_formKey.currentState!.validate()) {
-      return; // Stops saving if any form field is invalid
+    if (_nameController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a workout name')),
+      );
+      return;
     }
 
     final workoutProvider =
         Provider.of<WorkoutProvider>(context, listen: false);
 
-    final exercise = Exercise(
-      id: const Uuid().v4(),
-      name: _nameController.text,
-      targetMuscleGroup: 'Full Body',
-      description: _getWorkoutTypeDescription(_selectedWorkoutType),
-      sets:
-          _selectedExercises.isNotEmpty ? List.from(_selectedExercises) : null,
-      duration: Duration(minutes: int.tryParse(_durationController.text) ?? 0),
-      caloriesBurnedPerMinute: _getCaloriesPerMinute(_selectedWorkoutType),
-    );
-
-    final caloriesBurned = int.tryParse(_caloriesController.text ?? '') ?? 0;
+    final duration =
+        Duration(minutes: int.tryParse(_durationController.text) ?? 0);
+    final caloriesBurned = int.tryParse(_caloriesController.text) ??
+        (_getCaloriesPerMinute(_selectedWorkoutType) * duration.inMinutes)
+            .round();
 
     await workoutProvider.addWorkout(
       _nameController.text,
       widget.selectedDate,
-      Duration(minutes: int.tryParse(_durationController.text) ?? 0),
+      duration,
       _selectedWorkoutType,
-      [exercise],
+      _selectedExercises,
       caloriesBurned,
     );
 
@@ -1120,11 +1132,10 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter calories burned';
+                  return 'Please enter workout duration';
                 }
-                final parsed = int.tryParse(value);
-                if (parsed == null || parsed < 0) {
-                  return 'Enter a valid whole number';
+                if (int.tryParse(value) == null || int.parse(value) <= 0) {
+                  return 'Please enter a valid duration';
                 }
                 return null;
               },

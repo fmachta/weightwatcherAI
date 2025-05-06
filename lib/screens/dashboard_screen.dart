@@ -329,9 +329,8 @@ class _WeightProgressChart extends StatelessWidget {
       ..sort((a, b) => a.date.compareTo(b.date));
 
     // Only display last 7 measurements
-    final displayedMeasurements = sortedMeasurements.length > 7
-        ? sortedMeasurements.sublist(sortedMeasurements.length - 7)
-        : sortedMeasurements;
+    final displayedMeasurements =
+        sortedMeasurements.where((m) => m.weight > 0).toList();
 
     // Calculate min and max weight for y-axis
     final weights = displayedMeasurements.map((m) => m.weight).toList();
@@ -339,7 +338,7 @@ class _WeightProgressChart extends StatelessWidget {
     final maxWeight = weights.reduce((curr, next) => curr > next ? curr : next);
 
     // Add padding to min and max
-    final yMin = (minWeight - 2).clamp(0, double.infinity);
+    final yMin = (minWeight - 2).clamp(0, maxWeight);
     final yMax = maxWeight + 2;
 
     return Card(
@@ -412,7 +411,7 @@ class _WeightProgressChart extends StatelessWidget {
                     show: false,
                   ),
                   minX: 0,
-                  maxX: displayedMeasurements.length - 1.toDouble(),
+                  maxX: (displayedMeasurements.length - 1).toDouble(),
                   minY: yMin.toDouble(),
                   maxY: yMax,
                   lineBarsData: [
