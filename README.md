@@ -35,7 +35,7 @@ cd weightwatcherAI
 flutter pub get
 ```
 
-3. Create a `.env` file in the root directory and add your OpenAI API key:
+3. Create a `.env` file in the root directory and add your Gemini API key:
 ```
 OPENAI_API_KEY=your-api-key-here
 ```
