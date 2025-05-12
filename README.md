@@ -65,6 +65,95 @@ The app follows a clean architecture approach with:
 - **Services**: External API interactions
 - **Screens**: UI components
 
+## Build and Deployment Instructions
+
+### Building for Production
+
+1. Ensure you have the correct Flutter channel and dependencies:
+   ```bash
+   flutter channel stable
+   flutter upgrade
+   flutter pub get
+   ```
+
+2. Run Flutter diagnostics to verify everything is set up correctly:
+   ```bash
+   flutter doctor
+   ```
+
+3. Build the application for your target platform:
+
+   **Android**
+   ```bash
+   flutter build apk --release
+   # For app bundle (recommended for Play Store)
+   flutter build appbundle --release
+   ```
+
+   **iOS**
+   ```bash
+   flutter build ios --release
+   # Then archive using Xcode
+   ```
+
+   **Web**
+   ```bash
+   flutter build web --release
+   ```
+
+### Deployment
+
+#### Android Deployment
+1. Sign your app with a keystore (required for Play Store submission)
+   ```bash
+   # Create a keystore if you don't have one
+   keytool -genkey -v -keystore ~/upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+   ```
+
+2. Configure signing in `android/app/build.gradle` and `android/key.properties`
+
+3. Submit to Google Play Store through the [Google Play Console](https://play.google.com/console/)
+
+#### iOS Deployment
+1. Open the Runner.xcworkspace in Xcode:
+   ```bash
+   cd ios
+   open Runner.xcworkspace
+   ```
+
+2. Configure app signing, capabilities, and app identifier in Xcode
+
+3. Archive the application in Xcode and submit to App Store Connect
+
+#### Web Deployment
+1. Deploy the contents of the `build/web` directory to your hosting provider:
+   ```bash
+   # For Firebase Hosting example
+   firebase deploy --only hosting
+   ```
+
+## Release Notes
+
+### Version 1.0.0 (May 2025)
+- Initial release of Weight Watcher AI
+- Dashboard with fitness overview and statistics
+- Calorie tracking with food database
+- Workout tracking with custom exercise library
+- AI-powered fitness recommendations using Google Gemini API
+- Profile management with goal setting
+
+### Version 0.9.0 (April 2025) - Beta
+- Beta testing release
+- Core functionality implementation
+- Performance optimizations
+- UI/UX refinements based on initial feedback
+
+### Version 0.5.0 (March 2025) - Alpha
+- Alpha testing version
+- Basic UI implementation
+- Initial integration with Google Gemini API
+- Fundamental calorie and workout tracking features
+
 ## Future Enhancements
 
 - Social sharing functionality
