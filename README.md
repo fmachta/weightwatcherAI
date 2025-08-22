@@ -12,10 +12,10 @@ A comprehensive Flutter fitness application that helps users track calories, wor
 
 ## Screenshots
 
-<img width="488" height="772" alt="image" src="https://github.com/user-attachments/assets/5e9f532a-56e2-49d6-ae03-44e2ee7ebc93" />
-<img width="495" height="735" alt="image" src="https://github.com/user-attachments/assets/44954842-8cb5-4871-bda1-97a7b3204fcc" />
-<img width="491" height="735" alt="image" src="https://github.com/user-attachments/assets/09e91a7b-151e-4cdf-b2ef-a85fb10048a0" />
-<img width="479" height="772" alt="image" src="https://github.com/user-attachments/assets/286d2795-a0a1-489d-b835-b2f6eaafeea7" />
+<img width="200" height="500" alt="image" src="https://github.com/user-attachments/assets/5e9f532a-56e2-49d6-ae03-44e2ee7ebc93" />
+<img width="200" height="500" alt="image" src="https://github.com/user-attachments/assets/44954842-8cb5-4871-bda1-97a7b3204fcc" />
+<img width="200" height="500" alt="image" src="https://github.com/user-attachments/assets/09e91a7b-151e-4cdf-b2ef-a85fb10048a0" />
+<img width="200" height="500" alt="image" src="https://github.com/user-attachments/assets/286d2795-a0a1-489d-b835-b2f6eaafeea7" />
 
 ## Getting Started
 
